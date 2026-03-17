@@ -57,9 +57,10 @@
 	<header class="bg-white border-b border-stone-200 flex-shrink-0">
 		<div class="flex items-center justify-between px-4">
 			<div class="flex items-center gap-6">
-				<h1 class="text-lg font-bold text-stone-800 py-3" style="font-family: 'DM Serif Display', serif;">
-					BeanBrain
-				</h1>
+				<div class="flex items-center gap-2 py-2">
+					<img src="/img/logo.png" alt="BeanBrain" class="h-8 w-8" />
+					<span class="text-lg font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">BeanBrain</span>
+				</div>
 
 				<nav class="flex">
 					{#each tabDefs as tab}
@@ -109,7 +110,7 @@
 			<div class="flex-1 overflow-y-auto bg-[#faf8f5]">
 				{#if coffeePanel.type === 'empty'}
 					<div class="flex flex-col items-center justify-center h-full text-center">
-						<Icons icon="bean" size={48} className="text-stone-200 mb-3" />
+						<img src="/img/logo-256.png" alt="" class="w-24 h-24 opacity-20 mb-3" />
 						<p class="text-stone-300 text-lg" style="font-family: 'DM Serif Display', serif;">{$t('empty.title')}</p>
 						<p class="text-stone-200 text-sm mt-1">{$t('empty.subtitle')}</p>
 					</div>
