@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
-from ..models import Coffee, Descriptor
+from ..models import Coffee, Descriptor, GrinderSetting, Tasting
 from ..schemas import CoffeeCreate, CoffeeListOut, CoffeeOut, CoffeeUpdate
 
 router = APIRouter(prefix="/coffees", tags=["coffees"])
@@ -36,9 +36,9 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
         db.query(Coffee)
         .options(
             joinedload(Coffee.roastery_descriptors),
-            joinedload(Coffee.tastings).joinedload("descriptors"),
-            joinedload(Coffee.grinder_settings).joinedload("equipment"),
-            joinedload(Coffee.grinder_settings).joinedload("brew_method"),
+            joinedload(Coffee.tastings).joinedload(Tasting.descriptors),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.equipment),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_method),
         )
         .filter(Coffee.id == coffee_id)
         .first()

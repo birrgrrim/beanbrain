@@ -1,7 +1,7 @@
 .PHONY: setup-backend setup-frontend dev dev-backend dev-frontend test test-backend
 
 setup-backend:
-	cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
+	cd backend && python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 setup-frontend:
 	cd frontend && npm install

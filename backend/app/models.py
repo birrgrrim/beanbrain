@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Table, Boolean
 from sqlalchemy.orm import relationship
@@ -33,7 +33,7 @@ class Coffee(Base):
     roast_level = Column(String, nullable=True)
     roastery_url = Column(String, nullable=True)
     notes = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     roastery_descriptors = relationship("Descriptor", secondary=coffee_descriptor)
     tastings = relationship("Tasting", back_populates="coffee", cascade="all, delete-orphan")
@@ -56,7 +56,7 @@ class Tasting(Base):
     taster_name = Column(String, nullable=False)
     rating = Column(Integer, nullable=False)  # 1-10 (displayed as 5 stars with halves)
     comment = Column(String, nullable=True)
-    tasted_at = Column(DateTime, default=datetime.utcnow)
+    tasted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     coffee = relationship("Coffee", back_populates="tastings")
     descriptors = relationship("Descriptor", secondary=tasting_descriptor)
