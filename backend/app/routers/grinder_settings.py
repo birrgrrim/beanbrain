@@ -19,6 +19,7 @@ def list_grinder_settings(coffee_id: int, db: Session = Depends(get_db)):
         .options(
             joinedload(GrinderSetting.equipment),
             joinedload(GrinderSetting.brew_method),
+            joinedload(GrinderSetting.basket_size),
         )
         .filter(GrinderSetting.coffee_id == coffee_id)
         .all()
@@ -37,6 +38,7 @@ def create_grinder_setting(
         coffee_id=coffee_id,
         equipment_id=data.equipment_id,
         brew_method_id=data.brew_method_id,
+        basket_size_id=data.basket_size_id,
         setting=data.setting,
         notes=data.notes,
     )
@@ -49,6 +51,7 @@ def create_grinder_setting(
         .options(
             joinedload(GrinderSetting.equipment),
             joinedload(GrinderSetting.brew_method),
+            joinedload(GrinderSetting.basket_size),
         )
         .filter(GrinderSetting.id == setting.id)
         .first()

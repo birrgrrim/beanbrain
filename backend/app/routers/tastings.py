@@ -16,7 +16,7 @@ def list_tastings(coffee_id: int, db: Session = Depends(get_db)):
 
     return (
         db.query(Tasting)
-        .options(joinedload(Tasting.descriptors))
+        .options(joinedload(Tasting.descriptors), joinedload(Tasting.taster))
         .filter(Tasting.coffee_id == coffee_id)
         .order_by(Tasting.tasted_at.desc())
         .all()
@@ -31,7 +31,7 @@ def create_tasting(coffee_id: int, data: TastingCreate, db: Session = Depends(ge
 
     tasting = Tasting(
         coffee_id=coffee_id,
-        taster_name=data.taster_name,
+        taster_id=data.taster_id,
         rating=data.rating,
         comment=data.comment,
     )
@@ -48,7 +48,7 @@ def create_tasting(coffee_id: int, data: TastingCreate, db: Session = Depends(ge
 
     return (
         db.query(Tasting)
-        .options(joinedload(Tasting.descriptors))
+        .options(joinedload(Tasting.descriptors), joinedload(Tasting.taster))
         .filter(Tasting.id == tasting.id)
         .first()
     )

@@ -32,6 +32,11 @@ class Coffee(Base):
     process = Column(String, nullable=True)
     roast_level = Column(String, nullable=True)
     roastery_url = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    score = Column(Integer, nullable=True)
+    sweetness = Column(String, nullable=True)
+    acidity = Column(String, nullable=True)
+    bitterness = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -48,17 +53,25 @@ class Descriptor(Base):
     category = Column(String, nullable=False)
 
 
+class Taster(Base):
+    __tablename__ = "tasters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, unique=True)
+
+
 class Tasting(Base):
     __tablename__ = "tastings"
 
     id = Column(Integer, primary_key=True, index=True)
     coffee_id = Column(Integer, ForeignKey("coffees.id", ondelete="CASCADE"), nullable=False)
-    taster_name = Column(String, nullable=False)
+    taster_id = Column(Integer, ForeignKey("tasters.id"), nullable=False)
     rating = Column(Integer, nullable=False)  # 1-10 (displayed as 5 stars with halves)
     comment = Column(String, nullable=True)
     tasted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     coffee = relationship("Coffee", back_populates="tastings")
+    taster = relationship("Taster")
     descriptors = relationship("Descriptor", secondary=tasting_descriptor)
 
 
@@ -81,6 +94,14 @@ class BrewMethod(Base):
     name = Column(String, nullable=False, unique=True)
 
 
+class BasketSize(Base):
+    __tablename__ = "basket_sizes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    size_grams = Column(Integer, nullable=False, unique=True)
+    label = Column(String, nullable=False)
+
+
 class GrinderSetting(Base):
     __tablename__ = "grinder_settings"
 
@@ -88,9 +109,11 @@ class GrinderSetting(Base):
     coffee_id = Column(Integer, ForeignKey("coffees.id", ondelete="CASCADE"), nullable=False)
     equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
     brew_method_id = Column(Integer, ForeignKey("brew_methods.id"), nullable=False)
+    basket_size_id = Column(Integer, ForeignKey("basket_sizes.id"), nullable=True)
     setting = Column(Float, nullable=False)
     notes = Column(String, nullable=True)
 
     coffee = relationship("Coffee", back_populates="grinder_settings")
     equipment = relationship("Equipment", back_populates="grinder_settings")
     brew_method = relationship("BrewMethod")
+    basket_size = relationship("BasketSize")

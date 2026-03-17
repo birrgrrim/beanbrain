@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from .models import BrewMethod, Descriptor, Equipment
+from .models import BasketSize, BrewMethod, Descriptor, Equipment, Taster
 
 DESCRIPTORS = {
     "Fruity": [
@@ -13,7 +13,7 @@ DESCRIPTORS = {
     "Sweet": [
         "Chocolate", "Dark Chocolate", "Milk Chocolate", "Cocoa",
         "Caramel", "Brown Sugar", "Honey", "Maple Syrup", "Molasses",
-        "Vanilla", "Toffee", "Butterscotch",
+        "Vanilla", "Toffee", "Butterscotch", "Cookies",
     ],
     "Nutty": [
         "Almond", "Hazelnut", "Walnut", "Peanut", "Cashew",
@@ -48,6 +48,12 @@ EQUIPMENT = [
 
 BREW_METHODS = ["Espresso"]
 
+BASKET_SIZES = [
+    {"size_grams": 14, "label": "14g"},
+    {"size_grams": 18, "label": "18g"},
+    {"size_grams": 25, "label": "25g"},
+]
+
 
 def seed_database(db: Session) -> None:
     """Seed the database with initial data if tables are empty."""
@@ -63,5 +69,8 @@ def seed_database(db: Session) -> None:
 
     for method in BREW_METHODS:
         db.add(BrewMethod(name=method))
+
+    for bs in BASKET_SIZES:
+        db.add(BasketSize(**bs))
 
     db.commit()

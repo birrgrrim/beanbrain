@@ -37,8 +37,10 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
         .options(
             joinedload(Coffee.roastery_descriptors),
             joinedload(Coffee.tastings).joinedload(Tasting.descriptors),
+            joinedload(Coffee.tastings).joinedload(Tasting.taster),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.equipment),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_method),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.basket_size),
         )
         .filter(Coffee.id == coffee_id)
         .first()
@@ -57,6 +59,11 @@ def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
         process=data.process,
         roast_level=data.roast_level,
         roastery_url=data.roastery_url,
+        image_url=data.image_url,
+        score=data.score,
+        sweetness=data.sweetness,
+        acidity=data.acidity,
+        bitterness=data.bitterness,
         notes=data.notes,
     )
 

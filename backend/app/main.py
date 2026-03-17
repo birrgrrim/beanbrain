@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, SessionLocal, engine
-from .routers import coffees, descriptors, equipment, tastings, grinder_settings
+from .routers import coffees, descriptors, equipment, tastings, grinder_settings, tasters, scrape
 from .seed import seed_database
 
 
@@ -34,6 +34,8 @@ app.include_router(tastings.router)
 app.include_router(grinder_settings.router)
 app.include_router(descriptors.router)
 app.include_router(equipment.router)
+app.include_router(tasters.router)
+app.include_router(scrape.router)
 
 
 @app.get("/health")
