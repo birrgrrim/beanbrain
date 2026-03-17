@@ -18,6 +18,11 @@ export interface Descriptor {
 	category: string;
 }
 
+export interface Taster {
+	id: number;
+	name: string;
+}
+
 export interface Equipment {
 	id: number;
 	type: string;
@@ -31,21 +36,30 @@ export interface BrewMethod {
 	name: string;
 }
 
+export interface BasketSize {
+	id: number;
+	size_grams: number;
+	label: string;
+}
+
 export interface GrinderSetting {
 	id: number;
 	coffee_id: number;
 	equipment_id: number;
 	brew_method_id: number;
+	basket_size_id: number | null;
 	setting: number;
 	notes: string | null;
 	equipment: Equipment;
 	brew_method: BrewMethod;
+	basket_size: BasketSize | null;
 }
 
 export interface Tasting {
 	id: number;
 	coffee_id: number;
-	taster_name: string;
+	taster_id: number;
+	taster: Taster;
 	rating: number;
 	comment: string | null;
 	tasted_at: string;
@@ -60,6 +74,11 @@ export interface Coffee {
 	process: string | null;
 	roast_level: string | null;
 	roastery_url: string | null;
+	image_url: string | null;
+	score: number | null;
+	sweetness: string | null;
+	acidity: string | null;
+	bitterness: string | null;
 	notes: string | null;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
@@ -73,8 +92,25 @@ export interface CoffeeListItem {
 	roastery: string;
 	origin: string | null;
 	roast_level: string | null;
+	image_url: string | null;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
+}
+
+export interface ScrapeResult {
+	name: string;
+	roastery: string;
+	origin: string | null;
+	process: string | null;
+	roast_level: string | null;
+	roastery_url: string;
+	image_url: string | null;
+	score: number | null;
+	sweetness: string | null;
+	acidity: string | null;
+	bitterness: string | null;
+	flavor_descriptors: Record<string, string[]>;
+	name_i18n: Record<string, string>;
 }
 
 export const api = {
@@ -89,6 +125,11 @@ export const api = {
 			process?: string;
 			roast_level?: string;
 			roastery_url?: string;
+			image_url?: string;
+			score?: number;
+			sweetness?: string;
+			acidity?: string;
+			bitterness?: string;
 			notes?: string;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),
@@ -98,7 +139,7 @@ export const api = {
 	},
 	tastings: {
 		create: (coffeeId: number, data: {
-			taster_name: string;
+			taster_id: number;
 			rating: number;
 			comment?: string;
 			descriptor_ids?: number[];
@@ -112,6 +153,7 @@ export const api = {
 		create: (coffeeId: number, data: {
 			equipment_id: number;
 			brew_method_id: number;
+			basket_size_id?: number;
 			setting: number;
 			notes?: string;
 		}) => request<GrinderSetting>(`/coffees/${coffeeId}/settings/`, {
@@ -120,11 +162,21 @@ export const api = {
 		delete: (coffeeId: number, settingId: number) =>
 			request<void>(`/coffees/${coffeeId}/settings/${settingId}`, { method: 'DELETE' }),
 	},
+	tasters: {
+		list: () => request<Taster[]>('/tasters/'),
+		create: (name: string) => request<Taster>('/tasters/', {
+			method: 'POST', body: JSON.stringify({ name }),
+		}),
+		delete: (id: number) => request<void>(`/tasters/${id}`, { method: 'DELETE' }),
+	},
 	descriptors: {
 		list: () => request<Descriptor[]>('/descriptors/'),
 	},
 	equipment: {
 		list: () => request<Equipment[]>('/equipment'),
 		brewMethods: () => request<BrewMethod[]>('/brew-methods'),
+		basketSizes: () => request<BasketSize[]>('/basket-sizes'),
 	},
+	scrape: (url: string) =>
+		request<ScrapeResult>(`/scrape/?url=${encodeURIComponent(url)}`),
 };

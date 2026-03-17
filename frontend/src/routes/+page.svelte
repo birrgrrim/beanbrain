@@ -59,7 +59,10 @@
 					href="/coffee/{coffee.id}"
 					class="block bg-white rounded-xl border border-stone-200 p-4 hover:shadow-md hover:border-amber-300 transition-all"
 				>
-					<div class="flex items-start justify-between gap-3">
+					<div class="flex items-start gap-3">
+						{#if coffee.image_url}
+							<img src={coffee.image_url} alt={coffee.name} class="w-12 h-12 rounded-lg object-contain flex-shrink-0" />
+						{/if}
 						<div class="min-w-0">
 							<h2 class="font-semibold text-stone-800 truncate">{coffee.name}</h2>
 							<p class="text-sm text-stone-500">{coffee.roastery}</p>

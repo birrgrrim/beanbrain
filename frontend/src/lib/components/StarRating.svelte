@@ -14,9 +14,11 @@
 	}
 
 	function displayRating(starIndex: number, currentRating: number): 'full' | 'half' | 'empty' {
-		const value = currentRating / 2;
-		if (starIndex <= value - 0.5) return 'full';
-		if (starIndex <= value) return 'half';
+		const value = currentRating / 2; // e.g. 7 → 3.5
+		const fullStars = Math.floor(value); // e.g. 3
+		const hasHalf = value % 1 !== 0; // e.g. true
+		if (starIndex <= fullStars) return 'full';
+		if (hasHalf && starIndex === fullStars + 1) return 'half';
 		return 'empty';
 	}
 </script>
