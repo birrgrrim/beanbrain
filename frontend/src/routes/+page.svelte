@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { api, type CoffeeListItem } from '$lib/api';
 	import { lang, type Lang } from '$lib/lang';
+	import { t } from '$lib/i18n';
 	import CoffeeSidebar from '$lib/components/CoffeeSidebar.svelte';
 	import CoffeeDetail from '$lib/components/CoffeeDetail.svelte';
 	import AddCoffeePanel from '$lib/components/AddCoffeePanel.svelte';
@@ -18,10 +19,10 @@
 
 	lang.subscribe(v => currentLang = v);
 
-	const tabs: { id: Tab; label: string; icon: 'bean' | 'grinder' | 'cup' }[] = [
-		{ id: 'coffee', label: 'Coffee', icon: 'bean' },
-		{ id: 'grinders', label: 'Grinders', icon: 'grinder' },
-		{ id: 'persons', label: 'Persons', icon: 'cup' },
+	const tabDefs: { id: Tab; key: string; icon: 'bean' | 'grinder' | 'cup' }[] = [
+		{ id: 'coffee', key: 'tab.coffee', icon: 'bean' },
+		{ id: 'grinders', key: 'tab.grinders', icon: 'grinder' },
+		{ id: 'persons', key: 'tab.persons', icon: 'cup' },
 	];
 
 	async function loadCoffees() {
@@ -55,14 +56,13 @@
 	<!-- Top bar -->
 	<header class="bg-white border-b border-stone-200 flex-shrink-0">
 		<div class="flex items-center justify-between px-4">
-			<!-- Logo + tabs -->
 			<div class="flex items-center gap-6">
 				<h1 class="text-lg font-bold text-stone-800 py-3" style="font-family: 'DM Serif Display', serif;">
 					BeanBrain
 				</h1>
 
 				<nav class="flex">
-					{#each tabs as tab}
+					{#each tabDefs as tab}
 						<button
 							onclick={() => activeTab = tab.id}
 							class="flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-colors
@@ -73,13 +73,12 @@
 						>
 							<Icons icon={tab.icon} size={15}
 								className={activeTab === tab.id ? 'text-amber-600' : 'text-stone-300'} />
-							{tab.label}
+							{$t(tab.key)}
 						</button>
 					{/each}
 				</nav>
 			</div>
 
-			<!-- Language toggle -->
 			<button
 				onclick={toggleLang}
 				class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium
@@ -100,7 +99,6 @@
 	<!-- Content -->
 	<div class="flex flex-1 overflow-hidden">
 		{#if activeTab === 'coffee'}
-			<!-- Coffee: sidebar + detail -->
 			<CoffeeSidebar
 				{coffees}
 				{selectedId}
@@ -112,8 +110,8 @@
 				{#if coffeePanel.type === 'empty'}
 					<div class="flex flex-col items-center justify-center h-full text-center">
 						<Icons icon="bean" size={48} className="text-stone-200 mb-3" />
-						<p class="text-stone-300 text-lg" style="font-family: 'DM Serif Display', serif;">Select a coffee</p>
-						<p class="text-stone-200 text-sm mt-1">or add a new one to get started</p>
+						<p class="text-stone-300 text-lg" style="font-family: 'DM Serif Display', serif;">{$t('empty.title')}</p>
+						<p class="text-stone-200 text-sm mt-1">{$t('empty.subtitle')}</p>
 					</div>
 				{:else if coffeePanel.type === 'detail'}
 					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} />

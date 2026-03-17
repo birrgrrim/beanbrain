@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api, type Coffee, type Descriptor, type Equipment, type BrewMethod, type Taster, type BasketSize } from '$lib/api';
+	import { t } from '$lib/i18n';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import Icons from './Icons.svelte';
@@ -20,7 +21,6 @@
 	// Tasting form
 	let showTastingForm = $state(false);
 	let tastingTasterId = $state<number | null>(null);
-	let newTasterName = $state('');
 	let tastingRating = $state(0);
 	let tastingComment = $state('');
 	let tastingDescriptors = $state<number[]>([]);
@@ -33,7 +33,7 @@
 
 	async function loadData() {
 		loading = true;
-		const [c, d, eq, bm, t, bs] = await Promise.all([
+		const [c, d, eq, bm, ta, bs] = await Promise.all([
 			api.coffees.get(coffeeId),
 			api.descriptors.list(),
 			api.equipment.list(),
@@ -45,7 +45,7 @@
 		descriptors = d;
 		equipmentList = eq;
 		brewMethods = bm;
-		tasters = t;
+		tasters = ta;
 		basketSizes = bs;
 		loading = false;
 	}
@@ -68,21 +68,15 @@
 	}
 
 	async function addTasting() {
-		let tId = tastingTasterId;
-		if (!tId && newTasterName.trim()) {
-			const newTaster = await api.tasters.create(newTasterName.trim());
-			tId = newTaster.id;
-		}
-		if (!tId || tastingRating === 0) return;
+		if (!tastingTasterId || tastingRating === 0) return;
 
 		await api.tastings.create(coffeeId, {
-			taster_id: tId,
+			taster_id: tastingTasterId,
 			rating: tastingRating,
 			comment: tastingComment.trim() || undefined,
 			descriptor_ids: tastingDescriptors.length > 0 ? tastingDescriptors : undefined,
 		});
 		tastingTasterId = null;
-		newTasterName = '';
 		tastingRating = 0;
 		tastingComment = '';
 		tastingDescriptors = [];
@@ -120,7 +114,7 @@
 	}
 
 	async function deleteCoffee() {
-		if (!confirm('Delete this coffee and all its tastings?')) return;
+		if (!confirm($t('detail.delete_confirm'))) return;
 		await api.coffees.delete(coffeeId);
 		onDeleted();
 	}
@@ -140,7 +134,7 @@
 				</h2>
 				<p class="text-stone-400 text-sm mt-0.5">{coffee.roastery}</p>
 			</div>
-			<button onclick={deleteCoffee} class="p-2 text-stone-300 hover:text-red-500 transition-colors" title="Delete coffee">
+			<button onclick={deleteCoffee} class="p-2 text-stone-300 hover:text-red-500 transition-colors" title={$t('detail.delete')}>
 				<Icons icon="delete" size={18} />
 			</button>
 		</div>
@@ -157,19 +151,19 @@
 				<div class="flex flex-wrap gap-x-8 gap-y-2 text-sm">
 					{#if coffee.origin}
 						<div>
-							<span class="text-stone-300 text-xs uppercase tracking-wide">Origin</span>
+							<span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.origin')}</span>
 							<p class="text-stone-700 font-medium">{coffee.origin}</p>
 						</div>
 					{/if}
 					{#if coffee.process}
 						<div>
-							<span class="text-stone-300 text-xs uppercase tracking-wide">Process</span>
+							<span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.process')}</span>
 							<p class="text-stone-700 font-medium">{coffee.process}</p>
 						</div>
 					{/if}
 					{#if coffee.roast_level}
 						<div>
-							<span class="text-stone-300 text-xs uppercase tracking-wide">Roast</span>
+							<span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.roast')}</span>
 							<p class="text-stone-700 font-medium">{coffee.roast_level}</p>
 						</div>
 					{/if}
@@ -180,25 +174,25 @@
 						{#if coffee.score}
 							<div class="text-center">
 								<p class="text-2xl font-bold text-amber-700">{coffee.score}</p>
-								<p class="text-[10px] text-stone-300 uppercase tracking-wide">Score</p>
+								<p class="text-[10px] text-stone-300 uppercase tracking-wide">{$t('detail.score')}</p>
 							</div>
 						{/if}
 						{#if coffee.sweetness}
 							<div class="text-center">
 								<p class="text-sm font-semibold text-stone-600">{coffee.sweetness}</p>
-								<p class="text-[10px] text-stone-300 uppercase tracking-wide">Sweet</p>
+								<p class="text-[10px] text-stone-300 uppercase tracking-wide">{$t('detail.sweet')}</p>
 							</div>
 						{/if}
 						{#if coffee.acidity}
 							<div class="text-center">
 								<p class="text-sm font-semibold text-stone-600">{coffee.acidity}</p>
-								<p class="text-[10px] text-stone-300 uppercase tracking-wide">Acid</p>
+								<p class="text-[10px] text-stone-300 uppercase tracking-wide">{$t('detail.acid')}</p>
 							</div>
 						{/if}
 						{#if coffee.bitterness}
 							<div class="text-center">
 								<p class="text-sm font-semibold text-stone-600">{coffee.bitterness}</p>
-								<p class="text-[10px] text-stone-300 uppercase tracking-wide">Bitter</p>
+								<p class="text-[10px] text-stone-300 uppercase tracking-wide">{$t('detail.bitter')}</p>
 							</div>
 						{/if}
 					</div>
@@ -206,7 +200,7 @@
 
 				{#if coffee.roastery_descriptors.length > 0}
 					<div>
-						<p class="text-[10px] text-stone-300 uppercase tracking-wide mb-1.5">Flavor profile</p>
+						<p class="text-[10px] text-stone-300 uppercase tracking-wide mb-1.5">{$t('detail.flavor_profile')}</p>
 						<div class="flex flex-wrap gap-1.5">
 							{#each coffee.roastery_descriptors as desc}
 								<span class="px-2.5 py-1 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-100">
@@ -221,7 +215,7 @@
 					<a href={coffee.roastery_url} target="_blank" rel="noopener"
 						class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800 transition-colors">
 						<Icons icon="link" size={12} />
-						View on roastery site
+						{$t('detail.roastery_link')}
 					</a>
 				{/if}
 
@@ -236,16 +230,16 @@
 			<div class="flex items-center justify-between mb-4">
 				<div class="flex items-center gap-2">
 					<Icons icon="grinder" size={18} className="text-stone-400" />
-					<h3 class="font-semibold text-stone-700">Grinder Setting</h3>
+					<h3 class="font-semibold text-stone-700">{$t('grinder.title')}</h3>
 				</div>
 				{#if !showSettingForm}
 					<button onclick={() => showSettingForm = true}
-						class="text-xs text-amber-600 hover:text-amber-800 transition-colors font-medium">+ Add</button>
+						class="text-xs text-amber-600 hover:text-amber-800 transition-colors font-medium">{$t('grinder.add')}</button>
 				{/if}
 			</div>
 
 			{#if coffee.grinder_settings.length === 0 && !showSettingForm}
-				<p class="text-sm text-stone-300">No setting recorded yet</p>
+				<p class="text-sm text-stone-300">{$t('grinder.no_setting')}</p>
 			{/if}
 
 			{#each coffee.grinder_settings as setting}
@@ -259,7 +253,7 @@
 						</div>
 					</div>
 					<button onclick={() => deleteGrinderSetting(setting.id)}
-						class="p-1 text-stone-200 hover:text-red-400 transition-colors">
+						class="p-1 text-stone-200 hover:text-red-400 transition-colors" title={$t('detail.delete')}>
 						<Icons icon="delete" size={14} />
 					</button>
 				</div>
@@ -269,13 +263,13 @@
 				<div class="mt-3 p-4 bg-stone-50 rounded-xl space-y-3">
 					<div class="flex gap-3">
 						<div class="flex-1">
-							<label for="setting" class="block text-xs text-stone-400 mb-1">Setting</label>
+							<label for="setting" class="block text-xs text-stone-400 mb-1">{$t('grinder.setting')}</label>
 							<input id="setting" type="number" step="0.5" bind:value={settingValue}
 								class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 									focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="12.5" />
 						</div>
 						<div class="flex-1">
-							<label for="basket" class="block text-xs text-stone-400 mb-1">Basket</label>
+							<label for="basket" class="block text-xs text-stone-400 mb-1">{$t('grinder.basket')}</label>
 							<select id="basket" bind:value={settingBasketId}
 								class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 									focus:outline-none focus:ring-2 focus:ring-amber-400/50">
@@ -284,17 +278,17 @@
 							</select>
 						</div>
 						<div class="flex-1">
-							<label for="sn" class="block text-xs text-stone-400 mb-1">Notes</label>
+							<label for="sn" class="block text-xs text-stone-400 mb-1">{$t('grinder.notes')}</label>
 							<input id="sn" type="text" bind:value={settingNotes}
 								class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
-									focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Optional" />
+									focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder={$t('common.optional')} />
 						</div>
 					</div>
 					<div class="flex gap-2">
 						<button onclick={addGrinderSetting}
-							class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition-colors">Save</button>
+							class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition-colors">{$t('grinder.save')}</button>
 						<button onclick={() => showSettingForm = false}
-							class="px-4 py-2 text-stone-400 text-sm hover:text-stone-600 transition-colors">Cancel</button>
+							class="px-4 py-2 text-stone-400 text-sm hover:text-stone-600 transition-colors">{$t('grinder.cancel')}</button>
 					</div>
 				</div>
 			{/if}
@@ -305,18 +299,18 @@
 			<div class="flex items-center justify-between mb-4">
 				<div class="flex items-center gap-2">
 					<Icons icon="cup" size={18} className="text-stone-400" />
-					<h3 class="font-semibold text-stone-700">Tastings</h3>
+					<h3 class="font-semibold text-stone-700">{$t('tasting.title')}</h3>
 				</div>
 				{#if !showTastingForm}
 					<button onclick={() => showTastingForm = true}
-						class="text-xs text-amber-600 hover:text-amber-800 transition-colors font-medium">+ Add Tasting</button>
+						class="text-xs text-amber-600 hover:text-amber-800 transition-colors font-medium">{$t('tasting.add')}</button>
 				{/if}
 			</div>
 
 			{#if coffee.tastings.length === 0 && !showTastingForm}
 				<div class="text-center py-4">
 					<Icons icon="cup" size={28} className="mx-auto text-stone-200 mb-1" />
-					<p class="text-sm text-stone-300">No tastings yet</p>
+					<p class="text-sm text-stone-300">{$t('tasting.empty')}</p>
 				</div>
 			{/if}
 
@@ -329,7 +323,7 @@
 							<span class="text-xs text-stone-300 tabular-nums">{tasting.rating}/10</span>
 						</div>
 						<button onclick={() => deleteTasting(tasting.id)}
-							class="p-1 text-stone-200 hover:text-red-400 transition-colors">
+							class="p-1 text-stone-200 hover:text-red-400 transition-colors" title={$t('detail.delete')}>
 							<Icons icon="delete" size={14} />
 						</button>
 					</div>
@@ -352,30 +346,21 @@
 			{#if showTastingForm}
 				<div class="mt-3 p-4 bg-stone-50 rounded-xl space-y-3">
 					<div>
-						<label for="taster" class="block text-xs text-stone-400 mb-1">Who's tasting?</label>
+						<label for="taster" class="block text-xs text-stone-400 mb-1">{$t('tasting.who')}</label>
 						{#if tasters.length > 0}
-							<div class="flex gap-2">
-								<select id="taster" bind:value={tastingTasterId}
-									class="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
-										focus:outline-none focus:ring-2 focus:ring-amber-400/50">
-									<option value={null}>Select or add new...</option>
-									{#each tasters as t}<option value={t.id}>{t.name}</option>{/each}
-								</select>
-								{#if !tastingTasterId}
-									<input type="text" bind:value={newTasterName} placeholder="New name"
-										class="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
-											focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
-								{/if}
-							</div>
-						{:else}
-							<input type="text" bind:value={newTasterName} placeholder="Your name"
+							<select id="taster" bind:value={tastingTasterId}
 								class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
-									focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+									focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+								<option value={null}>{$t('tasting.select')}</option>
+								{#each tasters as ta}<option value={ta.id}>{ta.name}</option>{/each}
+							</select>
+						{:else}
+							<p class="text-sm text-amber-600">{$t('tasting.no_tasters')}</p>
 						{/if}
 					</div>
 
 					<div>
-						<span class="block text-xs text-stone-400 mb-1">Rating</span>
+						<span class="block text-xs text-stone-400 mb-1">{$t('tasting.rating')}</span>
 						<div class="flex items-center gap-2">
 							<StarRating rating={tastingRating} interactive onRate={(v) => tastingRating = v} />
 							{#if tastingRating > 0}
@@ -385,15 +370,15 @@
 					</div>
 
 					<div>
-						<label for="comment" class="block text-xs text-stone-400 mb-1">Comment</label>
+						<label for="comment" class="block text-xs text-stone-400 mb-1">{$t('tasting.comment')}</label>
 						<textarea id="comment" bind:value={tastingComment} rows={2}
 							class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 								focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"
-							placeholder="What did you taste?"></textarea>
+							placeholder={$t('tasting.comment_placeholder')}></textarea>
 					</div>
 
 					<div>
-						<p class="text-xs text-stone-400 mb-1">Flavors you taste</p>
+						<p class="text-xs text-stone-400 mb-1">{$t('tasting.flavors')}</p>
 						<DescriptorAutocomplete
 							{descriptors}
 							selected={tastingDescriptors}
@@ -404,11 +389,11 @@
 
 					<div class="flex gap-2">
 						<button onclick={addTasting}
-							disabled={(!tastingTasterId && !newTasterName.trim()) || tastingRating === 0}
+							disabled={!tastingTasterId || tastingRating === 0}
 							class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800
-								transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Save Tasting</button>
+								transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{$t('tasting.save')}</button>
 						<button onclick={() => { showTastingForm = false; tastingRating = 0; tastingDescriptors = []; }}
-							class="px-4 py-2 text-stone-400 text-sm hover:text-stone-600 transition-colors">Cancel</button>
+							class="px-4 py-2 text-stone-400 text-sm hover:text-stone-600 transition-colors">{$t('tasting.cancel')}</button>
 					</div>
 				</div>
 			{/if}

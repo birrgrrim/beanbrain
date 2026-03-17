@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { api, type CoffeeListItem } from '$lib/api';
+	import type { CoffeeListItem } from '$lib/api';
+	import { t } from '$lib/i18n';
 	import Icons from './Icons.svelte';
 
 	let { coffees = [], selectedId = null, onSelect, onAdd, onRefresh }: {
@@ -25,9 +26,7 @@
 	<!-- Header -->
 	<div class="p-4 border-b border-stone-100">
 		<div class="flex items-center justify-between mb-3">
-			<h1 class="text-lg font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-				BeanBrain
-			</h1>
+			<span class="text-sm font-semibold text-stone-600">{$t('tab.coffee')}</span>
 			<button
 				onclick={onAdd}
 				class="w-8 h-8 flex items-center justify-center rounded-lg
@@ -38,13 +37,12 @@
 			</button>
 		</div>
 
-		<!-- Search -->
 		<div class="relative">
 			<Icons icon="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" />
 			<input
 				type="text"
 				bind:value={search}
-				placeholder="Search coffees..."
+				placeholder={$t('sidebar.search')}
 				class="w-full pl-8 pr-3 py-2 rounded-lg border border-stone-200 bg-stone-50 text-sm
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
 					placeholder:text-stone-300"
@@ -52,13 +50,12 @@
 		</div>
 	</div>
 
-	<!-- Coffee list -->
 	<div class="flex-1 overflow-y-auto">
 		{#if filteredCoffees.length === 0}
 			<div class="p-8 text-center">
 				<Icons icon="bean" size={32} className="mx-auto text-stone-200 mb-2" />
 				<p class="text-sm text-stone-400">
-					{search ? 'No matches' : 'No coffees yet'}
+					{search ? $t('sidebar.no_matches') : $t('sidebar.empty')}
 				</p>
 			</div>
 		{:else}

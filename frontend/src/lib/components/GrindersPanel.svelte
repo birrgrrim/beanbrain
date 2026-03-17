@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api, type Equipment, type BrewMethod, type BasketSize } from '$lib/api';
+	import { t } from '$lib/i18n';
 	import Icons from './Icons.svelte';
 
 	let equipmentList = $state<Equipment[]>([]);
@@ -25,14 +26,14 @@
 
 <div class="max-w-lg mx-auto p-6 space-y-6">
 	<h2 class="text-2xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-		Grinders & Equipment
+		{$t('grinders.title')}
 	</h2>
 
 	<!-- Grinders -->
 	<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
 		<div class="flex items-center gap-2 mb-4">
 			<Icons icon="grinder" size={18} className="text-stone-400" />
-			<h3 class="font-semibold text-stone-700">Grinders</h3>
+			<h3 class="font-semibold text-stone-700">{$t('grinders.grinders')}</h3>
 		</div>
 		{#if grinders.length === 0}
 			<p class="text-sm text-stone-300">No grinders configured</p>
@@ -53,7 +54,7 @@
 	<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
 		<div class="flex items-center gap-2 mb-4">
 			<Icons icon="cup" size={18} className="text-stone-400" />
-			<h3 class="font-semibold text-stone-700">Espresso Machines</h3>
+			<h3 class="font-semibold text-stone-700">{$t('grinders.machines')}</h3>
 		</div>
 		{#if machines.length === 0}
 			<p class="text-sm text-stone-300">No machines configured</p>
@@ -74,7 +75,7 @@
 	<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
 		<div class="flex items-center gap-2 mb-4">
 			<Icons icon="bean" size={18} className="text-stone-400" />
-			<h3 class="font-semibold text-stone-700">Brew Methods</h3>
+			<h3 class="font-semibold text-stone-700">{$t('grinders.brew_methods')}</h3>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			{#each brewMethods as m}
@@ -87,7 +88,7 @@
 	<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
 		<div class="flex items-center gap-2 mb-4">
 			<Icons icon="settings" size={18} className="text-stone-400" />
-			<h3 class="font-semibold text-stone-700">Basket Sizes</h3>
+			<h3 class="font-semibold text-stone-700">{$t('grinders.baskets')}</h3>
 		</div>
 		<div class="flex gap-3">
 			{#each basketSizes as bs}

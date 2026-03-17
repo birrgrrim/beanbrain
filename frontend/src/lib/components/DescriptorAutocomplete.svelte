@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Descriptor } from '$lib/api';
+	import { t } from '$lib/i18n';
 
 	let { descriptors, selected = [], suggested = [], onToggle }: {
 		descriptors: Descriptor[];
@@ -34,7 +35,7 @@
 	<!-- Suggested from roastery -->
 	{#if unselectedSuggested.length > 0}
 		<div>
-			<p class="text-xs text-amber-600/80 mb-1">Roastery suggests</p>
+			<p class="text-xs text-amber-600/80 mb-1">{$t('desc.suggested')}</p>
 			<div class="flex flex-wrap gap-1.5">
 				{#each unselectedSuggested as id}
 					{@const desc = descriptors.find(d => d.id === id)}
@@ -58,7 +59,7 @@
 			bind:value={query}
 			onfocus={() => focused = true}
 			onblur={() => setTimeout(() => focused = false, 200)}
-			placeholder="Search flavors..."
+			placeholder={$t('desc.search')}
 			class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 				focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
 				placeholder:text-stone-300"

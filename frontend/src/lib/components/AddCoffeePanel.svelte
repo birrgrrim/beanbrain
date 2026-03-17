@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { api, type Descriptor, type ScrapeResult } from '$lib/api';
+	import { t } from '$lib/i18n';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import Icons from './Icons.svelte';
 
@@ -100,7 +101,7 @@
 <div class="max-w-2xl mx-auto p-6 space-y-6">
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-			Add Coffee
+			{$t('add.title')}
 		</h2>
 		<button onclick={onCancel} class="p-2 text-stone-300 hover:text-stone-500 transition-colors">
 			<Icons icon="back" size={18} />
@@ -111,7 +112,7 @@
 	<div class="bg-amber-50/50 rounded-2xl border border-amber-100 p-4">
 		<div class="flex items-center gap-2 mb-2">
 			<Icons icon="link" size={14} className="text-amber-500" />
-			<p class="text-sm font-medium text-amber-700">Paste a roastery URL to auto-fill</p>
+			<p class="text-sm font-medium text-amber-700">{$t('add.url_hint')}</p>
 		</div>
 		<div class="flex gap-2">
 			<input type="url" bind:value={scrapeUrl}
@@ -122,7 +123,7 @@
 				disabled={scraping || !scrapeUrl.trim()}
 				class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800
 					transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-				{scraping ? 'Fetching...' : 'Fetch'}
+				{scraping ? $t('add.fetching') : $t('add.fetch')}
 			</button>
 		</div>
 		{#if scrapeError}<p class="text-sm text-red-500 mt-1">{scrapeError}</p>{/if}
@@ -143,13 +144,13 @@
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			<div>
-				<label for="name" class="block text-xs text-stone-400 mb-1">Name *</label>
+				<label for="name" class="block text-xs text-stone-400 mb-1">{$t('add.name')} *</label>
 				<input id="name" type="text" bind:value={name} required
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Ethiopia Yirgacheffe" />
 			</div>
 			<div>
-				<label for="roastery" class="block text-xs text-stone-400 mb-1">Roastery *</label>
+				<label for="roastery" class="block text-xs text-stone-400 mb-1">{$t('add.roastery')} *</label>
 				<input id="roastery" type="text" bind:value={roastery} required
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Local Roasters" />
@@ -158,19 +159,19 @@
 
 		<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 			<div>
-				<label for="origin" class="block text-xs text-stone-400 mb-1">Origin</label>
+				<label for="origin" class="block text-xs text-stone-400 mb-1">{$t('add.origin')}</label>
 				<input id="origin" type="text" bind:value={origin}
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Ethiopia" />
 			</div>
 			<div>
-				<label for="process" class="block text-xs text-stone-400 mb-1">Process</label>
+				<label for="process" class="block text-xs text-stone-400 mb-1">{$t('add.process')}</label>
 				<input id="process" type="text" bind:value={process}
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Washed" />
 			</div>
 			<div>
-				<label for="roast_level" class="block text-xs text-stone-400 mb-1">Roast Level</label>
+				<label for="roast_level" class="block text-xs text-stone-400 mb-1">{$t('add.roast_level')}</label>
 				<input id="roast_level" type="text" bind:value={roastLevel}
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Light" />
@@ -187,7 +188,7 @@
 		{/if}
 
 		<div>
-			<label for="notes" class="block text-xs text-stone-400 mb-1">Notes</label>
+			<label for="notes" class="block text-xs text-stone-400 mb-1">{$t('add.notes')}</label>
 			<textarea id="notes" bind:value={notes} rows={2}
 				class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"
@@ -195,7 +196,7 @@
 		</div>
 
 		<div>
-			<p class="text-xs text-stone-400 mb-2">Roastery Descriptors</p>
+			<p class="text-xs text-stone-400 mb-2">{$t('add.descriptors')}</p>
 			<DescriptorAutocomplete {descriptors} selected={selectedDescriptors} onToggle={toggleDescriptor} />
 		</div>
 
@@ -203,10 +204,10 @@
 			<button type="submit" disabled={saving || !name.trim() || !roastery.trim()}
 				class="px-6 py-2.5 bg-amber-700 text-white rounded-lg hover:bg-amber-800
 					transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-				{saving ? 'Saving...' : 'Add Coffee'}
+				{saving ? $t('add.saving') : $t('add.save')}
 			</button>
 			<button type="button" onclick={onCancel}
-				class="px-6 py-2.5 text-stone-400 hover:text-stone-600 transition-colors">Cancel</button>
+				class="px-6 py-2.5 text-stone-400 hover:text-stone-600 transition-colors">{$t('add.cancel')}</button>
 		</div>
 	</form>
 </div>
