@@ -62,9 +62,10 @@
 			{#each filteredCoffees as coffee}
 				<button
 					onclick={() => onSelect(coffee.id)}
-					class="w-full text-left px-4 py-3 border-b border-stone-50 transition-colors
+					class="w-full text-left px-4 py-2.5 border-b border-stone-50 transition-colors
 						hover:bg-amber-50/50
-						{selectedId === coffee.id ? 'bg-amber-50 border-l-2 border-l-amber-600' : ''}"
+						{selectedId === coffee.id ? 'bg-amber-50 border-l-2 border-l-amber-600' : ''}
+						{!coffee.is_available ? 'opacity-40' : ''}"
 				>
 					<div class="flex items-center gap-3">
 						{#if coffee.image_url}
@@ -74,26 +75,22 @@
 								<Icons icon="bean" size={18} className="text-stone-300" />
 							</div>
 						{/if}
-						<div class="min-w-0">
+						<div class="min-w-0 flex-1">
 							<p class="font-medium text-sm text-stone-800 truncate">{coffee.name}</p>
-							<p class="text-xs text-stone-400 truncate">{coffee.roastery}</p>
-							{#if coffee.origin}
-								<p class="text-xs text-stone-300">{coffee.origin}</p>
-							{/if}
+							<div class="flex items-center gap-2 mt-0.5">
+								<span class="text-xs text-stone-400 truncate">{coffee.roastery}</span>
+								{#if coffee.default_grind != null || coffee.avg_rating != null}
+									<span class="text-stone-200">|</span>
+									{#if coffee.default_grind != null}
+										<span class="text-xs text-stone-400 tabular-nums">{coffee.default_grind}</span>
+									{/if}
+									{#if coffee.avg_rating != null}
+										<span class="text-xs text-amber-500 tabular-nums">{(coffee.avg_rating / 2).toFixed(1)}<span class="text-amber-400">&#9733;</span></span>
+									{/if}
+								{/if}
+							</div>
 						</div>
 					</div>
-					{#if coffee.roastery_descriptors.length > 0}
-						<div class="flex flex-wrap gap-1 mt-1.5 ml-13">
-							{#each coffee.roastery_descriptors.slice(0, 3) as desc}
-								<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-600">
-									{desc.name}
-								</span>
-							{/each}
-							{#if coffee.roastery_descriptors.length > 3}
-								<span class="text-[10px] text-stone-300">+{coffee.roastery_descriptors.length - 3}</span>
-							{/if}
-						</div>
-					{/if}
 				</button>
 			{/each}
 		{/if}

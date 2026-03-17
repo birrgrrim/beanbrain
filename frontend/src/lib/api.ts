@@ -29,17 +29,20 @@ export interface Equipment {
 	name: string;
 	model: string | null;
 	is_active: boolean;
+	is_default: boolean;
 }
 
 export interface BrewMethod {
 	id: number;
 	name: string;
+	is_default: boolean;
 }
 
 export interface BasketSize {
 	id: number;
 	size_grams: number;
 	label: string;
+	is_default: boolean;
 }
 
 export interface GrinderSetting {
@@ -55,14 +58,14 @@ export interface GrinderSetting {
 	basket_size: BasketSize | null;
 }
 
-export interface Tasting {
+export interface Review {
 	id: number;
 	coffee_id: number;
 	taster_id: number;
 	taster: Taster;
 	rating: number;
 	comment: string | null;
-	tasted_at: string;
+	updated_at: string;
 	descriptors: Descriptor[];
 }
 
@@ -80,9 +83,10 @@ export interface Coffee {
 	acidity: string | null;
 	bitterness: string | null;
 	notes: string | null;
+	is_available: boolean;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
-	tastings: Tasting[];
+	reviews: Review[];
 	grinder_settings: GrinderSetting[];
 }
 
@@ -93,6 +97,9 @@ export interface CoffeeListItem {
 	origin: string | null;
 	roast_level: string | null;
 	image_url: string | null;
+	is_available: boolean;
+	avg_rating: number | null;
+	default_grind: number | null;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
 }
@@ -131,23 +138,24 @@ export const api = {
 			acidity?: string;
 			bitterness?: string;
 			notes?: string;
+			is_available?: boolean;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Coffee>(`/coffees/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/coffees/${id}`, { method: 'DELETE' }),
 	},
-	tastings: {
-		create: (coffeeId: number, data: {
+	reviews: {
+		upsert: (coffeeId: number, data: {
 			taster_id: number;
 			rating: number;
 			comment?: string;
 			descriptor_ids?: number[];
-		}) => request<Tasting>(`/coffees/${coffeeId}/tastings/`, {
-			method: 'POST', body: JSON.stringify(data),
+		}) => request<Review>(`/coffees/${coffeeId}/reviews/`, {
+			method: 'PUT', body: JSON.stringify(data),
 		}),
-		delete: (coffeeId: number, tastingId: number) =>
-			request<void>(`/coffees/${coffeeId}/tastings/${tastingId}`, { method: 'DELETE' }),
+		delete: (coffeeId: number, reviewId: number) =>
+			request<void>(`/coffees/${coffeeId}/reviews/${reviewId}`, { method: 'DELETE' }),
 	},
 	grinderSettings: {
 		create: (coffeeId: number, data: {
@@ -174,8 +182,19 @@ export const api = {
 	},
 	equipment: {
 		list: () => request<Equipment[]>('/equipment'),
+		create: (data: { type: string; name: string; model?: string; is_default?: boolean }) =>
+			request<Equipment>('/equipment', { method: 'POST', body: JSON.stringify(data) }),
+		update: (id: number, data: Record<string, unknown>) =>
+			request<Equipment>(`/equipment/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+		delete: (id: number) => request<void>(`/equipment/${id}`, { method: 'DELETE' }),
 		brewMethods: () => request<BrewMethod[]>('/brew-methods'),
+		createBrewMethod: (data: { name: string; is_default?: boolean }) =>
+			request<BrewMethod>('/brew-methods', { method: 'POST', body: JSON.stringify(data) }),
+		deleteBrewMethod: (id: number) => request<void>(`/brew-methods/${id}`, { method: 'DELETE' }),
 		basketSizes: () => request<BasketSize[]>('/basket-sizes'),
+		createBasketSize: (data: { size_grams: number; label: string; is_default?: boolean }) =>
+			request<BasketSize>('/basket-sizes', { method: 'POST', body: JSON.stringify(data) }),
+		deleteBasketSize: (id: number) => request<void>(`/basket-sizes/${id}`, { method: 'DELETE' }),
 	},
 	scrape: (url: string) =>
 		request<ScrapeResult>(`/scrape/?url=${encodeURIComponent(url)}`),

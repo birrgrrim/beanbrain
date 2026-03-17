@@ -114,7 +114,7 @@
 						<p class="text-stone-200 text-sm mt-1">{$t('empty.subtitle')}</p>
 					</div>
 				{:else if coffeePanel.type === 'detail'}
-					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} />
+					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} />
 				{:else if coffeePanel.type === 'new'}
 					<AddCoffeePanel onCreated={onCoffeeCreated} onCancel={() => coffeePanel = { type: 'empty' }} />
 				{/if}
