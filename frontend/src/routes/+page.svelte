@@ -1,93 +1,85 @@
 <script lang="ts">
 	import { api, type CoffeeListItem } from '$lib/api';
+	import CoffeeSidebar from '$lib/components/CoffeeSidebar.svelte';
+	import CoffeeDetail from '$lib/components/CoffeeDetail.svelte';
+	import AddCoffeePanel from '$lib/components/AddCoffeePanel.svelte';
+	import EquipmentPanel from '$lib/components/EquipmentPanel.svelte';
+	import Icons from '$lib/components/Icons.svelte';
+
+	type Panel = { type: 'empty' } | { type: 'coffee'; id: number } | { type: 'new' } | { type: 'settings' };
 
 	let coffees = $state<CoffeeListItem[]>([]);
-	let search = $state('');
-	let loading = $state(true);
+	let panel = $state<Panel>({ type: 'empty' });
 
 	async function loadCoffees() {
-		loading = true;
-		coffees = await api.coffees.list(search || undefined);
-		loading = false;
+		coffees = await api.coffees.list();
 	}
 
-	$effect(() => {
-		loadCoffees();
-	});
+	$effect(() => { loadCoffees(); });
 
-	let debounceTimer: ReturnType<typeof setTimeout>;
-	function handleSearch(e: Event) {
-		const value = (e.target as HTMLInputElement).value;
-		search = value;
-		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => loadCoffees(), 300);
+	function selectCoffee(id: number) {
+		panel = { type: 'coffee', id };
 	}
+
+	function addCoffee() {
+		panel = { type: 'new' };
+	}
+
+	function showSettings() {
+		panel = { type: 'settings' };
+	}
+
+	async function onCoffeeCreated(id: number) {
+		await loadCoffees();
+		panel = { type: 'coffee', id };
+	}
+
+	async function onCoffeeDeleted() {
+		await loadCoffees();
+		panel = { type: 'empty' };
+	}
+
+	const selectedId = $derived(panel.type === 'coffee' ? panel.id : null);
 </script>
 
-<div class="space-y-6">
-	<div class="flex items-center justify-between gap-4">
-		<h1 class="text-2xl font-bold text-stone-800">Your Coffees</h1>
-		<a
-			href="/coffee/new"
-			class="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors font-medium text-sm"
-		>
-			+ Add Coffee
-		</a>
+<div class="flex h-screen overflow-hidden">
+	<!-- Sidebar -->
+	<div class="flex flex-col">
+		<CoffeeSidebar
+			{coffees}
+			{selectedId}
+			onSelect={selectCoffee}
+			onAdd={addCoffee}
+			onRefresh={loadCoffees}
+		/>
+		<!-- Bottom nav -->
+		<div class="w-80 border-r border-stone-200 bg-white border-t border-t-stone-100 p-2 flex-shrink-0">
+			<button
+				onclick={showSettings}
+				class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-stone-400
+					hover:bg-stone-50 hover:text-stone-600 transition-colors
+					{panel.type === 'settings' ? 'bg-stone-50 text-stone-600' : ''}"
+			>
+				<Icons icon="settings" size={16} />
+				Settings
+			</button>
+		</div>
 	</div>
 
-	<input
-		type="text"
-		placeholder="Search by name or roastery..."
-		value={search}
-		oninput={handleSearch}
-		class="w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-white
-			focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent
-			placeholder:text-stone-400"
-	/>
-
-	{#if loading}
-		<div class="text-center py-12 text-stone-400">Loading...</div>
-	{:else if coffees.length === 0}
-		<div class="text-center py-12">
-			<p class="text-stone-400 text-lg">No coffees yet</p>
-			<p class="text-stone-400 text-sm mt-1">Add your first coffee to get started</p>
-		</div>
-	{:else}
-		<div class="grid gap-3">
-			{#each coffees as coffee}
-				<a
-					href="/coffee/{coffee.id}"
-					class="block bg-white rounded-xl border border-stone-200 p-4 hover:shadow-md hover:border-amber-300 transition-all"
-				>
-					<div class="flex items-start gap-3">
-						{#if coffee.image_url}
-							<img src={coffee.image_url} alt={coffee.name} class="w-12 h-12 rounded-lg object-contain flex-shrink-0" />
-						{/if}
-						<div class="min-w-0">
-							<h2 class="font-semibold text-stone-800 truncate">{coffee.name}</h2>
-							<p class="text-sm text-stone-500">{coffee.roastery}</p>
-							<div class="flex items-center gap-3 mt-1 text-xs text-stone-400">
-								{#if coffee.origin}
-									<span>{coffee.origin}</span>
-								{/if}
-								{#if coffee.roast_level}
-									<span>{coffee.roast_level}</span>
-								{/if}
-							</div>
-						</div>
-					</div>
-
-					{#if coffee.roastery_descriptors.length > 0}
-						<div class="flex flex-wrap gap-1 mt-2">
-							{#each coffee.roastery_descriptors as desc}
-								<span class="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">
-									{desc.name}
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</a>
-			{/each}
-		</div>
-	{/if}
+	<!-- Content panel -->
+	<div class="flex-1 overflow-y-auto bg-[#faf8f5]">
+		{#if panel.type === 'empty'}
+			<div class="flex flex-col items-center justify-center h-full text-center">
+				<Icons icon="bean" size={48} className="text-stone-200 mb-3" />
+				<p class="text-stone-300 text-lg" style="font-family: 'DM Serif Display', serif;">Select a coffee</p>
+				<p class="text-stone-200 text-sm mt-1">or add a new one to get started</p>
+			</div>
+		{:else if panel.type === 'coffee'}
+			<CoffeeDetail coffeeId={panel.id} onDeleted={onCoffeeDeleted} />
+		{:else if panel.type === 'new'}
+			<AddCoffeePanel onCreated={onCoffeeCreated} onCancel={() => panel = { type: 'empty' }} />
+		{:else if panel.type === 'settings'}
+			<EquipmentPanel />
+		{/if}
+	</div>
 </div>
