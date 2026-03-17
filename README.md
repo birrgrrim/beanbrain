@@ -20,7 +20,8 @@ A personal coffee tracking tool for coffee enthusiasts. Track your beans, grinde
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
 - Node.js 18+
 
 ### Setup
@@ -74,7 +75,7 @@ beanbrain/
 │   │   ├── main.py        # FastAPI app & startup
 │   │   └── routers/       # API route handlers
 │   ├── tests/             # pytest tests
-│   └── requirements.txt
+│   └── pyproject.toml
 ├── frontend/              # SvelteKit app
 ├── Makefile
 └── README.md

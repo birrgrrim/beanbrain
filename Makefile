@@ -1,7 +1,7 @@
 .PHONY: setup-backend setup-frontend dev dev-backend dev-frontend test test-backend
 
 setup-backend:
-	cd backend && python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt
+	cd backend && uv sync
 
 setup-frontend:
 	cd frontend && npm install
@@ -11,7 +11,7 @@ dev:
 	@make dev-backend & make dev-frontend
 
 dev-backend:
-	cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000
+	cd backend && uv run uvicorn app.main:app --reload --port 8000
 
 dev-frontend:
 	cd frontend && npm run dev
@@ -19,4 +19,4 @@ dev-frontend:
 test: test-backend
 
 test-backend:
-	cd backend && .venv/bin/python -m pytest tests/ -v
+	cd backend && uv run pytest tests/ -v

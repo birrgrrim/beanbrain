@@ -11,6 +11,9 @@ build/
 venv/
 env/
 
+# uv
+uv.lock
+
 # SQLite
 *.db
 *.sqlite3
