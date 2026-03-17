@@ -1,0 +1,126 @@
+def _create_coffee(client):
+    resp = client.post("/coffees/", json={"name": "Test Coffee", "roastery": "R"})
+    return resp.json()["id"]
+
+
+def _create_taster(client, name="Alex"):
+    resp = client.post("/tasters/", json={"name": name})
+    return resp.json()["id"]
+
+
+def test_create_review(client):
+    coffee_id = _create_coffee(client)
+    taster_id = _create_taster(client)
+
+    resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id,
+        "rating": 8,
+        "comment": "Very smooth, great crema",
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["taster"]["name"] == "Alex"
+    assert data["rating"] == 8
+
+
+def test_upsert_review(client):
+    """Same person updating their review should overwrite, not create new."""
+    coffee_id = _create_coffee(client)
+    taster_id = _create_taster(client)
+
+    client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id, "rating": 6, "comment": "Ok",
+    })
+    resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id, "rating": 9, "comment": "Actually great!",
+    })
+    assert resp.json()["rating"] == 9
+    assert resp.json()["comment"] == "Actually great!"
+
+    # Should still be only one review
+    reviews = client.get(f"/coffees/{coffee_id}/reviews/").json()
+    assert len(reviews) == 1
+
+
+def test_review_with_descriptors(client):
+    coffee_id = _create_coffee(client)
+    taster_id = _create_taster(client, "Kate")
+    descriptors = client.get("/descriptors").json()
+    chocolate_id = next(d["id"] for d in descriptors if d["name"] == "Chocolate")
+
+    resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id,
+        "rating": 7,
+        "descriptor_ids": [chocolate_id],
+    })
+    assert resp.status_code == 200
+    assert any(d["name"] == "Chocolate" for d in resp.json()["descriptors"])
+
+
+def test_review_rating_validation(client):
+    coffee_id = _create_coffee(client)
+    taster_id = _create_taster(client)
+
+    resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id, "rating": 0,
+    })
+    assert resp.status_code == 422
+
+    resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id, "rating": 11,
+    })
+    assert resp.status_code == 422
+
+
+def test_list_reviews(client):
+    coffee_id = _create_coffee(client)
+    t1 = _create_taster(client, "Alex")
+    t2 = _create_taster(client, "Kate")
+    client.put(f"/coffees/{coffee_id}/reviews/", json={"taster_id": t1, "rating": 8})
+    client.put(f"/coffees/{coffee_id}/reviews/", json={"taster_id": t2, "rating": 6})
+
+    resp = client.get(f"/coffees/{coffee_id}/reviews/")
+    assert resp.status_code == 200
+    assert len(resp.json()) == 2
+
+
+def test_delete_review(client):
+    coffee_id = _create_coffee(client)
+    taster_id = _create_taster(client)
+    create = client.put(f"/coffees/{coffee_id}/reviews/", json={
+        "taster_id": taster_id, "rating": 5,
+    })
+    review_id = create.json()["id"]
+
+    resp = client.delete(f"/coffees/{coffee_id}/reviews/{review_id}")
+    assert resp.status_code == 204
+
+    resp = client.get(f"/coffees/{coffee_id}/reviews/")
+    assert len(resp.json()) == 0
+
+
+def test_review_for_nonexistent_coffee(client):
+    taster_id = _create_taster(client)
+    resp = client.put("/coffees/999/reviews/", json={
+        "taster_id": taster_id, "rating": 5,
+    })
+    assert resp.status_code == 404
+
+
+def test_coffee_availability(client):
+    resp = client.post("/coffees/", json={"name": "Available", "roastery": "R"})
+    assert resp.json()["is_available"] == True
+
+    coffee_id = resp.json()["id"]
+    resp = client.put(f"/coffees/{coffee_id}", json={"is_available": False})
+    assert resp.json()["is_available"] == False
+
+
+def test_coffees_sorted_by_availability(client):
+    c1 = client.post("/coffees/", json={"name": "Old", "roastery": "R"}).json()
+    c2 = client.post("/coffees/", json={"name": "New", "roastery": "R"}).json()
+    client.put(f"/coffees/{c1['id']}", json={"is_available": False})
+
+    coffees = client.get("/coffees/").json()
+    assert coffees[0]["name"] == "New"  # available first
+    assert coffees[1]["name"] == "Old"  # unavailable last

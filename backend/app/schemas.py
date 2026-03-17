@@ -28,31 +28,58 @@ class TasterOut(BaseModel):
 
 # --- Equipment ---
 
+class EquipmentCreate(BaseModel):
+    type: str
+    name: str
+    model: str | None = None
+    is_default: bool = False
+
+
+class EquipmentUpdate(BaseModel):
+    name: str | None = None
+    model: str | None = None
+    is_default: bool | None = None
+
+
 class EquipmentOut(BaseModel):
     id: int
     type: str
     name: str
     model: str | None = None
     is_active: bool
+    is_default: bool
 
     model_config = {"from_attributes": True}
 
 
 # --- Brew Method ---
 
+class BrewMethodCreate(BaseModel):
+    name: str
+    is_default: bool = False
+
+
 class BrewMethodOut(BaseModel):
     id: int
     name: str
+    is_default: bool
 
     model_config = {"from_attributes": True}
 
 
 # --- Basket Size ---
 
+class BasketSizeCreate(BaseModel):
+    size_grams: int
+    label: str
+    is_default: bool = False
+
+
 class BasketSizeOut(BaseModel):
     id: int
     size_grams: int
     label: str
+    is_default: bool
 
     model_config = {"from_attributes": True}
 
@@ -82,23 +109,23 @@ class GrinderSettingOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# --- Tasting ---
+# --- Review ---
 
-class TastingCreate(BaseModel):
+class ReviewUpsert(BaseModel):
     taster_id: int
     rating: int = Field(ge=1, le=10)
     comment: str | None = None
     descriptor_ids: list[int] = []
 
 
-class TastingOut(BaseModel):
+class ReviewOut(BaseModel):
     id: int
     coffee_id: int
     taster_id: int
     taster: TasterOut
     rating: int
     comment: str | None = None
-    tasted_at: datetime
+    updated_at: datetime
     descriptors: list[DescriptorOut] = []
 
     model_config = {"from_attributes": True}
@@ -119,6 +146,7 @@ class CoffeeCreate(BaseModel):
     acidity: str | None = None
     bitterness: str | None = None
     notes: str | None = None
+    is_available: bool = True
     roastery_descriptor_ids: list[int] = []
 
 
@@ -135,6 +163,7 @@ class CoffeeUpdate(BaseModel):
     acidity: str | None = None
     bitterness: str | None = None
     notes: str | None = None
+    is_available: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
 
 
@@ -152,9 +181,10 @@ class CoffeeOut(BaseModel):
     acidity: str | None = None
     bitterness: str | None = None
     notes: str | None = None
+    is_available: bool
     created_at: datetime
     roastery_descriptors: list[DescriptorOut] = []
-    tastings: list[TastingOut] = []
+    reviews: list[ReviewOut] = []
     grinder_settings: list[GrinderSettingOut] = []
 
     model_config = {"from_attributes": True}
@@ -167,7 +197,10 @@ class CoffeeListOut(BaseModel):
     origin: str | None = None
     roast_level: str | None = None
     image_url: str | None = None
+    is_available: bool
     created_at: datetime
+    avg_rating: float | None = None
+    default_grind: float | None = None
     roastery_descriptors: list[DescriptorOut] = []
 
     model_config = {"from_attributes": True}
@@ -187,5 +220,5 @@ class ScrapeResult(BaseModel):
     sweetness: str | None = None
     acidity: str | None = None
     bitterness: str | None = None
-    flavor_descriptors: dict[str, list[str]] = {}  # {en: [...], uk: [...]}
-    name_i18n: dict[str, str] = {}  # {en: "...", uk: "..."}
+    flavor_descriptors: dict[str, list[str]] = {}
+    name_i18n: dict[str, str] = {}

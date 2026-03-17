@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, SessionLocal, engine
-from .routers import coffees, descriptors, equipment, tastings, grinder_settings, tasters, scrape
+from .routers import coffees, descriptors, equipment, reviews, grinder_settings, tasters, scrape
 from .seed import seed_database
 
 
@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(coffees.router)
-app.include_router(tastings.router)
+app.include_router(reviews.router)
 app.include_router(grinder_settings.router)
 app.include_router(descriptors.router)
 app.include_router(equipment.router)

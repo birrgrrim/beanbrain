@@ -1,11 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
-from ..models import Coffee, Descriptor, GrinderSetting, Tasting
+from ..models import Coffee, Descriptor, GrinderSetting, Review, Equipment, BrewMethod
 from ..schemas import CoffeeCreate, CoffeeListOut, CoffeeOut, CoffeeUpdate
 
 router = APIRouter(prefix="/coffees", tags=["coffees"])
+
+
+def _get_default_grind(db: Session, coffee_id: int) -> float | None:
+    """Get grind setting for default equipment."""
+    default_grinder = db.query(Equipment).filter(
+        Equipment.type == "grinder", Equipment.is_default == True
+    ).first()
+    default_method = db.query(BrewMethod).filter(BrewMethod.is_default == True).first()
+    if not default_grinder or not default_method:
+        return None
+    setting = db.query(GrinderSetting).filter(
+        GrinderSetting.coffee_id == coffee_id,
+        GrinderSetting.equipment_id == default_grinder.id,
+        GrinderSetting.brew_method_id == default_method.id,
+    ).first()
+    return setting.setting if setting else None
+
+
+def _get_avg_rating(db: Session, coffee_id: int) -> float | None:
+    result = db.query(func.avg(Review.rating)).filter(
+        Review.coffee_id == coffee_id
+    ).scalar()
+    return round(result, 1) if result else None
 
 
 @router.get("/", response_model=list[CoffeeListOut])
@@ -27,7 +51,17 @@ def list_coffees(
     if descriptor_id:
         query = query.filter(Coffee.roastery_descriptors.any(Descriptor.id == descriptor_id))
 
-    return query.order_by(Coffee.created_at.desc()).all()
+    coffees = query.order_by(
+        Coffee.is_available.desc(), Coffee.created_at.desc()
+    ).all()
+
+    result = []
+    for c in coffees:
+        data = CoffeeListOut.model_validate(c)
+        data.avg_rating = _get_avg_rating(db, c.id)
+        data.default_grind = _get_default_grind(db, c.id)
+        result.append(data)
+    return result
 
 
 @router.get("/{coffee_id}", response_model=CoffeeOut)
@@ -36,8 +70,8 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
         db.query(Coffee)
         .options(
             joinedload(Coffee.roastery_descriptors),
-            joinedload(Coffee.tastings).joinedload(Tasting.descriptors),
-            joinedload(Coffee.tastings).joinedload(Tasting.taster),
+            joinedload(Coffee.reviews).joinedload(Review.descriptors),
+            joinedload(Coffee.reviews).joinedload(Review.taster),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.equipment),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_method),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.basket_size),
@@ -65,6 +99,7 @@ def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
         acidity=data.acidity,
         bitterness=data.bitterness,
         notes=data.notes,
+        is_available=data.is_available,
     )
 
     if data.roastery_descriptor_ids:

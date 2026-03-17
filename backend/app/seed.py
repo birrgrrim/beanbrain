@@ -42,16 +42,18 @@ DESCRIPTORS = {
 }
 
 EQUIPMENT = [
-    {"type": "grinder", "name": "Default Grinder", "model": None, "is_active": True},
-    {"type": "machine", "name": "Default Machine", "model": None, "is_active": True},
+    {"type": "grinder", "name": "Default Grinder", "model": None, "is_active": True, "is_default": True},
+    {"type": "machine", "name": "Default Machine", "model": None, "is_active": True, "is_default": True},
 ]
 
-BREW_METHODS = ["Espresso"]
+BREW_METHODS = [
+    {"name": "Espresso", "is_default": True},
+]
 
 BASKET_SIZES = [
-    {"size_grams": 14, "label": "14g"},
-    {"size_grams": 18, "label": "18g"},
-    {"size_grams": 25, "label": "25g"},
+    {"size_grams": 14, "label": "14g", "is_default": False},
+    {"size_grams": 18, "label": "18g", "is_default": True},
+    {"size_grams": 25, "label": "25g", "is_default": False},
 ]
 
 
@@ -68,7 +70,7 @@ def seed_database(db: Session) -> None:
         db.add(Equipment(**eq))
 
     for method in BREW_METHODS:
-        db.add(BrewMethod(name=method))
+        db.add(BrewMethod(**method))
 
     for bs in BASKET_SIZES:
         db.add(BasketSize(**bs))
