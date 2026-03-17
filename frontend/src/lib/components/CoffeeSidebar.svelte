@@ -21,7 +21,7 @@
 	);
 </script>
 
-<aside class="w-80 flex-shrink-0 bg-white border-r border-stone-200 flex flex-col h-screen">
+<aside class="w-80 flex-shrink-0 bg-white border-r border-stone-200 flex flex-col">
 	<!-- Header -->
 	<div class="p-4 border-b border-stone-100">
 		<div class="flex items-center justify-between mb-3">
