@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, type Coffee, type Descriptor, type Grinder, type BrewSetup, type Taster } from '$lib/api';
+	import { api, type Coffee, type Descriptor, type Grinder, type BrewSetup, type Taster, type Origin, type Roastery } from '$lib/api';
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
 	import StarRating from './StarRating.svelte';
@@ -23,11 +23,14 @@
 	let tasters = $state<Taster[]>([]);
 	let loading = $state(true);
 
+	let originsList = $state<Origin[]>([]);
+	let roasteriesList2 = $state<Roastery[]>([]);
+
 	// Edit mode
 	let editing = $state(false);
 	let editName = $state('');
-	let editRoastery = $state('');
-	let editOrigin = $state('');
+	let editRoasteryId = $state<number | null>(null);
+	let editOriginId = $state<number | null>(null);
 	let editProcess = $state('');
 	let editRoastLevel = $state('');
 	let editNotes = $state('');
@@ -53,18 +56,22 @@
 
 	async function loadData() {
 		loading = true;
-		const [c, d, gr, bs, ta] = await Promise.all([
+		const [c, d, gr, bs, ta, ori, roast] = await Promise.all([
 			api.coffees.get(coffeeId),
 			api.descriptors.list(),
 			api.grinders.list(),
 			api.brewSetups.list(),
 			api.tasters.list(),
+			api.origins.list(),
+			api.roasteries.list(),
 		]);
 		coffee = c;
 		descriptors = d;
 		grindersList = gr;
 		brewSetupsList = bs;
 		tasters = ta;
+		originsList = ori;
+		roasteriesList2 = roast;
 
 		settingGrinderId = gr.find(g => g.is_default)?.id ?? gr[0]?.id ?? null;
 		settingBrewSetupId = bs.find(s => s.is_default)?.id ?? bs[0]?.id ?? null;
@@ -100,8 +107,8 @@
 	function startEditing() {
 		if (!coffee) return;
 		editName = coffee.name;
-		editRoastery = coffee.roastery;
-		editOrigin = coffee.origin ?? '';
+		editRoasteryId = coffee.roastery_id;
+		editOriginId = coffee.origin_id;
 		editProcess = coffee.process ?? '';
 		editRoastLevel = coffee.roast_level ?? '';
 		editNotes = coffee.notes ?? '';
@@ -126,13 +133,13 @@
 	}
 
 	async function saveEditing() {
-		if (!editName.trim() || !editRoastery.trim()) return;
+		if (!editName.trim() || !editRoasteryId) return;
 		saving = true;
 		try {
 			await api.coffees.update(coffeeId, {
 				name: editName.trim(),
-				roastery: editRoastery.trim(),
-				origin: editOrigin.trim() || null,
+				roastery_id: editRoasteryId,
+				origin_id: editOriginId || null,
 				process: editProcess.trim() || null,
 				roast_level: editRoastLevel.trim() || null,
 				notes: editNotes.trim() || null,
@@ -280,8 +287,12 @@
 					{#if editing}
 						<!-- Edit mode -->
 						<div class="flex items-center justify-between">
-							<input type="text" bind:value={editRoastery} placeholder={$t('add.roastery')}
-								class={inputClass} style="max-width: 250px;" />
+							<select bind:value={editRoasteryId}
+								class="{inputClass}" style="max-width: 250px;">
+								{#each roasteriesList2 as r}
+									<option value={r.id}>{r.name}</option>
+								{/each}
+							</select>
 							<button onclick={toggleAvailability}
 								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
 									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
@@ -293,7 +304,12 @@
 						<div class="grid grid-cols-3 gap-3">
 							<div>
 								<label for="edit-origin" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</label>
-								<input id="edit-origin" type="text" bind:value={editOrigin} placeholder="Ethiopia" class={inputClass} />
+								<select id="edit-origin" bind:value={editOriginId} class={inputClass}>
+									<option value={null}>—</option>
+									{#each originsList as o}
+										<option value={o.id}>{o.flag ? o.flag + ' ' : ''}{currentLang === 'uk' ? o.name_uk : o.name_en}</option>
+									{/each}
+								</select>
 							</div>
 							<div>
 								<label for="edit-process" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</label>
@@ -334,7 +350,7 @@
 								class="w-full mt-1 px-3 py-1.5 rounded-lg border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
 						</div>
 						<div class="flex gap-2 pt-1">
-							<button onclick={saveEditing} disabled={saving || !editName.trim() || !editRoastery.trim()}
+							<button onclick={saveEditing} disabled={saving || !editName.trim() || !editRoasteryId}
 								class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">
 								{saving ? $t('add.saving') : $t('common.save')}
 							</button>
@@ -343,7 +359,7 @@
 					{:else}
 						<!-- Display mode -->
 						<div class="flex items-center justify-between">
-							<p class="text-base text-stone-400">{coffee.roastery}</p>
+							<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
 							<button onclick={toggleAvailability}
 								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
 									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
@@ -356,8 +372,8 @@
 							<!-- Left: details -->
 							<div class="flex-1 space-y-4">
 								<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
-									{#if coffee.origin}
-										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin}</p></div>
+									{#if coffee.origin_ref}
+										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin_ref.flag ? coffee.origin_ref.flag + ' ' : ''}{currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p></div>
 									{/if}
 									{#if coffee.process}
 										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
@@ -413,7 +429,7 @@
 			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
-						<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-60" />
+						<img src="/img/burr-icon.png" alt="" class="w-12 h-12 opacity-60" />
 						<h3 class="font-semibold text-base text-stone-700">{$t('grinder.title')}</h3>
 					</div>
 					{#if !showSettingForm}
@@ -499,7 +515,7 @@
 			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
-						<img src="/img/coffee-cup.png" alt="" class="w-8 h-8 opacity-60" />
+						<img src="/img/coffee-cup.png" alt="" class="w-12 h-12 opacity-60" />
 						<h3 class="font-semibold text-base text-stone-700">{$t('tasting.title')}</h3>
 					</div>
 					{#if unreviewedTasters.length > 0 && editingReviewTasterId === null}
@@ -523,8 +539,8 @@
 				{#each coffee.reviews as review}
 					{#if editingReviewTasterId === review.taster_id}
 						<div class="py-2 space-y-2">
-							<p class="text-base font-semibold text-stone-700">{review.taster.name}</p>
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-3">
+								<p class="text-lg font-semibold text-stone-700">{review.taster.name}</p>
 								<StarRating rating={reviewRating} interactive onRate={(v) => reviewRating = v} />
 								{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
 							</div>
@@ -566,8 +582,8 @@
 
 				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId)}
 					<div class="py-2 space-y-2">
-						<p class="text-sm font-medium text-stone-700">{tasters.find(ta => ta.id === editingReviewTasterId)?.name}</p>
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-3">
+							<p class="text-lg font-semibold text-stone-700">{tasters.find(ta => ta.id === editingReviewTasterId)?.name}</p>
 							<StarRating rating={reviewRating} interactive onRate={(v) => reviewRating = v} />
 							{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
 						</div>

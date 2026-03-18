@@ -46,15 +46,17 @@ def list_coffees(
     taster_id: int | None = Query(None, description="Active person — returns their rating"),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Coffee).options(joinedload(Coffee.roastery_descriptors))
+    query = db.query(Coffee).options(
+        joinedload(Coffee.origin_ref),
+        joinedload(Coffee.roastery_ref),
+        joinedload(Coffee.roastery_descriptors),
+    )
 
     if search:
         pattern = f"%{search}%"
         query = query.filter(
-            Coffee.name.ilike(pattern) | Coffee.roastery.ilike(pattern)
+            Coffee.name.ilike(pattern)
         )
-    if roastery:
-        query = query.filter(Coffee.roastery.ilike(f"%{roastery}%"))
     if descriptor_id:
         query = query.filter(Coffee.roastery_descriptors.any(Descriptor.id == descriptor_id))
 
@@ -78,6 +80,8 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
     coffee = (
         db.query(Coffee)
         .options(
+            joinedload(Coffee.origin_ref),
+            joinedload(Coffee.roastery_ref),
             joinedload(Coffee.roastery_descriptors),
             joinedload(Coffee.reviews).joinedload(Review.descriptors),
             joinedload(Coffee.reviews).joinedload(Review.taster),
@@ -96,8 +100,8 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
 def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
     coffee = Coffee(
         name=data.name,
-        roastery=data.roastery,
-        origin=data.origin,
+        roastery_id=data.roastery_id,
+        origin_id=data.origin_id,
         process=data.process,
         roast_level=data.roast_level,
         roastery_url=data.roastery_url,

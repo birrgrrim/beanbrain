@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, type CoffeeListItem, type Grinder, type BrewSetup } from '$lib/api';
+	import { api, type CoffeeListItem, type Grinder, type BrewSetup, type Roastery } from '$lib/api';
 	import { lang, type Lang } from '$lib/lang';
 	import { activePerson } from '$lib/personStore';
 	import { t } from '$lib/i18n';
@@ -13,12 +13,16 @@
 	import BrewSetupDetail from '$lib/components/BrewSetupDetail.svelte';
 	import BrewMethodPicker from '$lib/components/BrewMethodPicker.svelte';
 	import AddBrewSetupPanel from '$lib/components/AddBrewSetupPanel.svelte';
+	import RoasterySidebar from '$lib/components/RoasterySidebar.svelte';
+	import RoasteryDetail from '$lib/components/RoasteryDetail.svelte';
+	import AddRoasteryPanel from '$lib/components/AddRoasteryPanel.svelte';
 	import PersonSwitcher from '$lib/components/PersonSwitcher.svelte';
 
-	type Tab = 'coffee' | 'grinding' | 'brewing';
+	type Tab = 'coffee' | 'grinding' | 'brewing' | 'roasteries';
 	type CoffeePanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
 	type GrinderPanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
 	type BrewPanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'pick_method' } | { type: 'new'; methodType: string; hasBasket: boolean };
+	type RoasteryPanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
 
 	let activeTab = $state<Tab>('coffee');
 	let coffees = $state<CoffeeListItem[]>([]);
@@ -30,6 +34,9 @@
 	let brewSetups = $state<BrewSetup[]>([]);
 	let brewPanel = $state<BrewPanel>({ type: 'empty' });
 
+	let roasteriesList = $state<Roastery[]>([]);
+	let roasteryPanel = $state<RoasteryPanel>({ type: 'empty' });
+
 	let currentLang = $state<Lang>('en');
 	let currentPersonId = $state<number | null>(null);
 
@@ -40,6 +47,7 @@
 		{ id: 'coffee', key: 'tab.coffee', img: '/img/tab-coffee.png' },
 		{ id: 'grinding', key: 'tab.grinding', img: '/img/tab-grinder.png' },
 		{ id: 'brewing', key: 'tab.brewing', img: '/img/tab-machine.png' },
+		{ id: 'roasteries', key: 'tab.roasteries', img: '/img/roastery.png' },
 	];
 
 	async function loadCoffees() {
@@ -54,9 +62,14 @@
 		brewSetups = await api.brewSetups.list();
 	}
 
+	async function loadRoasteries() {
+		roasteriesList = await api.roasteries.list();
+	}
+
 	$effect(() => { currentPersonId; loadCoffees(); });
 	$effect(() => { if (activeTab === 'grinding') loadGrinders(); });
 	$effect(() => { if (activeTab === 'brewing') loadBrewSetups(); });
+	$effect(() => { if (activeTab === 'roasteries') loadRoasteries(); });
 
 	function selectCoffee(id: number) {
 		coffeePanel = { type: 'detail', id };
@@ -121,6 +134,28 @@
 		brewPanel = { type: 'empty' };
 	}
 
+	// Roastery handlers
+	function selectRoastery(id: number) {
+		roasteryPanel = { type: 'detail', id };
+	}
+
+	async function onRoasteryCreated(id: number) {
+		await loadRoasteries();
+		roasteryPanel = { type: 'detail', id };
+	}
+
+	async function onRoasteryUpdated() {
+		await loadRoasteries();
+		if (roasteryPanel.type === 'detail') {
+			roasteryPanel = { ...roasteryPanel };
+		}
+	}
+
+	async function onRoasteryDeleted() {
+		await loadRoasteries();
+		roasteryPanel = { type: 'empty' };
+	}
+
 	function toggleLang() {
 		lang.set(currentLang === 'en' ? 'uk' : 'en');
 	}
@@ -129,11 +164,16 @@
 	const selectedGrinderId = $derived(grinderPanel.type === 'detail' ? grinderPanel.id : null);
 	const selectedBrewSetupId = $derived(brewPanel.type === 'detail' ? brewPanel.id : null);
 
+	const selectedRoasteryId = $derived(roasteryPanel.type === 'detail' ? roasteryPanel.id : null);
+
 	const selectedGrinder = $derived(
 		selectedGrinderId != null ? grinders.find(g => g.id === selectedGrinderId) ?? null : null
 	);
 	const selectedBrewSetup = $derived(
 		selectedBrewSetupId != null ? brewSetups.find(s => s.id === selectedBrewSetupId) ?? null : null
+	);
+	const selectedRoastery = $derived(
+		selectedRoasteryId != null ? roasteriesList.find(r => r.id === selectedRoasteryId) ?? null : null
 	);
 </script>
 
@@ -157,7 +197,7 @@
 									? 'border-amber-600 text-amber-700'
 									: 'border-transparent text-stone-400 hover:text-stone-600'}"
 						>
-							<img src={tab.img} alt="" class="w-8 h-8 {activeTab === tab.id ? 'opacity-90' : 'opacity-40'}" />
+							<img src={tab.img} alt="" class="w-12 h-12 {activeTab === tab.id ? 'opacity-90' : 'opacity-40'}" />
 							{$t(tab.key)}
 						</button>
 					{/each}
@@ -256,6 +296,28 @@
 					<BrewMethodPicker onPicked={onMethodPicked} onCancel={() => brewPanel = { type: 'empty' }} />
 				{:else if brewPanel.type === 'new'}
 					<AddBrewSetupPanel methodType={brewPanel.methodType} hasBasket={brewPanel.hasBasket} onCreated={onBrewSetupCreated} onCancel={() => brewPanel = { type: 'empty' }} />
+				{/if}
+			</div>
+		{:else if activeTab === 'roasteries'}
+			<RoasterySidebar
+				roasteries={roasteriesList}
+				selectedId={selectedRoasteryId}
+				onSelect={selectRoastery}
+				onAdd={() => roasteryPanel = { type: 'new' }}
+			/>
+			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
+				{#if roasteryPanel.type === 'empty'}
+					<div class="flex flex-col items-center justify-center h-full text-center">
+						<div class="rounded-full bg-parchment p-8 mb-4"
+							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
+							<img src="/img/many-roasteries.png" alt="" class="opacity-70" style="max-width: 220px;" />
+						</div>
+						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('roastery.select')}</p>
+					</div>
+				{:else if roasteryPanel.type === 'detail' && selectedRoastery}
+					<RoasteryDetail roastery={selectedRoastery} onUpdated={onRoasteryUpdated} onDeleted={onRoasteryDeleted} onBack={() => roasteryPanel = { type: 'empty' }} />
+				{:else if roasteryPanel.type === 'new'}
+					<AddRoasteryPanel onCreated={onRoasteryCreated} onCancel={() => roasteryPanel = { type: 'empty' }} />
 				{/if}
 			</div>
 		{/if}

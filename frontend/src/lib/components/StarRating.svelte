@@ -1,10 +1,13 @@
 <script lang="ts">
-	let { rating = 0, interactive = false, onRate, size = 'md' }: {
+	let { rating = 0, interactive = false, onRate, size }: {
 		rating: number;
 		interactive?: boolean;
 		onRate?: (value: number) => void;
-		size?: 'sm' | 'md' | 'lg';
+		size?: 'sm' | 'md' | 'lg' | 'xl';
 	} = $props();
+
+	// Default: xl for interactive (easier to tap half-beans), md for display
+	const effectiveSize = size ?? (interactive ? 'xl' : 'md');
 
 	let hoverRating = $state(0);
 
@@ -40,13 +43,14 @@
 		sm: 10,
 		md: 14,
 		lg: 18,
+		xl: 28,
 	};
 </script>
 
 <div class="inline-flex items-center gap-1" role={interactive ? 'radiogroup' : 'img'} aria-label={`Rating: ${rating / 2} out of 5`}>
 	{#each [1, 2, 3, 4, 5] as bean}
 		{@const type = beanType(bean, hoverRating || rating)}
-		{@const px = sizeMap[size]}
+		{@const px = sizeMap[effectiveSize]}
 		{#if interactive}
 			<button
 				type="button"

@@ -73,7 +73,7 @@
 	</button>
 
 	{#if open}
-		<div class="absolute right-0 top-full mt-1 w-64 bg-card rounded-xl border border-stone-200 shadow-lg z-50 overflow-hidden">
+		<div class="absolute right-0 top-full mt-1 w-72 bg-card rounded-xl border border-stone-200 shadow-lg z-50 overflow-hidden">
 			<!-- "Everyone" option (average) -->
 			<button
 				onclick={() => selectPerson(null)}

@@ -1,5 +1,6 @@
 def _create_coffee(client):
-    resp = client.post("/coffees/", json={"name": "Test Coffee", "roastery": "R"})
+    rid = client.post("/roasteries/", json={"name": "Test Roastery"}).json()["id"]
+    resp = client.post("/coffees/", json={"name": "Test Coffee", "roastery_id": rid})
     return resp.json()["id"]
 
 

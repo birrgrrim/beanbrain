@@ -49,13 +49,7 @@
 			</div>
 		</button>
 
-		{#if grinders.length === 0}
-			<div class="p-6 text-center">
-				<img src="/img/select-grinder.png" alt="" class="mx-auto mb-3 opacity-60" style="max-width: 140px;" />
-				<p class="text-sm text-stone-500">{$t('grinding.empty')}</p>
-				<p class="text-xs text-stone-400 mt-1">{$t('grinding.empty_hint')}</p>
-			</div>
-		{:else if filtered.length === 0}
+		{#if filtered.length === 0 && search}
 			<div class="p-6 text-center">
 				<p class="text-sm text-stone-500">{$t('sidebar.no_matches')}</p>
 			</div>

@@ -5,7 +5,8 @@ const translations: Record<string, Record<string, string>> = {
 	// Top bar & tabs
 	'tab.coffee': { en: 'Coffee', uk: 'Кава' },
 	'tab.grinding': { en: 'Grind', uk: 'Помол' },
-	'tab.brewing': { en: 'Brew', uk: 'Заварка' },
+	'tab.brewing': { en: 'Brew', uk: 'Заварювання' },
+	'tab.roasteries': { en: 'Roast', uk: 'Ростерні' },
 
 	// Coffee sidebar
 	'sidebar.search': { en: 'Search coffees...', uk: 'Пошук кави...' },
@@ -111,6 +112,15 @@ const translations: Record<string, Record<string, string>> = {
 	'method.frenchpress': { en: 'French Press', uk: 'Френч-прес' },
 	'method.moka': { en: 'Moka Pot', uk: 'Мока' },
 	'method.cezve': { en: 'Cezve', uk: 'Джезва' },
+
+	// Roasteries tab
+	'roastery.title': { en: 'Roasteries', uk: 'Обсмажувачі' },
+	'roastery.add': { en: 'Add Roastery', uk: 'Додайте ростерню' },
+	'roastery.name': { en: 'Name', uk: 'Назва' },
+	'roastery.website': { en: 'Website', uk: 'Веб-сайт' },
+	'roastery.search': { en: 'Search roasteries...', uk: 'Пошук обсмажувачів...' },
+	'roastery.empty': { en: 'No roasteries yet', uk: 'Обсмажувачів ще немає' },
+	'roastery.select': { en: 'Select a roastery', uk: 'Оберіть ростерню' },
 
 	// Common
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },

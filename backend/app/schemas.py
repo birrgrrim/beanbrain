@@ -26,6 +26,42 @@ class TasterOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# --- Origin ---
+
+class OriginOut(BaseModel):
+    id: int
+    name_en: str
+    name_uk: str
+    flag: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+# --- Roastery ---
+
+class RoasteryCreate(BaseModel):
+    name: str
+    website: str | None = None
+    logo_url: str | None = None
+
+
+class RoasteryUpdate(BaseModel):
+    name: str | None = None
+    website: str | None = None
+    logo_url: str | None = None
+    is_active: bool | None = None
+
+
+class RoasteryOut(BaseModel):
+    id: int
+    name: str
+    website: str | None = None
+    logo_url: str | None = None
+    is_active: bool
+
+    model_config = {"from_attributes": True}
+
+
 # --- Grinder ---
 
 class GrinderCreate(BaseModel):
@@ -133,8 +169,8 @@ class ReviewOut(BaseModel):
 
 class CoffeeCreate(BaseModel):
     name: str
-    roastery: str
-    origin: str | None = None
+    roastery_id: int
+    origin_id: int | None = None
     process: str | None = None
     roast_level: str | None = None
     roastery_url: str | None = None
@@ -151,8 +187,8 @@ class CoffeeCreate(BaseModel):
 
 class CoffeeUpdate(BaseModel):
     name: str | None = None
-    roastery: str | None = None
-    origin: str | None = None
+    roastery_id: int | None = None
+    origin_id: int | None = None
     process: str | None = None
     roast_level: str | None = None
     roastery_url: str | None = None
@@ -170,8 +206,10 @@ class CoffeeUpdate(BaseModel):
 class CoffeeOut(BaseModel):
     id: int
     name: str
-    roastery: str
-    origin: str | None = None
+    roastery_id: int
+    origin_id: int | None = None
+    origin_ref: OriginOut | None = None
+    roastery_ref: RoasteryOut
     process: str | None = None
     roast_level: str | None = None
     roastery_url: str | None = None
@@ -194,8 +232,10 @@ class CoffeeOut(BaseModel):
 class CoffeeListOut(BaseModel):
     id: int
     name: str
-    roastery: str
-    origin: str | None = None
+    roastery_id: int
+    origin_id: int | None = None
+    origin_ref: OriginOut | None = None
+    roastery_ref: RoasteryOut | None = None
     roast_level: str | None = None
     image_url: str | None = None
     is_available: bool

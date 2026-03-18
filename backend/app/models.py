@@ -33,13 +33,32 @@ BREW_METHOD_TYPES = {
 }
 
 
+class Origin(Base):
+    __tablename__ = "origins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name_en = Column(String, nullable=False)
+    name_uk = Column(String, nullable=False)
+    flag = Column(String, nullable=True)  # emoji flag, null for regions
+
+
+class Roastery(Base):
+    __tablename__ = "roasteries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, unique=True)
+    website = Column(String, nullable=True)
+    logo_url = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+
+
 class Coffee(Base):
     __tablename__ = "coffees"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    roastery = Column(String, nullable=False)
-    origin = Column(String, nullable=True)
+    roastery_id = Column(Integer, ForeignKey("roasteries.id"), nullable=False)
+    origin_id = Column(Integer, ForeignKey("origins.id"), nullable=True)
     process = Column(String, nullable=True)
     roast_level = Column(String, nullable=True)
     roastery_url = Column(String, nullable=True)
@@ -53,6 +72,8 @@ class Coffee(Base):
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    origin_ref = relationship("Origin")
+    roastery_ref = relationship("Roastery")
     roastery_descriptors = relationship("Descriptor", secondary=coffee_descriptor)
     reviews = relationship("Review", back_populates="coffee", cascade="all, delete-orphan")
     grinder_settings = relationship("GrinderSetting", back_populates="coffee", cascade="all, delete-orphan")

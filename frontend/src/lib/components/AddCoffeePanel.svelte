@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { api, type Descriptor, type ScrapeResult } from '$lib/api';
+	import { api, type Descriptor, type ScrapeResult, type Origin, type Roastery } from '$lib/api';
 	import { t } from '$lib/i18n';
+	import { lang } from '$lib/lang';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import Icons from './Icons.svelte';
 
@@ -9,14 +10,17 @@
 		onCancel: () => void;
 	} = $props();
 
+	let currentLang = $state('en');
+	lang.subscribe(v => currentLang = v);
+
 	let scrapeUrl = $state('');
 	let scraping = $state(false);
 	let scrapeError = $state('');
 	let scraped = $state<ScrapeResult | null>(null);
 
 	let name = $state('');
-	let roastery = $state('');
-	let origin = $state('');
+	let roasteryId = $state<number | null>(null);
+	let originId = $state<number | null>(null);
 	let process = $state('');
 	let roastLevel = $state('');
 	let roasteryUrl = $state('');
@@ -29,10 +33,26 @@
 	let roasterComment = $state<Record<string, string>>({});
 	let selectedDescriptors = $state<number[]>([]);
 	let descriptors = $state<Descriptor[]>([]);
+	let originsList = $state<Origin[]>([]);
+	let roasteriesList = $state<Roastery[]>([]);
 	let saving = $state(false);
 
+	// New roastery inline creation
+	let showNewRoastery = $state(false);
+	let newRoasteryName = $state('');
+	let newRoasteryWebsite = $state('');
+	let creatingRoastery = $state(false);
+
 	$effect(() => {
-		api.descriptors.list().then(d => descriptors = d);
+		Promise.all([
+			api.descriptors.list(),
+			api.origins.list(),
+			api.roasteries.list(),
+		]).then(([d, o, r]) => {
+			descriptors = d;
+			originsList = o;
+			roasteriesList = r;
+		});
 	});
 
 	async function handleScrape() {
@@ -43,8 +63,6 @@
 			const result = await api.scrape(scrapeUrl.trim());
 			scraped = result;
 			name = result.name || '';
-			roastery = result.roastery || '';
-			origin = result.origin || '';
 			process = result.process || '';
 			roastLevel = result.roast_level || '';
 			roasteryUrl = result.roastery_url || '';
@@ -55,6 +73,32 @@
 			bitterness = result.bitterness ?? undefined;
 
 			roasterComment = result.roaster_comment || {};
+
+			// Match scraped roastery name to existing roastery
+			if (result.roastery) {
+				const match = roasteriesList.find(r =>
+					r.name.toLowerCase() === result.roastery.toLowerCase()
+				);
+				if (match) {
+					roasteryId = match.id;
+				} else {
+					// Auto-create new roastery
+					const newR = await api.roasteries.create({ name: result.roastery });
+					roasteriesList = await api.roasteries.list();
+					roasteryId = newR.id;
+				}
+			}
+
+			// Match scraped origin to existing origin
+			if (result.origin) {
+				const originMatch = originsList.find(o =>
+					o.name_en.toLowerCase() === result.origin!.toLowerCase() ||
+					o.name_uk.toLowerCase() === result.origin!.toLowerCase()
+				);
+				if (originMatch) {
+					originId = originMatch.id;
+				}
+			}
 
 			const enDescriptors = result.flavor_descriptors?.en || [];
 			const matched: number[] = [];
@@ -77,15 +121,30 @@
 		}
 	}
 
+	async function createNewRoastery() {
+		if (!newRoasteryName.trim()) return;
+		creatingRoastery = true;
+		const r = await api.roasteries.create({
+			name: newRoasteryName.trim(),
+			website: newRoasteryWebsite.trim() || undefined,
+		});
+		roasteriesList = await api.roasteries.list();
+		roasteryId = r.id;
+		showNewRoastery = false;
+		newRoasteryName = '';
+		newRoasteryWebsite = '';
+		creatingRoastery = false;
+	}
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!name.trim() || !roastery.trim()) return;
+		if (!name.trim() || !roasteryId) return;
 
 		saving = true;
 		const coffee = await api.coffees.create({
 			name: name.trim(),
-			roastery: roastery.trim(),
-			origin: origin.trim() || undefined,
+			roastery_id: roasteryId,
+			origin_id: originId || undefined,
 			process: process.trim() || undefined,
 			roast_level: roastLevel.trim() || undefined,
 			roastery_url: roasteryUrl.trim() || undefined,
@@ -157,18 +216,51 @@
 			</div>
 			<div>
 				<label for="roastery" class="block text-xs text-stone-400 mb-1">{$t('add.roastery')} *</label>
-				<input id="roastery" type="text" bind:value={roastery} required
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
-						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Local Roasters" />
+				{#if showNewRoastery}
+					<div class="space-y-2">
+						<input type="text" bind:value={newRoasteryName} placeholder={$t('roastery.name')}
+							class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
+								focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+						<input type="text" bind:value={newRoasteryWebsite} placeholder={$t('roastery.website')}
+							class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
+								focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+						<div class="flex gap-2">
+							<button type="button" onclick={createNewRoastery} disabled={!newRoasteryName.trim() || creatingRoastery}
+								class="px-3 py-1.5 bg-amber-700 text-white rounded-lg text-xs hover:bg-amber-800 disabled:opacity-50">
+								{$t('common.save')}
+							</button>
+							<button type="button" onclick={() => showNewRoastery = false}
+								class="px-3 py-1.5 text-stone-400 text-xs">{$t('common.cancel')}</button>
+						</div>
+					</div>
+				{:else}
+					<div class="flex gap-2">
+						<select id="roastery" bind:value={roasteryId}
+							class="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
+								focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+							<option value={null}>— {$t('roastery.select')} —</option>
+							{#each roasteriesList as r}
+								<option value={r.id}>{r.name}</option>
+							{/each}
+						</select>
+						<button type="button" onclick={() => showNewRoastery = true}
+							class="px-2 py-2 text-amber-600 hover:text-amber-800 text-lg" title={$t('roastery.add')}>+</button>
+					</div>
+				{/if}
 			</div>
 		</div>
 
 		<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 			<div>
 				<label for="origin" class="block text-xs text-stone-400 mb-1">{$t('add.origin')}</label>
-				<input id="origin" type="text" bind:value={origin}
+				<select id="origin" bind:value={originId}
 					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
-						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Ethiopia" />
+						focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+					<option value={null}>—</option>
+					{#each originsList as o}
+						<option value={o.id}>{o.flag ? o.flag + ' ' : ''}{currentLang === 'uk' ? o.name_uk : o.name_en}</option>
+					{/each}
+				</select>
 			</div>
 			<div>
 				<label for="process" class="block text-xs text-stone-400 mb-1">{$t('add.process')}</label>
@@ -207,7 +299,7 @@
 		</div>
 
 		<div class="pt-2">
-			<button type="submit" disabled={saving || !name.trim() || !roastery.trim()}
+			<button type="submit" disabled={saving || !name.trim() || !roasteryId}
 				class="px-6 py-2.5 bg-amber-700 text-white rounded-lg hover:bg-amber-800
 					transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
 				{saving ? $t('add.saving') : $t('add.save')}

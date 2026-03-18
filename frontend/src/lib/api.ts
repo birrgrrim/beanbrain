@@ -67,11 +67,28 @@ export interface Review {
 	descriptors: Descriptor[];
 }
 
+export interface Origin {
+	id: number;
+	name_en: string;
+	name_uk: string;
+	flag: string | null;
+}
+
+export interface Roastery {
+	id: number;
+	name: string;
+	website: string | null;
+	logo_url: string | null;
+	is_active: boolean;
+}
+
 export interface Coffee {
 	id: number;
 	name: string;
-	roastery: string;
-	origin: string | null;
+	roastery_id: number;
+	origin_id: number | null;
+	roastery_ref: Roastery;
+	origin_ref: Origin | null;
 	process: string | null;
 	roast_level: string | null;
 	roastery_url: string | null;
@@ -92,8 +109,10 @@ export interface Coffee {
 export interface CoffeeListItem {
 	id: number;
 	name: string;
-	roastery: string;
-	origin: string | null;
+	roastery_id: number;
+	origin_id: number | null;
+	roastery_ref: Roastery;
+	origin_ref: Origin | null;
 	roast_level: string | null;
 	image_url: string | null;
 	is_available: boolean;
@@ -133,8 +152,8 @@ export const api = {
 		get: (id: number) => request<Coffee>(`/coffees/${id}`),
 		create: (data: {
 			name: string;
-			roastery: string;
-			origin?: string;
+			roastery_id: number;
+			origin_id?: number | null;
 			process?: string;
 			roast_level?: string;
 			roastery_url?: string;
@@ -204,6 +223,17 @@ export const api = {
 	},
 	brewMethodTypes: {
 		list: () => request<BrewMethodType[]>('/brew-method-types'),
+	},
+	origins: {
+		list: () => request<Origin[]>('/origins/'),
+	},
+	roasteries: {
+		list: () => request<Roastery[]>('/roasteries/'),
+		create: (data: { name: string; website?: string; logo_url?: string }) =>
+			request<Roastery>('/roasteries/', { method: 'POST', body: JSON.stringify(data) }),
+		update: (id: number, data: Record<string, unknown>) =>
+			request<Roastery>(`/roasteries/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+		delete: (id: number) => request<void>(`/roasteries/${id}`, { method: 'DELETE' }),
 	},
 	scrape: (url: string) =>
 		request<ScrapeResult>(`/scrape/?url=${encodeURIComponent(url)}`),

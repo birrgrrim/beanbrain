@@ -1,5 +1,6 @@
 def _create_coffee(client):
-    resp = client.post("/coffees/", json={"name": "Test Coffee", "roastery": "R"})
+    rid = client.post("/roasteries/", json={"name": "Test Roastery"}).json()["id"]
+    resp = client.post("/coffees/", json={"name": "Test Coffee", "roastery_id": rid})
     return resp.json()["id"]
 
 
@@ -108,7 +109,8 @@ def test_review_for_nonexistent_coffee(client):
 
 
 def test_coffee_availability(client):
-    resp = client.post("/coffees/", json={"name": "Available", "roastery": "R"})
+    rid = client.post("/roasteries/", json={"name": "R"}).json()["id"]
+    resp = client.post("/coffees/", json={"name": "Available", "roastery_id": rid})
     assert resp.json()["is_available"] == True
 
     coffee_id = resp.json()["id"]
@@ -117,8 +119,9 @@ def test_coffee_availability(client):
 
 
 def test_coffees_sorted_by_availability(client):
-    c1 = client.post("/coffees/", json={"name": "Old", "roastery": "R"}).json()
-    c2 = client.post("/coffees/", json={"name": "New", "roastery": "R"}).json()
+    rid = client.post("/roasteries/", json={"name": "R"}).json()["id"]
+    c1 = client.post("/coffees/", json={"name": "Old", "roastery_id": rid}).json()
+    c2 = client.post("/coffees/", json={"name": "New", "roastery_id": rid}).json()
     client.put(f"/coffees/{c1['id']}", json={"is_available": False})
 
     coffees = client.get("/coffees/").json()
