@@ -26,7 +26,9 @@ const translations: Record<string, Record<string, string>> = {
 	'detail.bitter': { en: 'Bitter', uk: 'Гіркота' },
 	'detail.flavor_profile': { en: 'Flavor profile', uk: 'Профіль смаку' },
 	'detail.roastery_link': { en: 'View on roastery site', uk: 'Переглянути на сайті' },
+	'detail.edit': { en: 'edit', uk: 'змінити' },
 	'detail.delete': { en: 'Delete', uk: 'Видалити' },
+	'detail.notes': { en: 'Roaster comment', uk: 'Коментар обсмажувача' },
 	'detail.delete_confirm': { en: 'Delete this coffee and all its tastings?', uk: 'Видалити цю каву та всі дегустації?' },
 
 	// Grinder settings (in coffee detail)

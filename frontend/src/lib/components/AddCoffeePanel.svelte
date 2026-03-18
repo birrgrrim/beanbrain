@@ -26,6 +26,7 @@
 	let acidity = $state<number | undefined>();
 	let bitterness = $state<number | undefined>();
 	let notes = $state('');
+	let roasterComment = $state<Record<string, string>>({});
 	let selectedDescriptors = $state<number[]>([]);
 	let descriptors = $state<Descriptor[]>([]);
 	let saving = $state(false);
@@ -52,6 +53,8 @@
 			sweetness = result.sweetness ?? undefined;
 			acidity = result.acidity ?? undefined;
 			bitterness = result.bitterness ?? undefined;
+
+			roasterComment = result.roaster_comment || {};
 
 			const enDescriptors = result.flavor_descriptors?.en || [];
 			const matched: number[] = [];
@@ -92,6 +95,7 @@
 			acidity,
 			bitterness,
 			notes: notes.trim() || undefined,
+			roaster_comment: Object.keys(roasterComment).length > 0 ? JSON.stringify(roasterComment) : undefined,
 			roastery_descriptor_ids: selectedDescriptors.length > 0 ? selectedDescriptors : undefined,
 		});
 		onCreated(coffee.id);

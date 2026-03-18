@@ -38,6 +38,13 @@ def _migrate_equipment_to_grinders_and_setups(db):
     inspector = inspect(engine)
     table_names = inspector.get_table_names()
 
+    # Add roaster_comment column to coffees if missing
+    if "coffees" in table_names:
+        coffee_cols = {col["name"] for col in inspector.get_columns("coffees")}
+        if "roaster_comment" not in coffee_cols:
+            db.execute(text("ALTER TABLE coffees ADD COLUMN roaster_comment VARCHAR"))
+            db.commit()
+
     # Add kind column to grinders if missing
     if "grinders" in table_names:
         grinder_cols = {col["name"] for col in inspector.get_columns("grinders")}

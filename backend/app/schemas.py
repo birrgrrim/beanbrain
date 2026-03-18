@@ -144,6 +144,7 @@ class CoffeeCreate(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
+    roaster_comment: str | None = None  # JSON string: {"en": "...", "uk": "..."}
     is_available: bool = True
     roastery_descriptor_ids: list[int] = []
 
@@ -161,6 +162,7 @@ class CoffeeUpdate(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
+    roaster_comment: str | None = None
     is_available: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
 
@@ -179,6 +181,7 @@ class CoffeeOut(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
+    roaster_comment: str | None = None
     is_available: bool
     created_at: datetime
     roastery_descriptors: list[DescriptorOut] = []
@@ -221,3 +224,4 @@ class ScrapeResult(BaseModel):
     bitterness: int | None = None
     flavor_descriptors: dict[str, list[str]] = {}
     name_i18n: dict[str, str] = {}
+    roaster_comment: dict[str, str] = {}

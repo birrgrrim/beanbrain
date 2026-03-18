@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { api, type Coffee, type Descriptor, type Grinder, type BrewSetup, type Taster } from '$lib/api';
 	import { t } from '$lib/i18n';
+	import { lang } from '$lib/lang';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import Icons from './Icons.svelte';
+
+	let currentLang = $state('en');
+	lang.subscribe(v => currentLang = v);
 
 	let { coffeeId, onDeleted, onUpdated, onBack }: {
 		coffeeId: number;
@@ -18,6 +22,21 @@
 	let brewSetupsList = $state<BrewSetup[]>([]);
 	let tasters = $state<Taster[]>([]);
 	let loading = $state(true);
+
+	// Edit mode
+	let editing = $state(false);
+	let editName = $state('');
+	let editRoastery = $state('');
+	let editOrigin = $state('');
+	let editProcess = $state('');
+	let editRoastLevel = $state('');
+	let editNotes = $state('');
+	let editScore = $state<number | undefined>();
+	let editSweetness = $state<number | undefined>();
+	let editAcidity = $state<number | undefined>();
+	let editBitterness = $state<number | undefined>();
+	let editDescriptorIds = $state<number[]>([]);
+	let saving = $state(false);
 
 	// Review form
 	let editingReviewTasterId = $state<number | null>(null);
@@ -47,24 +66,91 @@
 		brewSetupsList = bs;
 		tasters = ta;
 
-		// Pre-select defaults for setting form
 		settingGrinderId = gr.find(g => g.is_default)?.id ?? gr[0]?.id ?? null;
 		settingBrewSetupId = bs.find(s => s.is_default)?.id ?? bs[0]?.id ?? null;
 
 		loading = false;
 	}
 
-	$effect(() => { coffeeId; loadData(); });
+	$effect(() => { coffeeId; editing = false; loadData(); });
 
 	const suggestedDescriptorIds = $derived(
 		coffee?.roastery_descriptors.map(d => d.id) ?? []
 	);
 
-	// Tasters who haven't reviewed yet
+	function parseRoasterComment(raw: string | null, lang: string): string | null {
+		if (!raw) return null;
+		try {
+			const parsed = JSON.parse(raw);
+			return parsed[lang] || parsed['en'] || null;
+		} catch {
+			return raw;
+		}
+	}
+
+	const roasterCommentText = $derived(
+		parseRoasterComment(coffee?.roaster_comment ?? null, currentLang)
+	);
+
 	const unreviewedTasters = $derived(
 		tasters.filter(ta => !coffee?.reviews.some(r => r.taster_id === ta.id))
 	);
 
+	// Edit mode helpers
+	function startEditing() {
+		if (!coffee) return;
+		editName = coffee.name;
+		editRoastery = coffee.roastery;
+		editOrigin = coffee.origin ?? '';
+		editProcess = coffee.process ?? '';
+		editRoastLevel = coffee.roast_level ?? '';
+		editNotes = coffee.notes ?? '';
+		editScore = coffee.score ?? undefined;
+		editSweetness = coffee.sweetness ?? undefined;
+		editAcidity = coffee.acidity ?? undefined;
+		editBitterness = coffee.bitterness ?? undefined;
+		editDescriptorIds = coffee.roastery_descriptors.map(d => d.id);
+		editing = true;
+	}
+
+	function cancelEditing() {
+		editing = false;
+	}
+
+	function toggleEditDescriptor(id: number) {
+		if (editDescriptorIds.includes(id)) {
+			editDescriptorIds = editDescriptorIds.filter(d => d !== id);
+		} else {
+			editDescriptorIds = [...editDescriptorIds, id];
+		}
+	}
+
+	async function saveEditing() {
+		if (!editName.trim() || !editRoastery.trim()) return;
+		saving = true;
+		try {
+			await api.coffees.update(coffeeId, {
+				name: editName.trim(),
+				roastery: editRoastery.trim(),
+				origin: editOrigin.trim() || null,
+				process: editProcess.trim() || null,
+				roast_level: editRoastLevel.trim() || null,
+				notes: editNotes.trim() || null,
+				score: editScore != null ? Math.round(editScore) : null,
+				sweetness: editSweetness != null ? Math.round(editSweetness) : null,
+				acidity: editAcidity != null ? Math.round(editAcidity) : null,
+				bitterness: editBitterness != null ? Math.round(editBitterness) : null,
+				roastery_descriptor_ids: editDescriptorIds,
+			});
+			editing = false;
+			await loadData();
+			onUpdated();
+		} finally {
+			saving = false;
+		}
+	}
+
+	// Review helpers
 	function startReview(tasterId: number, existing?: { rating: number; comment: string | null; descriptors: { id: number }[] }) {
 		editingReviewTasterId = tasterId;
 		reviewRating = existing?.rating ?? 0;
@@ -139,6 +225,9 @@
 		await api.coffees.delete(coffeeId);
 		onDeleted();
 	}
+
+	const inputClass = "w-full px-3 py-1.5 rounded-lg border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50";
+	const smallInputClass = "w-20 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 text-center";
 </script>
 
 {#if loading}
@@ -147,7 +236,7 @@
 	</div>
 {:else if coffee}
 	<div class="max-w-6xl mx-auto p-10 space-y-8">
-		<!-- Header with availability toggle -->
+		<!-- Header -->
 		<div class="flex items-start justify-between">
 			<div class="flex items-center gap-3">
 				<button onclick={onBack}
@@ -156,16 +245,30 @@
 					<Icons icon="back" size={18} />
 				</button>
 				<img src="/img/header-coffee.png" alt="" class="w-8 h-8 opacity-70" />
-				<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-					{coffee.name}
-				</h2>
+				{#if editing}
+					<input type="text" bind:value={editName}
+						class="text-3xl font-bold text-stone-800 bg-transparent border-b-2 border-amber-300 focus:outline-none focus:border-amber-500 px-1"
+						style="font-family: 'DM Serif Display', serif;" />
+				{:else}
+					<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
+						{coffee.name}
+					</h2>
+				{/if}
 			</div>
-			<button onclick={deleteCoffee} class="p-2 text-stone-400 hover:text-red-500 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-				<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
-			</button>
+			<div class="flex items-center gap-2">
+				{#if !editing && !coffee.roastery_url}
+					<button onclick={startEditing}
+						class="px-3 py-1.5 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded-lg hover:bg-card-inset font-medium">
+						{$t('detail.edit')}
+					</button>
+				{/if}
+				<button onclick={deleteCoffee} class="p-2 text-stone-400 hover:text-red-500 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+					<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
+				</button>
+			</div>
 		</div>
 
-		<!-- Coffee info — horizontal layout -->
+		<!-- Coffee info card -->
 		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
 			<div class="flex">
 				{#if coffee.image_url}
@@ -174,47 +277,131 @@
 					</div>
 				{/if}
 				<div class="p-6 flex-1 space-y-4">
-					<div class="flex items-center justify-between">
-						<p class="text-base text-stone-400">{coffee.roastery}</p>
-						<button onclick={toggleAvailability}
-							class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
-								{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
-							title={coffee.is_available ? 'Available' : 'Unavailable'}
-						>
-							<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
-								{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
-						</button>
-					</div>
-					<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
-						{#if coffee.origin}
-							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin}</p></div>
-						{/if}
-						{#if coffee.process}
-							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
-						{/if}
-						{#if coffee.roast_level}
-							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
-						{/if}
-					</div>
-					{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
-						<div class="flex gap-5">
-							{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
-							{#if coffee.sweetness != null}<div><span class="text-sm font-semibold">{coffee.sweetness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
-							{#if coffee.acidity != null}<div><span class="text-sm font-semibold">{coffee.acidity}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
-							{#if coffee.bitterness != null}<div><span class="text-sm font-semibold">{coffee.bitterness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
+					{#if editing}
+						<!-- Edit mode -->
+						<div class="flex items-center justify-between">
+							<input type="text" bind:value={editRoastery} placeholder={$t('add.roastery')}
+								class={inputClass} style="max-width: 250px;" />
+							<button onclick={toggleAvailability}
+								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
+									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
+								title={coffee.is_available ? 'Available' : 'Unavailable'}>
+								<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
+									{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
+							</button>
 						</div>
-					{/if}
-					{#if coffee.roastery_descriptors.length > 0}
-						<div class="flex flex-wrap gap-1.5">
-							{#each coffee.roastery_descriptors as desc}
-								<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
-							{/each}
+						<div class="grid grid-cols-3 gap-3">
+							<div>
+								<label for="edit-origin" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</label>
+								<input id="edit-origin" type="text" bind:value={editOrigin} placeholder="Ethiopia" class={inputClass} />
+							</div>
+							<div>
+								<label for="edit-process" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</label>
+								<input id="edit-process" type="text" bind:value={editProcess} placeholder="Washed" class={inputClass} />
+							</div>
+							<div>
+								<label for="edit-roast" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</label>
+								<input id="edit-roast" type="text" bind:value={editRoastLevel} placeholder="Light" class={inputClass} />
+							</div>
 						</div>
-					{/if}
-					{#if coffee.roastery_url}
-						<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
-							<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
-						</a>
+						<div class="flex gap-4 items-end">
+							<div>
+								<label for="edit-score" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.score')}</label>
+								<input id="edit-score" type="number" min="0" max="100" bind:value={editScore} placeholder="—" class={smallInputClass} />
+							</div>
+							<div>
+								<label for="edit-sweet" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.sweet')}</label>
+								<input id="edit-sweet" type="number" min="1" max="10" bind:value={editSweetness} placeholder="—" class={smallInputClass} />
+							</div>
+							<div>
+								<label for="edit-acid" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.acid')}</label>
+								<input id="edit-acid" type="number" min="1" max="10" bind:value={editAcidity} placeholder="—" class={smallInputClass} />
+							</div>
+							<div>
+								<label for="edit-bitter" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.bitter')}</label>
+								<input id="edit-bitter" type="number" min="1" max="10" bind:value={editBitterness} placeholder="—" class={smallInputClass} />
+							</div>
+						</div>
+						<div>
+							<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('add.descriptors')}</span>
+							<div class="mt-1">
+								<DescriptorAutocomplete {descriptors} selected={editDescriptorIds} onToggle={toggleEditDescriptor} />
+							</div>
+						</div>
+						<div>
+							<label for="edit-notes" class="text-stone-400 text-xs uppercase tracking-wide">{$t('add.notes')}</label>
+							<textarea id="edit-notes" bind:value={editNotes} rows={2} placeholder="Any notes..."
+								class="w-full mt-1 px-3 py-1.5 rounded-lg border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
+						</div>
+						<div class="flex gap-2 pt-1">
+							<button onclick={saveEditing} disabled={saving || !editName.trim() || !editRoastery.trim()}
+								class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">
+								{saving ? $t('add.saving') : $t('common.save')}
+							</button>
+							<button onclick={cancelEditing} class="px-5 py-2 text-stone-400 text-sm">{$t('common.cancel')}</button>
+						</div>
+					{:else}
+						<!-- Display mode -->
+						<div class="flex items-center justify-between">
+							<p class="text-base text-stone-400">{coffee.roastery}</p>
+							<button onclick={toggleAvailability}
+								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
+									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
+								title={coffee.is_available ? 'Available' : 'Unavailable'}>
+								<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
+									{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
+							</button>
+						</div>
+						<div class="flex gap-6">
+							<!-- Left: details -->
+							<div class="flex-1 space-y-4">
+								<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
+									{#if coffee.origin}
+										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin}</p></div>
+									{/if}
+									{#if coffee.process}
+										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
+									{/if}
+									{#if coffee.roast_level}
+										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
+									{/if}
+								</div>
+								{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
+									<div class="flex gap-5">
+										{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
+										{#if coffee.sweetness != null}<div><span class="text-sm font-semibold">{coffee.sweetness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
+										{#if coffee.acidity != null}<div><span class="text-sm font-semibold">{coffee.acidity}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
+										{#if coffee.bitterness != null}<div><span class="text-sm font-semibold">{coffee.bitterness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
+									</div>
+								{/if}
+								{#if coffee.roastery_descriptors.length > 0}
+									<div class="flex flex-wrap gap-1.5">
+										{#each coffee.roastery_descriptors as desc}
+											<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
+										{/each}
+									</div>
+								{/if}
+								{#if coffee.roastery_url}
+									<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
+										<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
+									</a>
+								{/if}
+							</div>
+							<!-- Right: roaster comment -->
+							{#if roasterCommentText || coffee.notes}
+								<div class="w-80 flex-shrink-0 space-y-3">
+									{#if roasterCommentText}
+										<div class="bg-card-inset rounded-xl px-4 py-3">
+											<p class="text-xs text-stone-400 uppercase tracking-wide mb-1">{$t('detail.notes')}</p>
+											<p class="text-sm text-stone-600 italic leading-relaxed">{roasterCommentText}</p>
+										</div>
+									{/if}
+									{#if coffee.notes}
+										<p class="text-sm text-stone-400 italic px-1">{coffee.notes}</p>
+									{/if}
+								</div>
+							{/if}
+						</div>
 					{/if}
 				</div>
 			</div>
@@ -260,24 +447,49 @@
 					</div>
 				{/each}
 				{#if showSettingForm}
-					<div class="mt-2 p-3 bg-card-inset rounded-xl space-y-2">
-						<div class="flex gap-2">
+					{@const selectedGrinder = grindersList.find(g => String(g.id) === String(settingGrinderId))}
+					{@const selectedSetup = brewSetupsList.find(s => String(s.id) === String(settingBrewSetupId))}
+					<div class="mt-3 bg-card-inset rounded-xl p-4 space-y-4">
+						<!-- Grind value — big centered input -->
+						<div class="flex items-center justify-center gap-3">
+							<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-40" />
 							<input type="number" step="0.5" bind:value={settingValue} placeholder="12.5"
-								class="w-20 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
-							<select bind:value={settingGrinderId} class="px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+								class="w-24 px-3 py-2 rounded-xl border border-stone-200 text-2xl font-bold text-amber-700 text-center bg-card
+									focus:outline-none focus:ring-2 focus:ring-amber-400/50 tabular-nums" />
+						</div>
+
+						<!-- Grinder selector -->
+						<div class="flex items-center gap-3 bg-card rounded-xl px-4 py-3 border border-stone-100">
+							{#if selectedGrinder}
+								<img src="/img/grinder-{selectedGrinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-8 h-8 opacity-50 flex-shrink-0" />
+							{/if}
+							<select bind:value={settingGrinderId}
+								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
 								{#each grindersList as g}<option value={g.id}>{g.name}{g.model ? ` ${g.model}` : ''}</option>{/each}
 							</select>
 						</div>
-						<div class="flex gap-2">
-							<select bind:value={settingBrewSetupId} class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+
+						<!-- Brew setup selector -->
+						<div class="flex items-center gap-3 bg-card rounded-xl px-4 py-3 border border-stone-100">
+							{#if selectedSetup}
+								<img src="/img/method-{selectedSetup.method_type}.png" alt="" class="w-8 h-8 opacity-50 flex-shrink-0" />
+							{/if}
+							<select bind:value={settingBrewSetupId}
+								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
 								{#each brewSetupsList as s}<option value={s.id}>{s.name}{s.basket_grams ? ` ${s.basket_grams}g` : ''}</option>{/each}
 							</select>
-							<input type="text" bind:value={settingNotes} placeholder={$t('grinder.notes')}
-								class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
 						</div>
-						<div class="flex gap-2">
-							<button onclick={addGrinderSetting} class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{$t('grinder.save')}</button>
+
+						<!-- Notes -->
+						<input type="text" bind:value={settingNotes} placeholder={$t('grinder.notes')}
+							class="w-full px-4 py-2.5 rounded-xl border border-stone-100 text-sm bg-card
+								focus:outline-none focus:ring-2 focus:ring-amber-400/50 placeholder:text-stone-300" />
+
+						<!-- Actions -->
+						<div class="flex gap-2 justify-end">
 							<button onclick={() => showSettingForm = false} class="px-4 py-2 text-stone-400 text-sm">{$t('grinder.cancel')}</button>
+							<button onclick={addGrinderSetting}
+								class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{$t('grinder.save')}</button>
 						</div>
 					</div>
 				{/if}
@@ -310,7 +522,6 @@
 
 				{#each coffee.reviews as review}
 					{#if editingReviewTasterId === review.taster_id}
-						<!-- Editing existing review -->
 						<div class="py-2 space-y-2">
 							<p class="text-base font-semibold text-stone-700">{review.taster.name}</p>
 							<div class="flex items-center gap-2">
@@ -327,7 +538,6 @@
 							</div>
 						</div>
 					{:else}
-						<!-- Display review -->
 						<div class="py-2 border-b border-stone-50 last:border-0">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
@@ -355,7 +565,6 @@
 				{/each}
 
 				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId)}
-					<!-- New review form -->
 					<div class="py-2 space-y-2">
 						<p class="text-sm font-medium text-stone-700">{tasters.find(ta => ta.id === editingReviewTasterId)?.name}</p>
 						<div class="flex items-center gap-2">
@@ -375,8 +584,5 @@
 			</div>
 		</div>
 
-		{#if coffee.notes}
-			<p class="text-sm text-stone-400 italic">{coffee.notes}</p>
-		{/if}
 	</div>
 {/if}

@@ -107,6 +107,7 @@ def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
         acidity=data.acidity,
         bitterness=data.bitterness,
         notes=data.notes,
+        roaster_comment=data.roaster_comment,
         is_available=data.is_available,
     )
 

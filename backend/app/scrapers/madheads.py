@@ -16,6 +16,8 @@ PROPERTY_IDS = {
     29: "score",
     27: "roast_type",
     36: "variety",
+    13: "roaster_comment",
+    14: "roaster_comment",
 }
 
 CDN_BASE = "https://api.madheadscoffee.com/cdn"
@@ -166,4 +168,5 @@ class MadHeadsScraper(BaseScraper):
                 for lang, info in data.get("i18n", {}).items()
                 if isinstance(info, dict) and "label" in info
             },
+            roaster_comment=chars.get("roaster_comment", {}),
         )

@@ -81,6 +81,7 @@ export interface Coffee {
 	acidity: number | null;
 	bitterness: number | null;
 	notes: string | null;
+	roaster_comment: string | null;
 	is_available: boolean;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
@@ -117,6 +118,7 @@ export interface ScrapeResult {
 	bitterness: number | null;
 	flavor_descriptors: Record<string, string[]>;
 	name_i18n: Record<string, string>;
+	roaster_comment: Record<string, string>;
 }
 
 export const api = {
@@ -142,6 +144,7 @@ export const api = {
 			acidity?: number;
 			bitterness?: number;
 			notes?: string;
+			roaster_comment?: string;
 			is_available?: boolean;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),

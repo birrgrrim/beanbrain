@@ -49,6 +49,7 @@ class Coffee(Base):
     acidity = Column(Integer, nullable=True)
     bitterness = Column(Integer, nullable=True)
     notes = Column(String, nullable=True)
+    roaster_comment = Column(String, nullable=True)  # JSON: {"en": "...", "uk": "..."}
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
