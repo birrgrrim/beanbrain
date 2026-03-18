@@ -39,18 +39,18 @@ const translations: Record<string, Record<string, string>> = {
 	'grinder.save': { en: 'Save', uk: 'Зберегти' },
 	'grinder.cancel': { en: 'Cancel', uk: 'Скасувати' },
 
-	// Tastings
-	'tasting.title': { en: 'Tastings', uk: 'Дегустації' },
-	'tasting.add': { en: '+ Add Tasting', uk: '+ Додати дегустацію' },
-	'tasting.empty': { en: 'No tastings yet', uk: 'Ще немає дегустацій' },
-	'tasting.who': { en: "Who's tasting?", uk: 'Хто дегустує?' },
-	'tasting.select': { en: 'Select taster...', uk: 'Оберіть дегустатора...' },
+	// Reviews
+	'tasting.title': { en: 'Reviews', uk: 'Відгуки' },
+	'tasting.add': { en: '+ Add Review', uk: '+ Додати відгук' },
+	'tasting.empty': { en: 'No reviews yet', uk: 'Ще немає відгуків' },
+	'tasting.who': { en: "Who's reviewing?", uk: 'Хто оцінює?' },
+	'tasting.select': { en: 'Select person...', uk: 'Оберіть персону...' },
 	'tasting.no_tasters': { en: 'Add persons in Persons tab first', uk: 'Спочатку додайте персону' },
 	'tasting.rating': { en: 'Rating', uk: 'Оцінка' },
 	'tasting.comment': { en: 'Comment', uk: 'Коментар' },
 	'tasting.comment_placeholder': { en: 'What did you taste?', uk: 'Що ви відчули?' },
 	'tasting.flavors': { en: 'Flavors you taste', uk: 'Смаки які ви відчуваєте' },
-	'tasting.save': { en: 'Save Tasting', uk: 'Зберегти дегустацію' },
+	'tasting.save': { en: 'Save Review', uk: 'Зберегти відгук' },
 	'tasting.cancel': { en: 'Cancel', uk: 'Скасувати' },
 
 	// Add coffee

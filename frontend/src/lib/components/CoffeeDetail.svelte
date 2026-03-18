@@ -167,7 +167,7 @@
 		</div>
 
 		<!-- Coffee info — horizontal layout -->
-		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
 			<div class="flex">
 				{#if coffee.image_url}
 					<div class="bg-card-inset p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 200px;">
@@ -224,7 +224,7 @@
 		<!-- Two-column: Grinder + Reviews -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 			<!-- Grinder Settings -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-60" />
@@ -274,7 +274,7 @@
 			</div>
 
 			<!-- Reviews -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/coffee-cup.png" alt="" class="w-8 h-8 opacity-60" />
