@@ -22,6 +22,17 @@ review_descriptor = Table(
 )
 
 
+# Hardcoded brew method types (not in DB)
+BREW_METHOD_TYPES = {
+    "espresso":    {"icon": "method-espresso.png",    "has_basket": True},
+    "pourover":    {"icon": "method-pourover.png",    "has_basket": False},
+    "aeropress":   {"icon": "method-aeropress.png",   "has_basket": False},
+    "frenchpress": {"icon": "method-frenchpress.png", "has_basket": False},
+    "moka":        {"icon": "method-moka.png",        "has_basket": False},
+    "cezve":       {"icon": "method-cezve.png",       "has_basket": False},
+}
+
+
 class Coffee(Base):
     __tablename__ = "coffees"
 
@@ -80,34 +91,28 @@ class Review(Base):
     descriptors = relationship("Descriptor", secondary=review_descriptor)
 
 
-class Equipment(Base):
-    __tablename__ = "equipment"
+class Grinder(Base):
+    __tablename__ = "grinders"
 
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, nullable=False)  # "grinder" or "machine"
     name = Column(String, nullable=False)
     model = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True)
+    kind = Column(String, default="auto")  # "auto" or "manual"
     is_default = Column(Boolean, default=False)
 
-    grinder_settings = relationship("GrinderSetting", back_populates="equipment")
+    grinder_settings = relationship("GrinderSetting", back_populates="grinder")
 
 
-class BrewMethod(Base):
-    __tablename__ = "brew_methods"
+class BrewSetup(Base):
+    __tablename__ = "brew_setups"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, unique=True)
+    method_type = Column(String, nullable=False)  # key from BREW_METHOD_TYPES
+    name = Column(String, nullable=False)  # user label, e.g. "Gaggia Classic 18g"
+    basket_grams = Column(Integer, nullable=True)  # espresso only
     is_default = Column(Boolean, default=False)
 
-
-class BasketSize(Base):
-    __tablename__ = "basket_sizes"
-
-    id = Column(Integer, primary_key=True, index=True)
-    size_grams = Column(Integer, nullable=False, unique=True)
-    label = Column(String, nullable=False)
-    is_default = Column(Boolean, default=False)
+    grinder_settings = relationship("GrinderSetting", back_populates="brew_setup")
 
 
 class GrinderSetting(Base):
@@ -115,13 +120,11 @@ class GrinderSetting(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     coffee_id = Column(Integer, ForeignKey("coffees.id", ondelete="CASCADE"), nullable=False)
-    equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
-    brew_method_id = Column(Integer, ForeignKey("brew_methods.id"), nullable=False)
-    basket_size_id = Column(Integer, ForeignKey("basket_sizes.id"), nullable=True)
+    grinder_id = Column(Integer, ForeignKey("grinders.id"), nullable=False)
+    brew_setup_id = Column(Integer, ForeignKey("brew_setups.id"), nullable=False)
     setting = Column(Float, nullable=False)
     notes = Column(String, nullable=True)
 
     coffee = relationship("Coffee", back_populates="grinder_settings")
-    equipment = relationship("Equipment", back_populates="grinder_settings")
-    brew_method = relationship("BrewMethod")
-    basket_size = relationship("BasketSize")
+    grinder = relationship("Grinder", back_populates="grinder_settings")
+    brew_setup = relationship("BrewSetup", back_populates="grinder_settings")

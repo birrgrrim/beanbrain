@@ -104,7 +104,7 @@
 								class="p-2 mr-2 text-stone-300 hover:text-red-400 transition-colors rounded"
 								title={$t('detail.delete')}
 							>
-								<Icons icon="delete" size={12} />
+								<img src="/img/knockbox.png" alt="delete" class="w-5 h-5 opacity-50" />
 							</button>
 						</div>
 					{/each}

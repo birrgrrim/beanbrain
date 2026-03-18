@@ -23,39 +23,37 @@ export interface Taster {
 	name: string;
 }
 
-export interface Equipment {
+export interface Grinder {
 	id: number;
-	type: string;
 	name: string;
 	model: string | null;
-	is_active: boolean;
+	kind: string;
 	is_default: boolean;
 }
 
-export interface BrewMethod {
+export interface BrewSetup {
 	id: number;
+	method_type: string;
 	name: string;
+	basket_grams: number | null;
 	is_default: boolean;
 }
 
-export interface BasketSize {
-	id: number;
-	size_grams: number;
-	label: string;
-	is_default: boolean;
+export interface BrewMethodType {
+	key: string;
+	icon: string;
+	has_basket: boolean;
 }
 
 export interface GrinderSetting {
 	id: number;
 	coffee_id: number;
-	equipment_id: number;
-	brew_method_id: number;
-	basket_size_id: number | null;
+	grinder_id: number;
+	brew_setup_id: number;
 	setting: number;
 	notes: string | null;
-	equipment: Equipment;
-	brew_method: BrewMethod;
-	basket_size: BasketSize | null;
+	grinder: Grinder;
+	brew_setup: BrewSetup;
 }
 
 export interface Review {
@@ -165,9 +163,8 @@ export const api = {
 	},
 	grinderSettings: {
 		create: (coffeeId: number, data: {
-			equipment_id: number;
-			brew_method_id: number;
-			basket_size_id?: number;
+			grinder_id: number;
+			brew_setup_id: number;
 			setting: number;
 			notes?: string;
 		}) => request<GrinderSetting>(`/coffees/${coffeeId}/settings/`, {
@@ -186,21 +183,24 @@ export const api = {
 	descriptors: {
 		list: () => request<Descriptor[]>('/descriptors/'),
 	},
-	equipment: {
-		list: () => request<Equipment[]>('/equipment'),
-		create: (data: { type: string; name: string; model?: string; is_default?: boolean }) =>
-			request<Equipment>('/equipment', { method: 'POST', body: JSON.stringify(data) }),
+	grinders: {
+		list: () => request<Grinder[]>('/grinders/'),
+		create: (data: { name: string; model?: string; kind?: string; is_default?: boolean }) =>
+			request<Grinder>('/grinders/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
-			request<Equipment>(`/equipment/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-		delete: (id: number) => request<void>(`/equipment/${id}`, { method: 'DELETE' }),
-		brewMethods: () => request<BrewMethod[]>('/brew-methods'),
-		createBrewMethod: (data: { name: string; is_default?: boolean }) =>
-			request<BrewMethod>('/brew-methods', { method: 'POST', body: JSON.stringify(data) }),
-		deleteBrewMethod: (id: number) => request<void>(`/brew-methods/${id}`, { method: 'DELETE' }),
-		basketSizes: () => request<BasketSize[]>('/basket-sizes'),
-		createBasketSize: (data: { size_grams: number; label: string; is_default?: boolean }) =>
-			request<BasketSize>('/basket-sizes', { method: 'POST', body: JSON.stringify(data) }),
-		deleteBasketSize: (id: number) => request<void>(`/basket-sizes/${id}`, { method: 'DELETE' }),
+			request<Grinder>(`/grinders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+		delete: (id: number) => request<void>(`/grinders/${id}`, { method: 'DELETE' }),
+	},
+	brewSetups: {
+		list: () => request<BrewSetup[]>('/brew-setups/'),
+		create: (data: { method_type: string; name: string; basket_grams?: number; is_default?: boolean }) =>
+			request<BrewSetup>('/brew-setups/', { method: 'POST', body: JSON.stringify(data) }),
+		update: (id: number, data: Record<string, unknown>) =>
+			request<BrewSetup>(`/brew-setups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+		delete: (id: number) => request<void>(`/brew-setups/${id}`, { method: 'DELETE' }),
+	},
+	brewMethodTypes: {
+		list: () => request<BrewMethodType[]>('/brew-method-types'),
 	},
 	scrape: (url: string) =>
 		request<ScrapeResult>(`/scrape/?url=${encodeURIComponent(url)}`),

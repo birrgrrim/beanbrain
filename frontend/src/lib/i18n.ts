@@ -4,7 +4,8 @@ import { lang } from './lang';
 const translations: Record<string, Record<string, string>> = {
 	// Top bar & tabs
 	'tab.coffee': { en: 'Coffee', uk: 'Кава' },
-	'tab.grinders': { en: 'Grinders', uk: 'Кавомолки' },
+	'tab.grinding': { en: 'Grind', uk: 'Помол' },
+	'tab.brewing': { en: 'Brew', uk: 'Заварка' },
 
 	// Coffee sidebar
 	'sidebar.search': { en: 'Search coffees...', uk: 'Пошук кави...' },
@@ -28,12 +29,11 @@ const translations: Record<string, Record<string, string>> = {
 	'detail.delete': { en: 'Delete', uk: 'Видалити' },
 	'detail.delete_confirm': { en: 'Delete this coffee and all its tastings?', uk: 'Видалити цю каву та всі дегустації?' },
 
-	// Grinder settings
+	// Grinder settings (in coffee detail)
 	'grinder.title': { en: 'Grinder Setting', uk: 'Налаштування помолу' },
 	'grinder.add': { en: '+ Add', uk: '+ Додати' },
 	'grinder.no_setting': { en: 'No setting recorded yet', uk: 'Ще немає налаштувань' },
 	'grinder.setting': { en: 'Setting', uk: 'Помол' },
-	'grinder.basket': { en: 'Basket', uk: 'Кошик' },
 	'grinder.notes': { en: 'Notes', uk: 'Нотатки' },
 	'grinder.save': { en: 'Save', uk: 'Зберегти' },
 	'grinder.cancel': { en: 'Cancel', uk: 'Скасувати' },
@@ -78,15 +78,44 @@ const translations: Record<string, Record<string, string>> = {
 	'persons.add_placeholder': { en: 'Name...', uk: "Ім'я..." },
 	'persons.add': { en: 'Add', uk: 'Додати' },
 
-	// Grinders panel
-	'grinders.title': { en: 'Grinders & Equipment', uk: 'Кавомолки та обладнання' },
-	'grinders.grinders': { en: 'Grinders', uk: 'Кавомолки' },
-	'grinders.machines': { en: 'Espresso Machines', uk: 'Еспресо машини' },
-	'grinders.brew_methods': { en: 'Brew Methods', uk: 'Методи приготування' },
-	'grinders.baskets': { en: 'Basket Sizes', uk: 'Розміри кошиків' },
+	// Grinding tab (sidebar + detail)
+	'grinding.title': { en: 'Grinders', uk: 'Кавомолки' },
+	'grinding.empty': { en: 'No grinders yet', uk: 'Кавомолок ще немає' },
+	'grinding.search': { en: 'Search grinders...', uk: 'Пошук кавомолок...' },
+	'grinding.empty_hint': { en: 'Add your first grinder', uk: 'Додайте першу кавомолку' },
+	'grinding.add': { en: 'Add Grinder', uk: 'Додати кавомолку' },
+	'grinding.name': { en: 'Name', uk: 'Назва' },
+	'grinding.name_placeholder': { en: 'e.g. Eureka Mignon', uk: 'напр. Eureka Mignon' },
+	'grinding.model': { en: 'Model', uk: 'Модель' },
+	'grinding.model_placeholder': { en: 'Model (optional)', uk: 'Модель (необов.)' },
+	'grinding.select': { en: 'Select a grinder', uk: 'Оберіть кавомолку' },
+
+	// Brewing tab (sidebar + detail)
+	'brewing.title': { en: 'Brew Setups', uk: 'Налаштування заварювання' },
+	'brewing.empty': { en: 'No brew setups yet', uk: 'Налаштувань ще немає' },
+	'brewing.search': { en: 'Search setups...', uk: 'Пошук налаштувань...' },
+	'brewing.empty_hint': { en: 'Add your first brew setup', uk: 'Додайте перше налаштування' },
+	'brewing.add': { en: 'Add Setup', uk: 'Додати' },
+	'brewing.pick_method': { en: 'Choose brew method', uk: 'Оберіть метод' },
+	'brewing.name': { en: 'Name', uk: 'Назва' },
+	'brewing.name_placeholder': { en: 'e.g. Gaggia Classic', uk: 'напр. Gaggia Classic' },
+	'brewing.basket': { en: 'Basket size (g)', uk: 'Розмір кошика (г)' },
+	'brewing.select': { en: 'Select a brew setup', uk: 'Оберіть налаштування' },
+
+	// Brew method type names
+	'method.espresso': { en: 'Espresso', uk: 'Еспресо' },
+	'method.pourover': { en: 'Pour Over', uk: 'Пуровер' },
+	'method.aeropress': { en: 'AeroPress', uk: 'Аеропрес' },
+	'method.frenchpress': { en: 'French Press', uk: 'Френч-прес' },
+	'method.moka': { en: 'Moka Pot', uk: 'Мока' },
+	'method.cezve': { en: 'Cezve', uk: 'Джезва' },
 
 	// Common
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },
+	'common.default': { en: 'default', uk: 'за замовч.' },
+	'common.set_default': { en: 'set default', uk: 'за замовч.' },
+	'common.save': { en: 'Save', uk: 'Зберегти' },
+	'common.cancel': { en: 'Cancel', uk: 'Скасувати' },
 };
 
 export const t = derived(lang, ($lang) => {

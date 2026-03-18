@@ -4,54 +4,49 @@ def _create_coffee(client):
 
 
 def _get_defaults(client):
-    equipment = client.get("/equipment").json()
-    methods = client.get("/brew-methods").json()
-    baskets = client.get("/basket-sizes").json()
-    grinder_id = next(e["id"] for e in equipment if e["type"] == "grinder")
-    espresso_id = next(m["id"] for m in methods if m["name"] == "Espresso")
-    basket_18 = next(b["id"] for b in baskets if b["size_grams"] == 18)
-    return grinder_id, espresso_id, basket_18
+    grinders = client.get("/grinders/").json()
+    setups = client.get("/brew-setups/").json()
+    grinder_id = next(g["id"] for g in grinders if g["is_default"])
+    setup_id = next(s["id"] for s in setups if s["is_default"])
+    return grinder_id, setup_id
 
 
 def test_create_grinder_setting(client):
     coffee_id = _create_coffee(client)
-    grinder_id, espresso_id, basket_18 = _get_defaults(client)
+    grinder_id, setup_id = _get_defaults(client)
 
     resp = client.post(f"/coffees/{coffee_id}/settings/", json={
-        "equipment_id": grinder_id,
-        "brew_method_id": espresso_id,
-        "basket_size_id": basket_18,
+        "grinder_id": grinder_id,
+        "brew_setup_id": setup_id,
         "setting": 12.5,
         "notes": "Good for medium extraction",
     })
     assert resp.status_code == 201
     data = resp.json()
     assert data["setting"] == 12.5
-    assert data["equipment"]["type"] == "grinder"
-    assert data["brew_method"]["name"] == "Espresso"
-    assert data["basket_size"]["size_grams"] == 18
+    assert data["grinder"]["name"] == "Default Grinder"
+    assert data["brew_setup"]["method_type"] == "espresso"
 
 
-def test_create_setting_without_basket(client):
+def test_create_setting_without_notes(client):
     coffee_id = _create_coffee(client)
-    grinder_id, espresso_id, _ = _get_defaults(client)
+    grinder_id, setup_id = _get_defaults(client)
 
     resp = client.post(f"/coffees/{coffee_id}/settings/", json={
-        "equipment_id": grinder_id,
-        "brew_method_id": espresso_id,
+        "grinder_id": grinder_id,
+        "brew_setup_id": setup_id,
         "setting": 10,
     })
     assert resp.status_code == 201
-    assert resp.json()["basket_size"] is None
+    assert resp.json()["notes"] is None
 
 
 def test_list_grinder_settings(client):
     coffee_id = _create_coffee(client)
-    grinder_id, espresso_id, basket_18 = _get_defaults(client)
+    grinder_id, setup_id = _get_defaults(client)
 
     client.post(f"/coffees/{coffee_id}/settings/", json={
-        "equipment_id": grinder_id, "brew_method_id": espresso_id,
-        "basket_size_id": basket_18, "setting": 10,
+        "grinder_id": grinder_id, "brew_setup_id": setup_id, "setting": 10,
     })
 
     resp = client.get(f"/coffees/{coffee_id}/settings/")
@@ -61,10 +56,10 @@ def test_list_grinder_settings(client):
 
 def test_delete_grinder_setting(client):
     coffee_id = _create_coffee(client)
-    grinder_id, espresso_id, _ = _get_defaults(client)
+    grinder_id, setup_id = _get_defaults(client)
 
     create = client.post(f"/coffees/{coffee_id}/settings/", json={
-        "equipment_id": grinder_id, "brew_method_id": espresso_id, "setting": 10,
+        "grinder_id": grinder_id, "brew_setup_id": setup_id, "setting": 10,
     })
     setting_id = create.json()["id"]
 

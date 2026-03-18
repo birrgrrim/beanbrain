@@ -48,7 +48,7 @@
 						<span class="text-sm font-medium text-stone-700">{taster.name}</span>
 						<button onclick={() => remove(taster.id)}
 							class="p-1 text-stone-200 hover:text-red-400 transition-colors" title="Remove">
-							<Icons icon="delete" size={14} />
+							<img src="/img/knockbox.png" alt="delete" class="w-6 h-6 opacity-50" />
 						</button>
 					</div>
 				{/each}

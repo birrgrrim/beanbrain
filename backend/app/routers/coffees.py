@@ -3,24 +3,22 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
-from ..models import Coffee, Descriptor, GrinderSetting, Review, Equipment, BrewMethod
+from ..models import Coffee, Descriptor, GrinderSetting, Review, Grinder, BrewSetup
 from ..schemas import CoffeeCreate, CoffeeListOut, CoffeeOut, CoffeeUpdate
 
 router = APIRouter(prefix="/coffees", tags=["coffees"])
 
 
 def _get_default_grind(db: Session, coffee_id: int) -> float | None:
-    """Get grind setting for default equipment."""
-    default_grinder = db.query(Equipment).filter(
-        Equipment.type == "grinder", Equipment.is_default == True
-    ).first()
-    default_method = db.query(BrewMethod).filter(BrewMethod.is_default == True).first()
-    if not default_grinder or not default_method:
+    """Get grind setting for default grinder + default brew setup."""
+    default_grinder = db.query(Grinder).filter(Grinder.is_default == True).first()
+    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default == True).first()
+    if not default_grinder or not default_setup:
         return None
     setting = db.query(GrinderSetting).filter(
         GrinderSetting.coffee_id == coffee_id,
-        GrinderSetting.equipment_id == default_grinder.id,
-        GrinderSetting.brew_method_id == default_method.id,
+        GrinderSetting.grinder_id == default_grinder.id,
+        GrinderSetting.brew_setup_id == default_setup.id,
     ).first()
     return setting.setting if setting else None
 
@@ -83,9 +81,8 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
             joinedload(Coffee.roastery_descriptors),
             joinedload(Coffee.reviews).joinedload(Review.descriptors),
             joinedload(Coffee.reviews).joinedload(Review.taster),
-            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.equipment),
-            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_method),
-            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.basket_size),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.grinder),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_setup),
         )
         .filter(Coffee.id == coffee_id)
         .first()

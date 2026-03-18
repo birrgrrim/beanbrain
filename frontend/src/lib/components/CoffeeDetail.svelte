@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, type Coffee, type Descriptor, type Equipment, type BrewMethod, type Taster, type BasketSize } from '$lib/api';
+	import { api, type Coffee, type Descriptor, type Grinder, type BrewSetup, type Taster } from '$lib/api';
 	import { t } from '$lib/i18n';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
@@ -14,10 +14,9 @@
 
 	let coffee = $state<Coffee | null>(null);
 	let descriptors = $state<Descriptor[]>([]);
-	let equipmentList = $state<Equipment[]>([]);
-	let brewMethods = $state<BrewMethod[]>([]);
+	let grindersList = $state<Grinder[]>([]);
+	let brewSetupsList = $state<BrewSetup[]>([]);
 	let tasters = $state<Taster[]>([]);
-	let basketSizes = $state<BasketSize[]>([]);
 	let loading = $state(true);
 
 	// Review form
@@ -30,24 +29,28 @@
 	let showSettingForm = $state(false);
 	let settingValue = $state('');
 	let settingNotes = $state('');
-	let settingBasketId = $state<number | null>(null);
+	let settingGrinderId = $state<number | null>(null);
+	let settingBrewSetupId = $state<number | null>(null);
 
 	async function loadData() {
 		loading = true;
-		const [c, d, eq, bm, ta, bs] = await Promise.all([
+		const [c, d, gr, bs, ta] = await Promise.all([
 			api.coffees.get(coffeeId),
 			api.descriptors.list(),
-			api.equipment.list(),
-			api.equipment.brewMethods(),
+			api.grinders.list(),
+			api.brewSetups.list(),
 			api.tasters.list(),
-			api.equipment.basketSizes(),
 		]);
 		coffee = c;
 		descriptors = d;
-		equipmentList = eq;
-		brewMethods = bm;
+		grindersList = gr;
+		brewSetupsList = bs;
 		tasters = ta;
-		basketSizes = bs;
+
+		// Pre-select defaults for setting form
+		settingGrinderId = gr.find(g => g.is_default)?.id ?? gr[0]?.id ?? null;
+		settingBrewSetupId = bs.find(s => s.is_default)?.id ?? bs[0]?.id ?? null;
+
 		loading = false;
 	}
 
@@ -111,19 +114,15 @@
 	}
 
 	async function addGrinderSetting() {
-		const grinder = equipmentList.find(e => e.type === 'grinder' && e.is_default) || equipmentList.find(e => e.type === 'grinder');
-		const method = brewMethods.find(m => m.is_default) || brewMethods[0];
-		if (!grinder || !method || !settingValue) return;
+		if (!settingGrinderId || !settingBrewSetupId || !settingValue) return;
 		await api.grinderSettings.create(coffeeId, {
-			equipment_id: grinder.id,
-			brew_method_id: method.id,
-			basket_size_id: settingBasketId ?? undefined,
+			grinder_id: Number(settingGrinderId),
+			brew_setup_id: Number(settingBrewSetupId),
 			setting: parseFloat(settingValue),
 			notes: settingNotes.trim() || undefined,
 		});
 		settingValue = '';
 		settingNotes = '';
-		settingBasketId = null;
 		showSettingForm = false;
 		await loadData();
 		onUpdated();
@@ -162,7 +161,7 @@
 				</h2>
 			</div>
 			<button onclick={deleteCoffee} class="p-2 text-stone-400 hover:text-red-500 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-				<Icons icon="delete" size={20} />
+				<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
 			</button>
 		</div>
 
@@ -236,20 +235,27 @@
 				</div>
 				{#if coffee.grinder_settings.length === 0 && !showSettingForm}
 					<div class="text-center py-2">
-						<img src="/img/empty-grinder.png" alt="" class="mx-auto opacity-50" style="max-width: 60px;" />
+						<img src="/img/empty-grinder-new.png" alt="" class="mx-auto opacity-60" style="max-width: 100px;" />
 						<p class="text-sm text-stone-500 mt-1">{$t('grinder.no_setting')}</p>
 					</div>
 				{/if}
 				{#each coffee.grinder_settings as setting}
-					<div class="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
-						<div class="flex items-center gap-3">
-							<span class="text-3xl font-bold text-amber-700 tabular-nums">{setting.setting}</span>
-							<div class="text-base text-stone-400">
-								<p>{setting.brew_method.name}{#if setting.basket_size} &middot; {setting.basket_size.label}{/if}</p>
+					<div class="flex items-center gap-3 py-2 border-b border-stone-50 last:border-0">
+						<span class="text-3xl font-bold text-amber-700 tabular-nums flex-shrink-0">{setting.setting}</span>
+						<div class="flex gap-2 flex-1 min-w-0">
+							<div class="flex items-center gap-2 px-3 py-1.5 bg-card-inset rounded-lg">
+								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-5 h-5 opacity-50" />
+								<span class="text-sm text-stone-600">{setting.grinder.name}</span>
+								{#if setting.grinder.model}<span class="text-sm text-stone-400">{setting.grinder.model}</span>{/if}
+							</div>
+							<div class="flex items-center gap-2 px-3 py-1.5 bg-card-inset rounded-lg">
+								<img src="/img/method-{setting.brew_setup.method_type}.png" alt="" class="w-5 h-5 opacity-50" />
+								<span class="text-sm text-stone-600">{setting.brew_setup.name}</span>
+								{#if setting.brew_setup.basket_grams}<span class="text-sm text-stone-400">{setting.brew_setup.basket_grams}g</span>{/if}
 							</div>
 						</div>
-						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-							<Icons icon="delete" size={18} />
+						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1.5 flex-shrink-0 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+							<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
 						</button>
 					</div>
 				{/each}
@@ -258,9 +264,13 @@
 						<div class="flex gap-2">
 							<input type="number" step="0.5" bind:value={settingValue} placeholder="12.5"
 								class="w-20 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
-							<select bind:value={settingBasketId} class="px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
-								<option value={null}>{$t('grinder.basket')}</option>
-								{#each basketSizes as bs}<option value={bs.id}>{bs.label}</option>{/each}
+							<select bind:value={settingGrinderId} class="px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+								{#each grindersList as g}<option value={g.id}>{g.name}{g.model ? ` ${g.model}` : ''}</option>{/each}
+							</select>
+						</div>
+						<div class="flex gap-2">
+							<select bind:value={settingBrewSetupId} class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+								{#each brewSetupsList as s}<option value={s.id}>{s.name}{s.basket_grams ? ` ${s.basket_grams}g` : ''}</option>{/each}
 							</select>
 							<input type="text" bind:value={settingNotes} placeholder={$t('grinder.notes')}
 								class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
@@ -328,7 +338,7 @@
 								<div class="flex gap-2 items-center">
 									<button onclick={() => startReview(review.taster_id, review)} class="px-3 py-1 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded hover:bg-card-inset">edit</button>
 									<button onclick={() => deleteReview(review.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-										<Icons icon="delete" size={18} />
+										<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
 									</button>
 								</div>
 							</div>

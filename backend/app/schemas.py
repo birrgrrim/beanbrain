@@ -26,70 +26,70 @@ class TasterOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# --- Equipment ---
+# --- Grinder ---
 
-class EquipmentCreate(BaseModel):
-    type: str
+class GrinderCreate(BaseModel):
     name: str
     model: str | None = None
+    kind: str = "auto"
     is_default: bool = False
 
 
-class EquipmentUpdate(BaseModel):
+class GrinderUpdate(BaseModel):
     name: str | None = None
     model: str | None = None
+    kind: str | None = None
     is_default: bool | None = None
 
 
-class EquipmentOut(BaseModel):
+class GrinderOut(BaseModel):
     id: int
-    type: str
     name: str
     model: str | None = None
-    is_active: bool
+    kind: str
     is_default: bool
 
     model_config = {"from_attributes": True}
 
 
-# --- Brew Method ---
+# --- Brew Setup ---
 
-class BrewMethodCreate(BaseModel):
+class BrewSetupCreate(BaseModel):
+    method_type: str
     name: str
+    basket_grams: int | None = None
     is_default: bool = False
 
 
-class BrewMethodOut(BaseModel):
+class BrewSetupUpdate(BaseModel):
+    name: str | None = None
+    basket_grams: int | None = None
+    is_default: bool | None = None
+
+
+class BrewSetupOut(BaseModel):
     id: int
+    method_type: str
     name: str
+    basket_grams: int | None = None
     is_default: bool
 
     model_config = {"from_attributes": True}
 
 
-# --- Basket Size ---
+# --- Brew Method Type (hardcoded, not DB) ---
 
-class BasketSizeCreate(BaseModel):
-    size_grams: int
-    label: str
-    is_default: bool = False
-
-
-class BasketSizeOut(BaseModel):
-    id: int
-    size_grams: int
-    label: str
-    is_default: bool
-
-    model_config = {"from_attributes": True}
+class BrewMethodTypeOut(BaseModel):
+    key: str
+    icon: str
+    has_basket: bool
 
 
 # --- Grinder Setting ---
 
 class GrinderSettingCreate(BaseModel):
-    equipment_id: int
-    brew_method_id: int
-    basket_size_id: int | None = None
+    grinder_id: int
+    brew_setup_id: int
     setting: float
     notes: str | None = None
 
@@ -97,14 +97,12 @@ class GrinderSettingCreate(BaseModel):
 class GrinderSettingOut(BaseModel):
     id: int
     coffee_id: int
-    equipment_id: int
-    brew_method_id: int
-    basket_size_id: int | None = None
+    grinder_id: int
+    brew_setup_id: int
     setting: float
     notes: str | None = None
-    equipment: EquipmentOut
-    brew_method: BrewMethodOut
-    basket_size: BasketSizeOut | None = None
+    grinder: GrinderOut
+    brew_setup: BrewSetupOut
 
     model_config = {"from_attributes": True}
 

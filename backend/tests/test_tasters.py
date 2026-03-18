@@ -28,10 +28,27 @@ def test_delete_taster(client):
     assert len(resp.json()) == 0
 
 
-def test_list_basket_sizes(client):
-    resp = client.get("/basket-sizes")
+def test_list_grinders(client):
+    resp = client.get("/grinders/")
     assert resp.status_code == 200
-    sizes = resp.json()
-    assert len(sizes) == 3
-    grams = [s["size_grams"] for s in sizes]
-    assert 14 in grams and 18 in grams and 25 in grams
+    grinders = resp.json()
+    assert len(grinders) == 1
+    assert grinders[0]["name"] == "Default Grinder"
+    assert grinders[0]["is_default"] is True
+
+
+def test_list_brew_setups(client):
+    resp = client.get("/brew-setups/")
+    assert resp.status_code == 200
+    setups = resp.json()
+    assert len(setups) == 1
+    assert setups[0]["method_type"] == "espresso"
+
+
+def test_list_brew_method_types(client):
+    resp = client.get("/brew-method-types")
+    assert resp.status_code == 200
+    types = resp.json()
+    assert len(types) == 6
+    keys = [t["key"] for t in types]
+    assert "espresso" in keys and "pourover" in keys

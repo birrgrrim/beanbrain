@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from .models import BasketSize, BrewMethod, Descriptor, Equipment, Taster
+from .models import BrewSetup, Descriptor, Grinder, Taster
 
 DESCRIPTORS = {
     "Fruity": [
@@ -41,21 +41,6 @@ DESCRIPTORS = {
     ],
 }
 
-EQUIPMENT = [
-    {"type": "grinder", "name": "Default Grinder", "model": None, "is_active": True, "is_default": True},
-    {"type": "machine", "name": "Default Machine", "model": None, "is_active": True, "is_default": True},
-]
-
-BREW_METHODS = [
-    {"name": "Espresso", "is_default": True},
-]
-
-BASKET_SIZES = [
-    {"size_grams": 14, "label": "14g", "is_default": False},
-    {"size_grams": 18, "label": "18g", "is_default": True},
-    {"size_grams": 25, "label": "25g", "is_default": False},
-]
-
 
 def seed_database(db: Session) -> None:
     """Seed the database with initial data if tables are empty."""
@@ -66,13 +51,7 @@ def seed_database(db: Session) -> None:
         for name in names:
             db.add(Descriptor(name=name, category=category))
 
-    for eq in EQUIPMENT:
-        db.add(Equipment(**eq))
-
-    for method in BREW_METHODS:
-        db.add(BrewMethod(**method))
-
-    for bs in BASKET_SIZES:
-        db.add(BasketSize(**bs))
+    db.add(Grinder(name="Default Grinder", is_default=True))
+    db.add(BrewSetup(method_type="espresso", name="Espresso", is_default=True))
 
     db.commit()

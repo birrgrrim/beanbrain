@@ -24,33 +24,27 @@
 </script>
 
 <aside class="w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
-	<!-- Header -->
 	<div class="p-4 border-b border-stone-100">
-		<div class="flex items-center justify-between mb-3">
-			<div class="flex items-center gap-2">
-				<img src="/img/header-coffee.png" alt="" class="w-6 h-6 opacity-70" />
-				<span class="text-sm font-semibold text-stone-600">{$t('tab.coffee')}</span>
+		<div class="flex items-center gap-2">
+			<div class="relative flex-1">
+				<Icons icon="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" />
+				<input
+					type="text"
+					bind:value={search}
+					placeholder={$t('sidebar.search')}
+					class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-stone-200 bg-card-inset text-base
+						focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
+						placeholder:text-stone-400"
+				/>
 			</div>
 			<button
 				onclick={onAdd}
-				class="w-10 h-10 flex items-center justify-center rounded-lg
+				class="w-10 h-10 flex items-center justify-center rounded-lg flex-shrink-0
 					bg-amber-700 text-white hover:bg-amber-800 transition-colors"
 				title="Add coffee"
 			>
 				<Icons icon="plus" size={20} />
 			</button>
-		</div>
-
-		<div class="relative">
-			<Icons icon="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" />
-			<input
-				type="text"
-				bind:value={search}
-				placeholder={$t('sidebar.search')}
-				class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-stone-200 bg-card-inset text-base
-					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
-					placeholder:text-stone-400"
-			/>
 		</div>
 	</div>
 
@@ -81,24 +75,26 @@
 						{/if}
 						<div class="min-w-0 flex-1">
 							<p class="font-semibold text-lg text-stone-800 truncate">{coffee.name}</p>
-							<div class="flex items-center gap-2 mt-0.5">
-								<span class="text-sm text-stone-400 truncate">{coffee.roastery}</span>
+							<div class="flex items-center justify-between mt-0.5">
+								<div class="min-w-0">
+									<p class="text-sm text-stone-400 truncate">{coffee.roastery}</p>
+									{#if coffee.person_rating != null}
+										<div class="mt-0.5">
+											<StarRating rating={coffee.person_rating} size="sm" />
+										</div>
+									{:else if coffee.avg_rating != null}
+										<div class="mt-0.5 opacity-50">
+											<StarRating rating={Math.round(coffee.avg_rating)} size="sm" />
+										</div>
+									{/if}
+								</div>
 								{#if coffee.default_grind != null}
-									<span class="text-stone-200">|</span>
-									<span class="text-base text-stone-500 tabular-nums font-medium" title="Grind setting">
-										<img src="/img/burr-icon.png" alt="" class="w-6 h-6 inline opacity-50 mr-0.5" />{coffee.default_grind}
-									</span>
+									<div class="flex items-center gap-1 flex-shrink-0 ml-2" title="Grind setting">
+										<img src="/img/burr-icon.png" alt="" class="w-6 h-6 opacity-40" />
+										<span class="text-2xl text-amber-700 tabular-nums font-bold">{coffee.default_grind}</span>
+									</div>
 								{/if}
 							</div>
-							{#if coffee.person_rating != null}
-								<div class="mt-0.5">
-									<StarRating rating={coffee.person_rating} size="sm" />
-								</div>
-							{:else if coffee.avg_rating != null}
-								<div class="mt-0.5 opacity-50">
-									<StarRating rating={Math.round(coffee.avg_rating)} size="sm" />
-								</div>
-							{/if}
 						</div>
 					</div>
 				</button>
