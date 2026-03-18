@@ -4,7 +4,7 @@
 
 <script lang="ts">
 	let { icon, size = 24, className = '' }: {
-		icon: 'bean' | 'grinder' | 'cup' | 'star' | 'settings' | 'search' | 'plus' | 'back' | 'delete' | 'link';
+		icon: 'bean' | 'grinder' | 'cup' | 'star' | 'settings' | 'search' | 'plus' | 'back' | 'delete' | 'link' | 'chevron' | 'users';
 		size?: number;
 		className?: string;
 	} = $props();
@@ -42,5 +42,12 @@
 	{:else if icon === 'link'}
 		<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
 		<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+	{:else if icon === 'chevron'}
+		<path d="M6 9l6 6 6-6" />
+	{:else if icon === 'users'}
+		<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+		<circle cx="9" cy="7" r="4" />
+		<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+		<path d="M16 3.13a4 4 0 0 1 0 7.75" />
 	{/if}
 </svg>

@@ -32,11 +32,20 @@ def _get_avg_rating(db: Session, coffee_id: int) -> float | None:
     return round(result, 1) if result else None
 
 
+def _get_person_rating(db: Session, coffee_id: int, taster_id: int) -> int | None:
+    review = db.query(Review).filter(
+        Review.coffee_id == coffee_id,
+        Review.taster_id == taster_id,
+    ).first()
+    return review.rating if review else None
+
+
 @router.get("/", response_model=list[CoffeeListOut])
 def list_coffees(
     search: str | None = Query(None, description="Search by name or roastery"),
     roastery: str | None = Query(None),
     descriptor_id: int | None = Query(None, description="Filter by roastery descriptor"),
+    taster_id: int | None = Query(None, description="Active person — returns their rating"),
     db: Session = Depends(get_db),
 ):
     query = db.query(Coffee).options(joinedload(Coffee.roastery_descriptors))
@@ -59,6 +68,8 @@ def list_coffees(
     for c in coffees:
         data = CoffeeListOut.model_validate(c)
         data.avg_rating = _get_avg_rating(db, c.id)
+        if taster_id:
+            data.person_rating = _get_person_rating(db, c.id, taster_id)
         data.default_grind = _get_default_grind(db, c.id)
         result.append(data)
     return result

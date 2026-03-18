@@ -1,34 +1,36 @@
 <script lang="ts">
 	import { api, type CoffeeListItem } from '$lib/api';
 	import { lang, type Lang } from '$lib/lang';
+	import { activePerson } from '$lib/personStore';
 	import { t } from '$lib/i18n';
 	import CoffeeSidebar from '$lib/components/CoffeeSidebar.svelte';
 	import CoffeeDetail from '$lib/components/CoffeeDetail.svelte';
 	import AddCoffeePanel from '$lib/components/AddCoffeePanel.svelte';
 	import GrindersPanel from '$lib/components/GrindersPanel.svelte';
-	import PersonsPanel from '$lib/components/PersonsPanel.svelte';
+	import PersonSwitcher from '$lib/components/PersonSwitcher.svelte';
 
-	type Tab = 'coffee' | 'grinders' | 'persons';
+	type Tab = 'coffee' | 'grinders';
 	type CoffeePanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
 
 	let activeTab = $state<Tab>('coffee');
 	let coffees = $state<CoffeeListItem[]>([]);
 	let coffeePanel = $state<CoffeePanel>({ type: 'empty' });
 	let currentLang = $state<Lang>('en');
+	let currentPersonId = $state<number | null>(null);
 
 	lang.subscribe(v => currentLang = v);
+	activePerson.subscribe(v => currentPersonId = v);
 
 	const tabDefs: { id: Tab; key: string; img: string }[] = [
 		{ id: 'coffee', key: 'tab.coffee', img: '/img/tab-coffee.png' },
 		{ id: 'grinders', key: 'tab.grinders', img: '/img/tab-grinder.png' },
-		{ id: 'persons', key: 'tab.persons', img: '/img/tab-person.png' },
 	];
 
 	async function loadCoffees() {
-		coffees = await api.coffees.list();
+		coffees = await api.coffees.list(undefined, currentPersonId);
 	}
 
-	$effect(() => { loadCoffees(); });
+	$effect(() => { currentPersonId; loadCoffees(); });
 
 	function selectCoffee(id: number) {
 		coffeePanel = { type: 'detail', id };
@@ -78,20 +80,23 @@
 				</nav>
 			</div>
 
-			<button
-				onclick={toggleLang}
-				class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
-					bg-card-inset hover:bg-parchment transition-colors text-stone-500"
-				title="Switch language"
-			>
-				{#if currentLang === 'en'}
-					<span class="text-lg leading-none">🇬🇧</span>
-					<span>EN</span>
-				{:else}
-					<span class="text-lg leading-none">🇺🇦</span>
-					<span>UA</span>
-				{/if}
-			</button>
+			<div class="flex items-center gap-3">
+				<PersonSwitcher onChange={loadCoffees} />
+				<button
+					onclick={toggleLang}
+					class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
+						bg-card-inset hover:bg-parchment transition-colors text-stone-500"
+					title="Switch language"
+				>
+					{#if currentLang === 'en'}
+						<span class="text-lg leading-none">🇬🇧</span>
+						<span>EN</span>
+					{:else}
+						<span class="text-lg leading-none">🇺🇦</span>
+						<span>UA</span>
+					{/if}
+				</button>
+			</div>
 		</div>
 	</header>
 
@@ -125,10 +130,6 @@
 		{:else if activeTab === 'grinders'}
 			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				<GrindersPanel />
-			</div>
-		{:else if activeTab === 'persons'}
-			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
-				<PersonsPanel />
 			</div>
 		{/if}
 	</div>

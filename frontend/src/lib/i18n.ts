@@ -5,7 +5,6 @@ const translations: Record<string, Record<string, string>> = {
 	// Top bar & tabs
 	'tab.coffee': { en: 'Coffee', uk: 'Кава' },
 	'tab.grinders': { en: 'Grinders', uk: 'Кавомолки' },
-	'tab.persons': { en: 'Persons', uk: 'Персони' },
 
 	// Coffee sidebar
 	'sidebar.search': { en: 'Search coffees...', uk: 'Пошук кави...' },
@@ -45,7 +44,7 @@ const translations: Record<string, Record<string, string>> = {
 	'tasting.empty': { en: 'No reviews yet', uk: 'Ще немає відгуків' },
 	'tasting.who': { en: "Who's reviewing?", uk: 'Хто оцінює?' },
 	'tasting.select': { en: 'Select person...', uk: 'Оберіть персону...' },
-	'tasting.no_tasters': { en: 'Add persons in Persons tab first', uk: 'Спочатку додайте персону' },
+	'tasting.no_tasters': { en: 'Add a person via the switcher first', uk: 'Спочатку додайте персону' },
 	'tasting.rating': { en: 'Rating', uk: 'Оцінка' },
 	'tasting.comment': { en: 'Comment', uk: 'Коментар' },
 	'tasting.comment_placeholder': { en: 'What did you taste?', uk: 'Що ви відчули?' },
@@ -73,11 +72,10 @@ const translations: Record<string, Record<string, string>> = {
 	'desc.search': { en: 'Search flavors...', uk: 'Пошук смаків...' },
 	'desc.suggested': { en: 'Roastery suggests', uk: 'Обсмажувач рекомендує' },
 
-	// Persons panel
-	'persons.title': { en: 'Persons', uk: 'Персони' },
-	'persons.subtitle': { en: "Who's tasting coffee", uk: 'Хто дегустує каву' },
-	'persons.empty': { en: 'No tasters yet — add yourself!', uk: 'Ще немає дегустаторів — додайте себе!' },
-	'persons.add_placeholder': { en: 'Add person...', uk: 'Додати персону...' },
+	// Person switcher
+	'person.everyone': { en: 'Everyone', uk: 'Усі' },
+	'person.add_new': { en: 'Add person...', uk: 'Додати персону...' },
+	'persons.add_placeholder': { en: 'Name...', uk: "Ім'я..." },
 	'persons.add': { en: 'Add', uk: 'Додати' },
 
 	// Grinders panel

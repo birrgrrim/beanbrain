@@ -200,6 +200,7 @@ class CoffeeListOut(BaseModel):
     is_available: bool
     created_at: datetime
     avg_rating: float | None = None
+    person_rating: int | None = None
     default_grind: float | None = None
     roastery_descriptors: list[DescriptorOut] = []
 

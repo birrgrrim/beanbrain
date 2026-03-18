@@ -99,6 +99,7 @@ export interface CoffeeListItem {
 	image_url: string | null;
 	is_available: boolean;
 	avg_rating: number | null;
+	person_rating: number | null;
 	default_grind: number | null;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
@@ -122,8 +123,13 @@ export interface ScrapeResult {
 
 export const api = {
 	coffees: {
-		list: (search?: string) =>
-			request<CoffeeListItem[]>(`/coffees/${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+		list: (search?: string, tasterId?: number | null) => {
+			const params = new URLSearchParams();
+			if (search) params.set('search', search);
+			if (tasterId) params.set('taster_id', String(tasterId));
+			const qs = params.toString();
+			return request<CoffeeListItem[]>(`/coffees/${qs ? `?${qs}` : ''}`);
+		},
 		get: (id: number) => request<Coffee>(`/coffees/${id}`),
 		create: (data: {
 			name: string;

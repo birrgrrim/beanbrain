@@ -90,8 +90,12 @@
 									</span>
 								{/if}
 							</div>
-							{#if coffee.avg_rating != null}
+							{#if coffee.person_rating != null}
 								<div class="mt-0.5">
+									<StarRating rating={coffee.person_rating} size="sm" />
+								</div>
+							{:else if coffee.avg_rating != null}
+								<div class="mt-0.5 opacity-50">
 									<StarRating rating={Math.round(coffee.avg_rating)} size="sm" />
 								</div>
 							{/if}
