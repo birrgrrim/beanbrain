@@ -2,6 +2,7 @@
 	import type { CoffeeListItem } from '$lib/api';
 	import { t } from '$lib/i18n';
 	import Icons from './Icons.svelte';
+	import StarRating from './StarRating.svelte';
 
 	let { coffees = [], selectedId = null, onSelect, onAdd, onRefresh }: {
 		coffees: CoffeeListItem[];
@@ -22,18 +23,21 @@
 	);
 </script>
 
-<aside class="w-80 flex-shrink-0 bg-white border-r border-stone-200 flex flex-col">
+<aside class="w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
 	<!-- Header -->
 	<div class="p-4 border-b border-stone-100">
 		<div class="flex items-center justify-between mb-3">
-			<span class="text-sm font-semibold text-stone-600">{$t('tab.coffee')}</span>
+			<div class="flex items-center gap-2">
+				<img src="/img/header-coffee.png" alt="" class="w-6 h-6 opacity-70" />
+				<span class="text-sm font-semibold text-stone-600">{$t('tab.coffee')}</span>
+			</div>
 			<button
 				onclick={onAdd}
-				class="w-8 h-8 flex items-center justify-center rounded-lg
+				class="w-10 h-10 flex items-center justify-center rounded-lg
 					bg-amber-700 text-white hover:bg-amber-800 transition-colors"
 				title="Add coffee"
 			>
-				<Icons icon="plus" size={16} />
+				<Icons icon="plus" size={20} />
 			</button>
 		</div>
 
@@ -43,18 +47,18 @@
 				type="text"
 				bind:value={search}
 				placeholder={$t('sidebar.search')}
-				class="w-full pl-8 pr-3 py-2 rounded-lg border border-stone-200 bg-stone-50 text-sm
+				class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-stone-200 bg-card-inset text-base
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
-					placeholder:text-stone-300"
+					placeholder:text-stone-400"
 			/>
 		</div>
 	</div>
 
 	<div class="flex-1 overflow-y-auto">
 		{#if filteredCoffees.length === 0}
-			<div class="p-8 text-center">
-				<Icons icon="bean" size={32} className="mx-auto text-stone-200 mb-2" />
-				<p class="text-sm text-stone-400">
+			<div class="p-6 text-center">
+				<img src="/img/empty-shelf.png" alt="" class="mx-auto mb-3 opacity-80" style="max-width: 180px;" />
+				<p class="text-sm text-stone-500">
 					{search ? $t('sidebar.no_matches') : $t('sidebar.empty')}
 				</p>
 			</div>
@@ -62,33 +66,35 @@
 			{#each filteredCoffees as coffee}
 				<button
 					onclick={() => onSelect(coffee.id)}
-					class="w-full text-left px-4 py-2.5 border-b border-stone-50 transition-colors
+					class="w-full text-left px-5 py-4 border-b border-stone-50 transition-colors
 						hover:bg-amber-50/50
 						{selectedId === coffee.id ? 'bg-amber-50 border-l-2 border-l-amber-600' : ''}
 						{!coffee.is_available ? 'opacity-40' : ''}"
 				>
 					<div class="flex items-center gap-3">
 						{#if coffee.image_url}
-							<img src={coffee.image_url} alt="" class="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-stone-50" />
+							<img src={coffee.image_url} alt="" class="w-14 h-14 rounded-lg object-contain flex-shrink-0 bg-card-inset" />
 						{:else}
-							<div class="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
-								<Icons icon="bean" size={18} className="text-stone-300" />
+							<div class="w-14 h-14 rounded-lg bg-card-inset flex items-center justify-center flex-shrink-0 overflow-hidden">
+								<img src="/img/coffee-placeholder.png" alt="" class="w-10 h-10 opacity-60" />
 							</div>
 						{/if}
 						<div class="min-w-0 flex-1">
-							<p class="font-medium text-sm text-stone-800 truncate">{coffee.name}</p>
+							<p class="font-semibold text-lg text-stone-800 truncate">{coffee.name}</p>
 							<div class="flex items-center gap-2 mt-0.5">
-								<span class="text-xs text-stone-400 truncate">{coffee.roastery}</span>
-								{#if coffee.default_grind != null || coffee.avg_rating != null}
+								<span class="text-sm text-stone-400 truncate">{coffee.roastery}</span>
+								{#if coffee.default_grind != null}
 									<span class="text-stone-200">|</span>
-									{#if coffee.default_grind != null}
-										<span class="text-xs text-stone-400 tabular-nums">{coffee.default_grind}</span>
-									{/if}
-									{#if coffee.avg_rating != null}
-										<span class="text-xs text-amber-500 tabular-nums">{(coffee.avg_rating / 2).toFixed(1)}<span class="text-amber-400">&#9733;</span></span>
-									{/if}
+									<span class="text-base text-stone-500 tabular-nums font-medium" title="Grind setting">
+										<img src="/img/burr-icon.png" alt="" class="w-6 h-6 inline opacity-50 mr-0.5" />{coffee.default_grind}
+									</span>
 								{/if}
 							</div>
+							{#if coffee.avg_rating != null}
+								<div class="mt-0.5">
+									<StarRating rating={Math.round(coffee.avg_rating)} size="sm" />
+								</div>
+							{/if}
 						</div>
 					</div>
 				</button>

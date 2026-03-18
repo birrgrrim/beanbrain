@@ -1,1 +1,12 @@
 @import 'tailwindcss';
+
+@theme {
+	--color-parchment: #f4ecdd;
+	--color-card: #faf6ee;
+	--color-card-inset: #f0e8d6;
+}
+
+/* Scale up for high-DPI displays */
+html {
+	font-size: 18px;
+}

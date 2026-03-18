@@ -5,10 +5,11 @@
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import Icons from './Icons.svelte';
 
-	let { coffeeId, onDeleted, onUpdated }: {
+	let { coffeeId, onDeleted, onUpdated, onBack }: {
 		coffeeId: number;
 		onDeleted: () => void;
 		onUpdated: () => void;
+		onBack: () => void;
 	} = $props();
 
 	let coffee = $state<Coffee | null>(null);
@@ -146,60 +147,68 @@
 		<div class="text-stone-300">Loading...</div>
 	</div>
 {:else if coffee}
-	<div class="p-6 space-y-5">
+	<div class="max-w-6xl mx-auto p-10 space-y-8">
 		<!-- Header with availability toggle -->
 		<div class="flex items-start justify-between">
 			<div class="flex items-center gap-3">
-				<h2 class="text-2xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
+				<button onclick={onBack}
+					class="p-1.5 text-stone-400 hover:text-stone-600 transition-colors rounded-lg hover:bg-card-inset"
+					title="Back">
+					<Icons icon="back" size={18} />
+				</button>
+				<img src="/img/header-coffee.png" alt="" class="w-8 h-8 opacity-70" />
+				<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
 					{coffee.name}
 				</h2>
-				<button onclick={toggleAvailability}
-					class="px-2 py-0.5 rounded text-xs font-medium transition-colors
-						{coffee.is_available
-							? 'bg-green-100 text-green-700 hover:bg-green-200'
-							: 'bg-stone-100 text-stone-400 hover:bg-stone-200'}"
-				>
-					{coffee.is_available ? 'Have it' : 'Out'}
-				</button>
 			</div>
-			<button onclick={deleteCoffee} class="p-2 text-stone-300 hover:text-red-500 transition-colors" title={$t('detail.delete')}>
-				<Icons icon="delete" size={18} />
+			<button onclick={deleteCoffee} class="p-2 text-stone-400 hover:text-red-500 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+				<Icons icon="delete" size={20} />
 			</button>
 		</div>
 
 		<!-- Coffee info — horizontal layout -->
-		<div class="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
 			<div class="flex">
 				{#if coffee.image_url}
-					<div class="bg-stone-50 p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 200px;">
+					<div class="bg-card-inset p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 200px;">
 						<img src={coffee.image_url} alt={coffee.name} class="max-h-40 object-contain" />
 					</div>
 				{/if}
-				<div class="p-5 flex-1 space-y-3">
-					<p class="text-sm text-stone-400">{coffee.roastery}</p>
-					<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+				<div class="p-6 flex-1 space-y-4">
+					<div class="flex items-center justify-between">
+						<p class="text-base text-stone-400">{coffee.roastery}</p>
+						<button onclick={toggleAvailability}
+							class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
+								{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
+							title={coffee.is_available ? 'Available' : 'Unavailable'}
+						>
+							<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
+								{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
+						</button>
+					</div>
+					<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
 						{#if coffee.origin}
-							<div><span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin}</p></div>
+							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin}</p></div>
 						{/if}
 						{#if coffee.process}
-							<div><span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
+							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
 						{/if}
 						{#if coffee.roast_level}
-							<div><span class="text-stone-300 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
+							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
 						{/if}
 					</div>
 					{#if coffee.score || coffee.sweetness || coffee.acidity || coffee.bitterness}
 						<div class="flex gap-5">
-							{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-[10px] text-stone-300 ml-1">{$t('detail.score')}</span></div>{/if}
-							{#if coffee.sweetness}<div><span class="text-sm font-semibold">{coffee.sweetness}</span><span class="text-[10px] text-stone-300 ml-1">{$t('detail.sweet')}</span></div>{/if}
-							{#if coffee.acidity}<div><span class="text-sm font-semibold">{coffee.acidity}</span><span class="text-[10px] text-stone-300 ml-1">{$t('detail.acid')}</span></div>{/if}
-							{#if coffee.bitterness}<div><span class="text-sm font-semibold">{coffee.bitterness}</span><span class="text-[10px] text-stone-300 ml-1">{$t('detail.bitter')}</span></div>{/if}
+							{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
+							{#if coffee.sweetness}<div><span class="text-sm font-semibold">{coffee.sweetness}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
+							{#if coffee.acidity}<div><span class="text-sm font-semibold">{coffee.acidity}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
+							{#if coffee.bitterness}<div><span class="text-sm font-semibold">{coffee.bitterness}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
 						</div>
 					{/if}
 					{#if coffee.roastery_descriptors.length > 0}
 						<div class="flex flex-wrap gap-1.5">
 							{#each coffee.roastery_descriptors as desc}
-								<span class="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
+								<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
 							{/each}
 						</div>
 					{/if}
@@ -213,60 +222,63 @@
 		</div>
 
 		<!-- Two-column: Grinder + Reviews -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 			<!-- Grinder Settings -->
-			<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
-						<Icons icon="grinder" size={16} className="text-stone-400" />
-						<h3 class="font-semibold text-sm text-stone-700">{$t('grinder.title')}</h3>
+						<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-60" />
+						<h3 class="font-semibold text-base text-stone-700">{$t('grinder.title')}</h3>
 					</div>
 					{#if !showSettingForm}
 						<button onclick={() => showSettingForm = true} class="text-xs text-amber-600 hover:text-amber-800 font-medium">{$t('grinder.add')}</button>
 					{/if}
 				</div>
 				{#if coffee.grinder_settings.length === 0 && !showSettingForm}
-					<p class="text-sm text-stone-300">{$t('grinder.no_setting')}</p>
+					<div class="text-center py-2">
+						<img src="/img/empty-grinder.png" alt="" class="mx-auto opacity-50" style="max-width: 60px;" />
+						<p class="text-sm text-stone-500 mt-1">{$t('grinder.no_setting')}</p>
+					</div>
 				{/if}
 				{#each coffee.grinder_settings as setting}
 					<div class="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
 						<div class="flex items-center gap-3">
-							<span class="text-2xl font-bold text-amber-700 tabular-nums">{setting.setting}</span>
-							<div class="text-xs text-stone-400">
+							<span class="text-3xl font-bold text-amber-700 tabular-nums">{setting.setting}</span>
+							<div class="text-base text-stone-400">
 								<p>{setting.brew_method.name}{#if setting.basket_size} &middot; {setting.basket_size.label}{/if}</p>
 							</div>
 						</div>
-						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1 text-stone-200 hover:text-red-400 transition-colors" title={$t('detail.delete')}>
-							<Icons icon="delete" size={14} />
+						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+							<Icons icon="delete" size={18} />
 						</button>
 					</div>
 				{/each}
 				{#if showSettingForm}
-					<div class="mt-2 p-3 bg-stone-50 rounded-xl space-y-2">
+					<div class="mt-2 p-3 bg-card-inset rounded-xl space-y-2">
 						<div class="flex gap-2">
 							<input type="number" step="0.5" bind:value={settingValue} placeholder="12.5"
-								class="w-20 px-2 py-1.5 rounded border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
-							<select bind:value={settingBasketId} class="px-2 py-1.5 rounded border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+								class="w-20 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+							<select bind:value={settingBasketId} class="px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50">
 								<option value={null}>{$t('grinder.basket')}</option>
 								{#each basketSizes as bs}<option value={bs.id}>{bs.label}</option>{/each}
 							</select>
 							<input type="text" bind:value={settingNotes} placeholder={$t('grinder.notes')}
-								class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+								class="flex-1 px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
 						</div>
 						<div class="flex gap-2">
-							<button onclick={addGrinderSetting} class="px-3 py-1.5 bg-amber-700 text-white rounded text-xs hover:bg-amber-800">{$t('grinder.save')}</button>
-							<button onclick={() => showSettingForm = false} class="px-3 py-1.5 text-stone-400 text-xs">{$t('grinder.cancel')}</button>
+							<button onclick={addGrinderSetting} class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{$t('grinder.save')}</button>
+							<button onclick={() => showSettingForm = false} class="px-4 py-2 text-stone-400 text-sm">{$t('grinder.cancel')}</button>
 						</div>
 					</div>
 				{/if}
 			</div>
 
 			<!-- Reviews -->
-			<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
-						<Icons icon="cup" size={16} className="text-stone-400" />
-						<h3 class="font-semibold text-sm text-stone-700">{$t('tasting.title')}</h3>
+						<img src="/img/coffee-cup.png" alt="" class="w-8 h-8 opacity-60" />
+						<h3 class="font-semibold text-base text-stone-700">{$t('tasting.title')}</h3>
 					</div>
 					{#if unreviewedTasters.length > 0 && editingReviewTasterId === null}
 						<select
@@ -280,25 +292,28 @@
 				</div>
 
 				{#if coffee.reviews.length === 0 && editingReviewTasterId === null}
-					<p class="text-sm text-stone-300">{$t('tasting.empty')}</p>
+					<div class="text-center py-2">
+						<img src="/img/no-reviews.png" alt="" class="mx-auto opacity-70" style="max-width: 100px;" />
+						<p class="text-sm text-stone-500 mt-1">{$t('tasting.empty')}</p>
+					</div>
 				{/if}
 
 				{#each coffee.reviews as review}
 					{#if editingReviewTasterId === review.taster_id}
 						<!-- Editing existing review -->
 						<div class="py-2 space-y-2">
-							<p class="text-sm font-medium text-stone-700">{review.taster.name}</p>
+							<p class="text-base font-semibold text-stone-700">{review.taster.name}</p>
 							<div class="flex items-center gap-2">
 								<StarRating rating={reviewRating} interactive onRate={(v) => reviewRating = v} />
 								{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
 							</div>
 							<textarea bind:value={reviewComment} rows={2} placeholder={$t('tasting.comment_placeholder')}
-								class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
+								class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
 							<DescriptorAutocomplete {descriptors} selected={reviewDescriptors} suggested={suggestedDescriptorIds} onToggle={toggleReviewDescriptor} />
 							<div class="flex gap-2">
 								<button onclick={saveReview} disabled={reviewRating === 0}
-									class="px-3 py-1.5 bg-amber-700 text-white rounded text-xs hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
-								<button onclick={cancelReview} class="px-3 py-1.5 text-stone-400 text-xs">{$t('tasting.cancel')}</button>
+									class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
+								<button onclick={cancelReview} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
 							</div>
 						</div>
 					{:else}
@@ -306,22 +321,22 @@
 						<div class="py-2 border-b border-stone-50 last:border-0">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
-									<span class="text-sm font-medium text-stone-700">{review.taster.name}</span>
+									<span class="text-base font-semibold text-stone-700">{review.taster.name}</span>
 									<StarRating rating={review.rating} />
-									<span class="text-xs text-stone-300 tabular-nums">{review.rating}/10</span>
+									<span class="text-sm text-stone-400 tabular-nums">{review.rating}/10</span>
 								</div>
-								<div class="flex gap-1">
-									<button onclick={() => startReview(review.taster_id, review)} class="px-1.5 py-0.5 text-[10px] text-stone-300 hover:text-amber-600 transition-colors">edit</button>
-									<button onclick={() => deleteReview(review.id)} class="p-1 text-stone-200 hover:text-red-400 transition-colors" title={$t('detail.delete')}>
-										<Icons icon="delete" size={12} />
+								<div class="flex gap-2 items-center">
+									<button onclick={() => startReview(review.taster_id, review)} class="px-3 py-1 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded hover:bg-card-inset">edit</button>
+									<button onclick={() => deleteReview(review.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+										<Icons icon="delete" size={18} />
 									</button>
 								</div>
 							</div>
-							{#if review.comment}<p class="text-sm text-stone-500 mt-1">{review.comment}</p>{/if}
+							{#if review.comment}<p class="text-base text-stone-500 mt-1.5">{review.comment}</p>{/if}
 							{#if review.descriptors.length > 0}
-								<div class="flex flex-wrap gap-1 mt-1">
+								<div class="flex flex-wrap gap-1.5 mt-2">
 									{#each review.descriptors as desc}
-										<span class="px-1.5 py-0.5 rounded-full text-[10px] bg-stone-50 text-stone-500 border border-stone-100">{desc.name}</span>
+										<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
 									{/each}
 								</div>
 							{/if}
@@ -338,12 +353,12 @@
 							{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
 						</div>
 						<textarea bind:value={reviewComment} rows={2} placeholder={$t('tasting.comment_placeholder')}
-							class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
+							class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
 						<DescriptorAutocomplete {descriptors} selected={reviewDescriptors} suggested={suggestedDescriptorIds} onToggle={toggleReviewDescriptor} />
 						<div class="flex gap-2">
 							<button onclick={saveReview} disabled={reviewRating === 0}
-								class="px-3 py-1.5 bg-amber-700 text-white rounded text-xs hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
-							<button onclick={cancelReview} class="px-3 py-1.5 text-stone-400 text-xs">{$t('tasting.cancel')}</button>
+								class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
+							<button onclick={cancelReview} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
 						</div>
 					</div>
 				{/if}

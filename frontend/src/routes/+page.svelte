@@ -7,7 +7,6 @@
 	import AddCoffeePanel from '$lib/components/AddCoffeePanel.svelte';
 	import GrindersPanel from '$lib/components/GrindersPanel.svelte';
 	import PersonsPanel from '$lib/components/PersonsPanel.svelte';
-	import Icons from '$lib/components/Icons.svelte';
 
 	type Tab = 'coffee' | 'grinders' | 'persons';
 	type CoffeePanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
@@ -19,10 +18,10 @@
 
 	lang.subscribe(v => currentLang = v);
 
-	const tabDefs: { id: Tab; key: string; icon: 'bean' | 'grinder' | 'cup' }[] = [
-		{ id: 'coffee', key: 'tab.coffee', icon: 'bean' },
-		{ id: 'grinders', key: 'tab.grinders', icon: 'grinder' },
-		{ id: 'persons', key: 'tab.persons', icon: 'cup' },
+	const tabDefs: { id: Tab; key: string; img: string }[] = [
+		{ id: 'coffee', key: 'tab.coffee', img: '/img/tab-coffee.png' },
+		{ id: 'grinders', key: 'tab.grinders', img: '/img/tab-grinder.png' },
+		{ id: 'persons', key: 'tab.persons', img: '/img/tab-person.png' },
 	];
 
 	async function loadCoffees() {
@@ -52,28 +51,27 @@
 	const selectedId = $derived(coffeePanel.type === 'detail' ? coffeePanel.id : null);
 </script>
 
-<div class="flex flex-col h-screen overflow-hidden">
+<div class="flex flex-col h-screen overflow-hidden text-base">
 	<!-- Top bar -->
-	<header class="bg-white border-b border-stone-200 flex-shrink-0">
-		<div class="flex items-center justify-between px-4">
-			<div class="flex items-center gap-6">
-				<div class="flex items-center gap-2 py-2">
-					<img src="/img/logo.png" alt="BeanBrain" class="h-8 w-8" />
-					<span class="text-lg font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">BeanBrain</span>
+	<header class="bg-card border-b border-stone-200 flex-shrink-0">
+		<div class="flex items-center justify-between px-5">
+			<div class="flex items-center gap-8">
+				<div class="flex items-center gap-3 py-4">
+					<img src="/img/logo.png" alt="BeanBrain" class="h-12 w-12" />
+					<span class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">BeanBrain</span>
 				</div>
 
 				<nav class="flex">
 					{#each tabDefs as tab}
 						<button
 							onclick={() => activeTab = tab.id}
-							class="flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-colors
+							class="flex items-center gap-3 px-7 py-5 text-lg font-medium transition-colors
 								border-b-2 -mb-px
 								{activeTab === tab.id
 									? 'border-amber-600 text-amber-700'
 									: 'border-transparent text-stone-400 hover:text-stone-600'}"
 						>
-							<Icons icon={tab.icon} size={15}
-								className={activeTab === tab.id ? 'text-amber-600' : 'text-stone-300'} />
+							<img src={tab.img} alt="" class="w-8 h-8 {activeTab === tab.id ? 'opacity-90' : 'opacity-40'}" />
 							{$t(tab.key)}
 						</button>
 					{/each}
@@ -82,15 +80,15 @@
 
 			<button
 				onclick={toggleLang}
-				class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium
-					bg-stone-50 hover:bg-stone-100 transition-colors text-stone-500"
+				class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
+					bg-card-inset hover:bg-parchment transition-colors text-stone-500"
 				title="Switch language"
 			>
 				{#if currentLang === 'en'}
-					<span class="text-base leading-none">🇬🇧</span>
+					<span class="text-lg leading-none">🇬🇧</span>
 					<span>EN</span>
 				{:else}
-					<span class="text-base leading-none">🇺🇦</span>
+					<span class="text-lg leading-none">🇺🇦</span>
 					<span>UA</span>
 				{/if}
 			</button>
@@ -107,25 +105,29 @@
 				onAdd={() => coffeePanel = { type: 'new' }}
 				onRefresh={loadCoffees}
 			/>
-			<div class="flex-1 overflow-y-auto bg-[#faf8f5]">
+			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				{#if coffeePanel.type === 'empty'}
 					<div class="flex flex-col items-center justify-center h-full text-center">
-						<img src="/img/logo-256.png" alt="" class="w-24 h-24 opacity-20 mb-3" />
-						<p class="text-stone-300 text-lg" style="font-family: 'DM Serif Display', serif;">{$t('empty.title')}</p>
-						<p class="text-stone-200 text-sm mt-1">{$t('empty.subtitle')}</p>
+						<!-- Solid circle behind image to mask background pattern -->
+						<div class="rounded-full bg-parchment p-8 mb-4"
+							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
+							<img src="/img/choose-coffee.png" alt="" class="opacity-70" style="max-width: 220px;" />
+						</div>
+						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('empty.title')}</p>
+						<p class="text-stone-400 text-base mt-2">{$t('empty.subtitle')}</p>
 					</div>
 				{:else if coffeePanel.type === 'detail'}
-					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} />
+					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} onBack={() => coffeePanel = { type: 'empty' }} />
 				{:else if coffeePanel.type === 'new'}
 					<AddCoffeePanel onCreated={onCoffeeCreated} onCancel={() => coffeePanel = { type: 'empty' }} />
 				{/if}
 			</div>
 		{:else if activeTab === 'grinders'}
-			<div class="flex-1 overflow-y-auto bg-[#faf8f5]">
+			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				<GrindersPanel />
 			</div>
 		{:else if activeTab === 'persons'}
-			<div class="flex-1 overflow-y-auto bg-[#faf8f5]">
+			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				<PersonsPanel />
 			</div>
 		{/if}

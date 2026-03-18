@@ -60,13 +60,13 @@
 			onfocus={() => focused = true}
 			onblur={() => setTimeout(() => focused = false, 200)}
 			placeholder={$t('desc.search')}
-			class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+			class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 				focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300
-				placeholder:text-stone-300"
+				placeholder:text-stone-400"
 		/>
 
 		{#if focused && filtered.length > 0}
-			<div class="absolute z-10 mt-1 w-full bg-white rounded-lg border border-stone-200 shadow-lg overflow-hidden">
+			<div class="absolute z-10 mt-1 w-full bg-card rounded-lg border border-stone-200 shadow-lg overflow-hidden">
 				{#each filtered as desc}
 					<button
 						type="button"

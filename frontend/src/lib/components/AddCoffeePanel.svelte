@@ -103,13 +103,15 @@
 		<h2 class="text-2xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
 			{$t('add.title')}
 		</h2>
-		<button onclick={onCancel} class="p-2 text-stone-300 hover:text-stone-500 transition-colors">
-			<Icons icon="back" size={18} />
+		<button onclick={onCancel}
+			class="px-4 py-2 text-sm text-stone-500 hover:text-stone-700 bg-card-inset hover:bg-parchment
+				rounded-lg transition-colors font-medium">
+			{$t('add.cancel')}
 		</button>
 	</div>
 
 	<!-- URL Auto-fill -->
-	<div class="bg-amber-50/50 rounded-2xl border border-amber-100 p-4">
+	<div class="bg-card rounded-2xl border border-amber-200 p-4">
 		<div class="flex items-center gap-2 mb-2">
 			<Icons icon="link" size={14} className="text-amber-500" />
 			<p class="text-sm font-medium text-amber-700">{$t('add.url_hint')}</p>
@@ -117,7 +119,7 @@
 		<div class="flex gap-2">
 			<input type="url" bind:value={scrapeUrl}
 				placeholder="https://madheadscoffee.com/p/..."
-				class="flex-1 px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm
+				class="flex-1 px-3 py-2 rounded-lg border border-amber-200 bg-card text-sm
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
 			<button type="button" onclick={handleScrape}
 				disabled={scraping || !scrapeUrl.trim()}
@@ -135,9 +137,9 @@
 		{/if}
 	</div>
 
-	<form onsubmit={handleSubmit} class="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 space-y-4">
+	<form onsubmit={handleSubmit} class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6 space-y-4">
 		{#if imageUrl}
-			<div class="flex justify-center bg-stone-50 rounded-xl p-4">
+			<div class="flex justify-center bg-card-inset rounded-xl p-4">
 				<img src={imageUrl} alt={name} class="h-32 object-contain" />
 			</div>
 		{/if}
@@ -146,13 +148,13 @@
 			<div>
 				<label for="name" class="block text-xs text-stone-400 mb-1">{$t('add.name')} *</label>
 				<input id="name" type="text" bind:value={name} required
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Ethiopia Yirgacheffe" />
 			</div>
 			<div>
 				<label for="roastery" class="block text-xs text-stone-400 mb-1">{$t('add.roastery')} *</label>
 				<input id="roastery" type="text" bind:value={roastery} required
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Local Roasters" />
 			</div>
 		</div>
@@ -161,25 +163,25 @@
 			<div>
 				<label for="origin" class="block text-xs text-stone-400 mb-1">{$t('add.origin')}</label>
 				<input id="origin" type="text" bind:value={origin}
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Ethiopia" />
 			</div>
 			<div>
 				<label for="process" class="block text-xs text-stone-400 mb-1">{$t('add.process')}</label>
 				<input id="process" type="text" bind:value={process}
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Washed" />
 			</div>
 			<div>
 				<label for="roast_level" class="block text-xs text-stone-400 mb-1">{$t('add.roast_level')}</label>
 				<input id="roast_level" type="text" bind:value={roastLevel}
-					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+					class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 						focus:outline-none focus:ring-2 focus:ring-amber-400/50" placeholder="Light" />
 			</div>
 		</div>
 
 		{#if score || sweetness || acidity || bitterness}
-			<div class="flex gap-6 p-3 bg-stone-50 rounded-xl">
+			<div class="flex gap-6 p-3 bg-card-inset rounded-xl">
 				{#if score}<div class="text-center"><p class="text-lg font-bold text-amber-700">{score}</p><p class="text-[10px] text-stone-300 uppercase">Score</p></div>{/if}
 				{#if sweetness}<div class="text-center"><p class="text-sm font-semibold">{sweetness}</p><p class="text-[10px] text-stone-300 uppercase">Sweet</p></div>{/if}
 				{#if acidity}<div class="text-center"><p class="text-sm font-semibold">{acidity}</p><p class="text-[10px] text-stone-300 uppercase">Acid</p></div>{/if}
@@ -190,7 +192,7 @@
 		<div>
 			<label for="notes" class="block text-xs text-stone-400 mb-1">{$t('add.notes')}</label>
 			<textarea id="notes" bind:value={notes} rows={2}
-				class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-white
+				class="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm bg-card
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"
 				placeholder="Any notes..."></textarea>
 		</div>
@@ -200,14 +202,12 @@
 			<DescriptorAutocomplete {descriptors} selected={selectedDescriptors} onToggle={toggleDescriptor} />
 		</div>
 
-		<div class="pt-2 flex gap-3">
+		<div class="pt-2">
 			<button type="submit" disabled={saving || !name.trim() || !roastery.trim()}
 				class="px-6 py-2.5 bg-amber-700 text-white rounded-lg hover:bg-amber-800
 					transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
 				{saving ? $t('add.saving') : $t('add.save')}
 			</button>
-			<button type="button" onclick={onCancel}
-				class="px-6 py-2.5 text-stone-400 hover:text-stone-600 transition-colors">{$t('add.cancel')}</button>
 		</div>
 	</form>
 </div>
