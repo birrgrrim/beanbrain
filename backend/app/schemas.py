@@ -142,9 +142,9 @@ class CoffeeCreate(BaseModel):
     roastery_url: str | None = None
     image_url: str | None = None
     score: int | None = None
-    sweetness: str | None = None
-    acidity: str | None = None
-    bitterness: str | None = None
+    sweetness: int | None = None
+    acidity: int | None = None
+    bitterness: int | None = None
     notes: str | None = None
     is_available: bool = True
     roastery_descriptor_ids: list[int] = []
@@ -159,9 +159,9 @@ class CoffeeUpdate(BaseModel):
     roastery_url: str | None = None
     image_url: str | None = None
     score: int | None = None
-    sweetness: str | None = None
-    acidity: str | None = None
-    bitterness: str | None = None
+    sweetness: int | None = None
+    acidity: int | None = None
+    bitterness: int | None = None
     notes: str | None = None
     is_available: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
@@ -177,9 +177,9 @@ class CoffeeOut(BaseModel):
     roastery_url: str | None = None
     image_url: str | None = None
     score: int | None = None
-    sweetness: str | None = None
-    acidity: str | None = None
-    bitterness: str | None = None
+    sweetness: int | None = None
+    acidity: int | None = None
+    bitterness: int | None = None
     notes: str | None = None
     is_available: bool
     created_at: datetime
@@ -218,8 +218,8 @@ class ScrapeResult(BaseModel):
     roastery_url: str
     image_url: str | None = None
     score: int | None = None
-    sweetness: str | None = None
-    acidity: str | None = None
-    bitterness: str | None = None
+    sweetness: int | None = None
+    acidity: int | None = None
+    bitterness: int | None = None
     flavor_descriptors: dict[str, list[str]] = {}
     name_i18n: dict[str, str] = {}

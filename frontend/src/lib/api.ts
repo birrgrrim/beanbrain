@@ -79,9 +79,9 @@ export interface Coffee {
 	roastery_url: string | null;
 	image_url: string | null;
 	score: number | null;
-	sweetness: string | null;
-	acidity: string | null;
-	bitterness: string | null;
+	sweetness: number | null;
+	acidity: number | null;
+	bitterness: number | null;
 	notes: string | null;
 	is_available: boolean;
 	created_at: string;
@@ -114,9 +114,9 @@ export interface ScrapeResult {
 	roastery_url: string;
 	image_url: string | null;
 	score: number | null;
-	sweetness: string | null;
-	acidity: string | null;
-	bitterness: string | null;
+	sweetness: number | null;
+	acidity: number | null;
+	bitterness: number | null;
 	flavor_descriptors: Record<string, string[]>;
 	name_i18n: Record<string, string>;
 }
@@ -140,9 +140,9 @@ export const api = {
 			roastery_url?: string;
 			image_url?: string;
 			score?: number;
-			sweetness?: string;
-			acidity?: string;
-			bitterness?: string;
+			sweetness?: number;
+			acidity?: number;
+			bitterness?: number;
 			notes?: string;
 			is_available?: boolean;
 			roastery_descriptor_ids?: number[];

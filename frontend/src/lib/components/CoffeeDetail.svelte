@@ -197,12 +197,12 @@
 							<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
 						{/if}
 					</div>
-					{#if coffee.score || coffee.sweetness || coffee.acidity || coffee.bitterness}
+					{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
 						<div class="flex gap-5">
 							{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
-							{#if coffee.sweetness}<div><span class="text-sm font-semibold">{coffee.sweetness}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
-							{#if coffee.acidity}<div><span class="text-sm font-semibold">{coffee.acidity}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
-							{#if coffee.bitterness}<div><span class="text-sm font-semibold">{coffee.bitterness}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
+							{#if coffee.sweetness != null}<div><span class="text-sm font-semibold">{coffee.sweetness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
+							{#if coffee.acidity != null}<div><span class="text-sm font-semibold">{coffee.acidity}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
+							{#if coffee.bitterness != null}<div><span class="text-sm font-semibold">{coffee.bitterness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
 						</div>
 					{/if}
 					{#if coffee.roastery_descriptors.length > 0}

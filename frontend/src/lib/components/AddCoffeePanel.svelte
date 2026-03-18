@@ -22,9 +22,9 @@
 	let roasteryUrl = $state('');
 	let imageUrl = $state('');
 	let score = $state<number | undefined>();
-	let sweetness = $state('');
-	let acidity = $state('');
-	let bitterness = $state('');
+	let sweetness = $state<number | undefined>();
+	let acidity = $state<number | undefined>();
+	let bitterness = $state<number | undefined>();
 	let notes = $state('');
 	let selectedDescriptors = $state<number[]>([]);
 	let descriptors = $state<Descriptor[]>([]);
@@ -49,9 +49,9 @@
 			roasteryUrl = result.roastery_url || '';
 			imageUrl = result.image_url || '';
 			score = result.score ?? undefined;
-			sweetness = result.sweetness || '';
-			acidity = result.acidity || '';
-			bitterness = result.bitterness || '';
+			sweetness = result.sweetness ?? undefined;
+			acidity = result.acidity ?? undefined;
+			bitterness = result.bitterness ?? undefined;
 
 			const enDescriptors = result.flavor_descriptors?.en || [];
 			const matched: number[] = [];
@@ -88,9 +88,9 @@
 			roastery_url: roasteryUrl.trim() || undefined,
 			image_url: imageUrl.trim() || undefined,
 			score,
-			sweetness: sweetness.trim() || undefined,
-			acidity: acidity.trim() || undefined,
-			bitterness: bitterness.trim() || undefined,
+			sweetness,
+			acidity,
+			bitterness,
 			notes: notes.trim() || undefined,
 			roastery_descriptor_ids: selectedDescriptors.length > 0 ? selectedDescriptors : undefined,
 		});
@@ -180,12 +180,12 @@
 			</div>
 		</div>
 
-		{#if score || sweetness || acidity || bitterness}
+		{#if score || sweetness != null || acidity != null || bitterness != null}
 			<div class="flex gap-6 p-3 bg-card-inset rounded-xl">
-				{#if score}<div class="text-center"><p class="text-lg font-bold text-amber-700">{score}</p><p class="text-[10px] text-stone-300 uppercase">Score</p></div>{/if}
-				{#if sweetness}<div class="text-center"><p class="text-sm font-semibold">{sweetness}</p><p class="text-[10px] text-stone-300 uppercase">Sweet</p></div>{/if}
-				{#if acidity}<div class="text-center"><p class="text-sm font-semibold">{acidity}</p><p class="text-[10px] text-stone-300 uppercase">Acid</p></div>{/if}
-				{#if bitterness}<div class="text-center"><p class="text-sm font-semibold">{bitterness}</p><p class="text-[10px] text-stone-300 uppercase">Bitter</p></div>{/if}
+				{#if score}<div class="text-center"><p class="text-lg font-bold text-amber-700">{score}</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.score')}</p></div>{/if}
+				{#if sweetness != null}<div class="text-center"><p class="text-sm font-semibold">{sweetness}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.sweet')}</p></div>{/if}
+				{#if acidity != null}<div class="text-center"><p class="text-sm font-semibold">{acidity}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.acid')}</p></div>{/if}
+				{#if bitterness != null}<div class="text-center"><p class="text-sm font-semibold">{bitterness}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.bitter')}</p></div>{/if}
 			</div>
 		{/if}
 

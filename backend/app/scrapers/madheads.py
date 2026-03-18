@@ -140,6 +140,14 @@ class MadHeadsScraper(BaseScraper):
             except (ValueError, IndexError):
                 pass
 
+        def _parse_metric(val: str | None) -> int | None:
+            if not val:
+                return None
+            try:
+                return int(val.split("/")[0])
+            except (ValueError, IndexError):
+                return None
+
         return ScrapeResult(
             name=data.get("label", ""),
             roastery="MadHeads",
@@ -149,9 +157,9 @@ class MadHeadsScraper(BaseScraper):
             roastery_url=uk_url,
             image_url=image_url,
             score=score,
-            sweetness=chars.get("sweetness", {}).get("en"),
-            acidity=chars.get("acidity", {}).get("en"),
-            bitterness=chars.get("bitterness", {}).get("en"),
+            sweetness=_parse_metric(chars.get("sweetness", {}).get("en")),
+            acidity=_parse_metric(chars.get("acidity", {}).get("en")),
+            bitterness=_parse_metric(chars.get("bitterness", {}).get("en")),
             flavor_descriptors=chars.get("flavor_profile", {}),
             name_i18n={
                 lang: info["label"]
