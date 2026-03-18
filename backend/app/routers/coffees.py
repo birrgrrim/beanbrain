@@ -41,7 +41,6 @@ def _get_person_rating(db: Session, coffee_id: int, taster_id: int) -> int | Non
 @router.get("/", response_model=list[CoffeeListOut])
 def list_coffees(
     search: str | None = Query(None, description="Search by name or roastery"),
-    roastery: str | None = Query(None),
     descriptor_id: int | None = Query(None, description="Filter by roastery descriptor"),
     taster_id: int | None = Query(None, description="Active person — returns their rating"),
     db: Session = Depends(get_db),
@@ -64,13 +63,47 @@ def list_coffees(
         Coffee.is_available.desc(), Coffee.created_at.desc()
     ).all()
 
+    if not coffees:
+        return []
+
+    coffee_ids = [c.id for c in coffees]
+
+    # Bulk: avg ratings (1 query)
+    avg_ratings = dict(
+        db.query(Review.coffee_id, func.avg(Review.rating))
+        .filter(Review.coffee_id.in_(coffee_ids))
+        .group_by(Review.coffee_id)
+        .all()
+    )
+
+    # Bulk: person ratings (1 query)
+    person_ratings = {}
+    if taster_id:
+        person_ratings = dict(
+            db.query(Review.coffee_id, Review.rating)
+            .filter(Review.coffee_id.in_(coffee_ids), Review.taster_id == taster_id)
+            .all()
+        )
+
+    # Bulk: default grind settings (1+2 queries instead of 3N)
+    default_grinds: dict[int, float] = {}
+    default_grinder = db.query(Grinder).filter(Grinder.is_default == True).first()
+    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default == True).first()
+    if default_grinder and default_setup:
+        for row in db.query(GrinderSetting.coffee_id, GrinderSetting.setting).filter(
+            GrinderSetting.coffee_id.in_(coffee_ids),
+            GrinderSetting.grinder_id == default_grinder.id,
+            GrinderSetting.brew_setup_id == default_setup.id,
+        ).all():
+            default_grinds[row.coffee_id] = row.setting
+
     result = []
     for c in coffees:
         data = CoffeeListOut.model_validate(c)
-        data.avg_rating = _get_avg_rating(db, c.id)
-        if taster_id:
-            data.person_rating = _get_person_rating(db, c.id, taster_id)
-        data.default_grind = _get_default_grind(db, c.id)
+        avg = avg_ratings.get(c.id)
+        data.avg_rating = round(avg, 1) if avg else None
+        data.person_rating = person_ratings.get(c.id)
+        data.default_grind = default_grinds.get(c.id)
         result.append(data)
     return result
 

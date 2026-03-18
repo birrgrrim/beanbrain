@@ -10,15 +10,6 @@
 		onBack: () => void;
 	} = $props();
 
-	const iconMap: Record<string, string> = {
-		espresso: 'method-espresso.png',
-		pourover: 'method-pourover.png',
-		aeropress: 'method-aeropress.png',
-		frenchpress: 'method-frenchpress.png',
-		moka: 'method-moka.png',
-		cezve: 'method-cezve.png',
-	};
-
 	async function toggleDefault() {
 		await api.brewSetups.update(brewSetup.id, { is_default: !brewSetup.is_default });
 		onUpdated();
@@ -39,7 +30,7 @@
 				title="Back">
 				<Icons icon="back" size={18} />
 			</button>
-			<img src="/img/{iconMap[brewSetup.method_type] ?? 'method-espresso.png'}" alt="" class="w-8 h-8 opacity-70" />
+			<img src="/img/method-{brewSetup.method_type}.png" alt="" class="w-8 h-8 opacity-70" />
 			<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
 				{brewSetup.name}
 			</h2>
@@ -53,7 +44,7 @@
 
 	<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6 space-y-4">
 		<div class="flex items-center gap-4">
-			<img src="/img/{iconMap[brewSetup.method_type] ?? 'method-espresso.png'}" alt="" class="w-16 h-16 opacity-60" />
+			<img src="/img/method-{brewSetup.method_type}.png" alt="" class="w-16 h-16 opacity-60" />
 			<div class="space-y-1">
 				<p class="text-stone-700 font-medium text-lg">{brewSetup.name}</p>
 				<p class="text-sm text-stone-400">{$t(`method.${brewSetup.method_type}`)}</p>

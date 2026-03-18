@@ -24,7 +24,7 @@
 	let loading = $state(true);
 
 	let originsList = $state<Origin[]>([]);
-	let roasteriesList2 = $state<Roastery[]>([]);
+	let roasteriesList = $state<Roastery[]>([]);
 
 	// Edit mode
 	let editing = $state(false);
@@ -71,7 +71,7 @@
 		brewSetupsList = bs;
 		tasters = ta;
 		originsList = ori;
-		roasteriesList2 = roast;
+		roasteriesList = roast;
 
 		settingGrinderId = gr.find(g => g.is_default)?.id ?? gr[0]?.id ?? null;
 		settingBrewSetupId = bs.find(s => s.is_default)?.id ?? bs[0]?.id ?? null;
@@ -289,7 +289,7 @@
 						<div class="flex items-center justify-between">
 							<select bind:value={editRoasteryId}
 								class="{inputClass}" style="max-width: 250px;">
-								{#each roasteriesList2 as r}
+								{#each roasteriesList as r}
 									<option value={r.id}>{r.name}</option>
 								{/each}
 							</select>
