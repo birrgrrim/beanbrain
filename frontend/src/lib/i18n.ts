@@ -14,7 +14,8 @@ const translations: Record<string, Record<string, string>> = {
 	'sidebar.no_matches': { en: 'No matches', uk: 'Нічого не знайдено' },
 	'sidebar.filters': { en: 'Filters', uk: 'Фільтри' },
 	'sidebar.clear_filters': { en: 'Clear', uk: 'Скинути' },
-	'sidebar.hide_unavailable': { en: 'Hide unavailable', uk: 'Сховати недоступні' },
+	'sidebar.only_in_stock': { en: 'At home', uk: 'Вдома' },
+	'sidebar.only_in_store': { en: 'In store', uk: 'В магазині' },
 	'sidebar.origin': { en: 'Origin', uk: 'Країна' },
 	'sidebar.roastery': { en: 'Roastery', uk: 'Обсмажувач' },
 	'sidebar.roast': { en: 'Roast', uk: 'Обсмаження' },
@@ -48,6 +49,9 @@ const translations: Record<string, Record<string, string>> = {
 	'detail.updated_at': { en: 'Updated', uk: 'Оновлено' },
 	'detail.refresh': { en: 'Refresh', uk: 'Оновити' },
 	'detail.refreshing': { en: 'Refreshing...', uk: 'Оновлення...' },
+	'detail.in_stock': { en: 'At home', uk: 'Вдома' },
+	'detail.in_store': { en: 'In store', uk: 'В магазині' },
+	'detail.sold_out': { en: 'Sold out', uk: 'Немає в наявності' },
 	'detail.delete_confirm': { en: 'Delete this coffee and all its tastings?', uk: 'Видалити цю каву та всі дегустації?' },
 
 	// Grinder settings (in coffee detail)

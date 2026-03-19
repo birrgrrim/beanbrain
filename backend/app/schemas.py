@@ -185,7 +185,8 @@ class CoffeeCreate(BaseModel):
     roaster_comment: dict[str, str] | None = None
     price: int | None = None
     price_wholesale: int | None = None
-    is_available: bool = True
+    in_stock: bool = False
+    in_store: bool = True
     roastery_descriptor_ids: list[int] = []
 
 
@@ -205,7 +206,8 @@ class CoffeeUpdate(BaseModel):
     roaster_comment: dict[str, str] | None = None
     price: int | None = None
     price_wholesale: int | None = None
-    is_available: bool | None = None
+    in_stock: bool | None = None
+    in_store: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
 
 
@@ -228,7 +230,8 @@ class CoffeeOut(BaseModel):
     roaster_comment: dict[str, str] | None = None
     price: int | None = None
     price_wholesale: int | None = None
-    is_available: bool
+    in_stock: bool
+    in_store: bool
     created_at: datetime
     updated_at: datetime | None = None
     fetched_at: datetime | None = None
@@ -250,7 +253,8 @@ class CoffeeListOut(BaseModel):
     image_url: str | None = None
     price: int | None = None
     price_wholesale: int | None = None
-    is_available: bool
+    in_stock: bool
+    in_store: bool
     created_at: datetime
     avg_rating: float | None = None
     person_rating: int | None = None

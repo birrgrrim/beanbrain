@@ -71,7 +71,8 @@ class Coffee(Base):
     roaster_comment = Column(JSON, nullable=True)
     price = Column(Integer, nullable=True)  # retail price (whole UAH)
     price_wholesale = Column(Integer, nullable=True)  # bulk/discount price (whole UAH)
-    is_available = Column(Boolean, default=True)
+    in_stock = Column(Boolean, default=False)   # at home right now
+    in_store = Column(Boolean, default=True)    # available at roastery
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, nullable=True)
     fetched_at = Column(DateTime, nullable=True)

@@ -63,7 +63,7 @@ def list_coffees(
         query = query.filter(Coffee.roastery_descriptors.any(Descriptor.id == descriptor_id))
 
     coffees = query.order_by(
-        Coffee.is_available.desc(), Coffee.created_at.desc()
+        Coffee.in_stock.desc(), Coffee.in_store.desc(), Coffee.created_at.desc()
     ).all()
 
     if not coffees:
@@ -150,7 +150,8 @@ def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
         roaster_comment=data.roaster_comment,
         price=data.price,
         price_wholesale=data.price_wholesale,
-        is_available=data.is_available,
+        in_stock=data.in_stock,
+        in_store=data.in_store,
         fetched_at=datetime.now(timezone.utc) if data.roastery_url else None,
     )
 

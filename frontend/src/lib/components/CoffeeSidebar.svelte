@@ -47,7 +47,8 @@
 	let search = $state('');
 	let showSort = $state(loadState('showSort', false));
 	let showFilters = $state(loadState('showFilters', false));
-	let hideUnavailable = $state(loadState('hideUnavailable', false));
+	let hideNotInStock = $state(loadState('hideNotInStock', false));
+	let hideNotInStore = $state(loadState('hideNotInStore', false));
 	let filterOriginIds = $state<number[]>(loadState('filterOriginIds', []));
 	let filterRoasteryIds = $state<number[]>(loadState('filterRoasteryIds', []));
 	let filterRoastLevels = $state<string[]>(loadState('filterRoastLevels', []));
@@ -59,7 +60,8 @@
 	// Persist on change
 	$effect(() => { saveState('showSort', showSort); });
 	$effect(() => { saveState('showFilters', showFilters); });
-	$effect(() => { saveState('hideUnavailable', hideUnavailable); });
+	$effect(() => { saveState('hideNotInStock', hideNotInStock); });
+	$effect(() => { saveState('hideNotInStore', hideNotInStore); });
 	$effect(() => { saveState('filterOriginIds', filterOriginIds); });
 	$effect(() => { saveState('filterRoasteryIds', filterRoasteryIds); });
 	$effect(() => { saveState('filterRoastLevels', filterRoastLevels); });
@@ -74,14 +76,15 @@
 	);
 
 	const hasActiveFilters = $derived(
-		hideUnavailable || filterOriginIds.length > 0 || filterRoasteryIds.length > 0 ||
+		hideNotInStock || hideNotInStore || filterOriginIds.length > 0 || filterRoasteryIds.length > 0 ||
 		filterRoastLevels.length > 0 || filterMinRating > 0 || filterDescriptorIds.length > 0
 	);
 
 	const hasNonDefaultSort = $derived(sortKey !== 'date' || sortAsc);
 
 	function clearFilters() {
-		hideUnavailable = false;
+		hideNotInStock = false;
+		hideNotInStore = false;
 		filterOriginIds = [];
 		filterRoasteryIds = [];
 		filterRoastLevels = [];
@@ -112,7 +115,8 @@
 		}
 
 		// Filters
-		if (hideUnavailable) list = list.filter(c => c.is_available);
+		if (hideNotInStock) list = list.filter(c => c.in_stock);
+		if (hideNotInStore) list = list.filter(c => c.in_store);
 		if (filterOriginIds.length > 0) list = list.filter(c => c.origin_id != null && filterOriginIds.includes(c.origin_id));
 		if (filterRoasteryIds.length > 0) list = list.filter(c => filterRoasteryIds.includes(c.roastery_id));
 		if (filterRoastLevels.length > 0) list = list.filter(c => c.roast_level != null && filterRoastLevels.includes(c.roast_level));
@@ -144,11 +148,12 @@
 			return sortAsc ? cmp : -cmp;
 		});
 
-		// Always keep unavailable at bottom regardless of sort (unless hidden)
-		if (!hideUnavailable && sortKey !== 'date') {
-			const available = sorted.filter(c => c.is_available);
-			const unavailable = sorted.filter(c => !c.is_available);
-			return [...available, ...unavailable];
+		// Always group: in_stock first, then in_store only, then archive
+		if (sortKey !== 'date') {
+			const inStock = sorted.filter(c => c.in_stock);
+			const inStoreOnly = sorted.filter(c => !c.in_stock && c.in_store);
+			const archive = sorted.filter(c => !c.in_stock && !c.in_store);
+			return [...inStock, ...inStoreOnly, ...archive];
 		}
 
 		return sorted;
@@ -220,12 +225,19 @@
 		<!-- Filters panel -->
 		{#if showFilters}
 			<div class="space-y-2.5 pt-1">
-				<!-- Availability toggle -->
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="checkbox" bind:checked={hideUnavailable}
-						class="rounded border-stone-300 text-amber-600 focus:ring-amber-400/50" />
-					<span class="text-xs text-stone-500">{$t('sidebar.hide_unavailable')}</span>
-				</label>
+				<!-- Availability toggles -->
+				<div class="flex gap-4">
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="checkbox" bind:checked={hideNotInStock}
+							class="rounded border-stone-300 text-amber-600 focus:ring-amber-400/50" />
+						<span class="text-xs text-stone-500">{$t('sidebar.only_in_stock')}</span>
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="checkbox" bind:checked={hideNotInStore}
+							class="rounded border-stone-300 text-amber-600 focus:ring-amber-400/50" />
+						<span class="text-xs text-stone-500">{$t('sidebar.only_in_store')}</span>
+					</label>
+				</div>
 
 				<!-- Origin -->
 				{#if origins.length > 0}
@@ -349,7 +361,7 @@
 					class="w-full text-left px-5 py-4 border-b border-stone-50 transition-colors
 						hover:bg-amber-50/50
 						{selectedId === coffee.id ? 'bg-amber-50 border-l-2 border-l-amber-600' : ''}
-						{!coffee.is_available ? 'opacity-40' : ''}"
+						{!coffee.in_stock && !coffee.in_store ? 'opacity-30' : !coffee.in_stock ? 'opacity-50' : ''}"
 				>
 					<div class="flex items-center gap-3">
 						{#if coffee.image_url}

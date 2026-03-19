@@ -101,7 +101,8 @@ export interface Coffee {
 	roaster_comment: Record<string, string> | null;
 	price: number | null;
 	price_wholesale: number | null;
-	is_available: boolean;
+	in_stock: boolean;
+	in_store: boolean;
 	created_at: string;
 	updated_at: string | null;
 	fetched_at: string | null;
@@ -121,7 +122,8 @@ export interface CoffeeListItem {
 	image_url: string | null;
 	price: number | null;
 	price_wholesale: number | null;
-	is_available: boolean;
+	in_stock: boolean;
+	in_store: boolean;
 	avg_rating: number | null;
 	person_rating: number | null;
 	default_grind: number | null;
@@ -183,7 +185,8 @@ export const api = {
 			roaster_comment?: Record<string, string>;
 			price?: number;
 			price_wholesale?: number;
-			is_available?: boolean;
+			in_stock?: boolean;
+			in_store?: boolean;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>

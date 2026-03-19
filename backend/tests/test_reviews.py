@@ -108,22 +108,28 @@ def test_review_for_nonexistent_coffee(client):
     assert resp.status_code == 404
 
 
-def test_coffee_availability(client):
+def test_coffee_stock_and_store(client):
     rid = client.post("/roasteries/", json={"name": "R"}).json()["id"]
-    resp = client.post("/coffees/", json={"name": "Available", "roastery_id": rid})
-    assert resp.json()["is_available"] == True
+    resp = client.post("/coffees/", json={"name": "Coffee", "roastery_id": rid})
+    data = resp.json()
+    assert data["in_stock"] == False
+    assert data["in_store"] == True
 
-    coffee_id = resp.json()["id"]
-    resp = client.put(f"/coffees/{coffee_id}", json={"is_available": False})
-    assert resp.json()["is_available"] == False
+    coffee_id = data["id"]
+    resp = client.put(f"/coffees/{coffee_id}", json={"in_stock": True})
+    assert resp.json()["in_stock"] == True
+
+    resp = client.put(f"/coffees/{coffee_id}", json={"in_store": False})
+    assert resp.json()["in_store"] == False
 
 
-def test_coffees_sorted_by_availability(client):
+def test_coffees_sorted_by_stock(client):
     rid = client.post("/roasteries/", json={"name": "R"}).json()["id"]
-    c1 = client.post("/coffees/", json={"name": "Old", "roastery_id": rid}).json()
-    c2 = client.post("/coffees/", json={"name": "New", "roastery_id": rid}).json()
-    client.put(f"/coffees/{c1['id']}", json={"is_available": False})
+    c1 = client.post("/coffees/", json={"name": "Archive", "roastery_id": rid}).json()
+    c2 = client.post("/coffees/", json={"name": "AtHome", "roastery_id": rid}).json()
+    client.put(f"/coffees/{c1['id']}", json={"in_store": False})
+    client.put(f"/coffees/{c2['id']}", json={"in_stock": True})
 
     coffees = client.get("/coffees/").json()
-    assert coffees[0]["name"] == "New"  # available first
-    assert coffees[1]["name"] == "Old"  # unavailable last
+    assert coffees[0]["name"] == "AtHome"  # in_stock first
+    assert coffees[1]["name"] == "Archive"  # archive last

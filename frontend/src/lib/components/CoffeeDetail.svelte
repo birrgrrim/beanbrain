@@ -187,9 +187,16 @@
 		onUpdated();
 	}
 
-	async function toggleAvailability() {
+	async function toggleInStock() {
 		if (!coffee) return;
-		await api.coffees.update(coffeeId, { is_available: !coffee.is_available });
+		await api.coffees.update(coffeeId, { in_stock: !coffee.in_stock });
+		await loadData();
+		onUpdated();
+	}
+
+	async function toggleInStore() {
+		if (!coffee) return;
+		await api.coffees.update(coffeeId, { in_store: !coffee.in_store });
 		await loadData();
 		onUpdated();
 	}
@@ -293,13 +300,27 @@
 									<option value={r.id}>{r.name}</option>
 								{/each}
 							</select>
-							<button onclick={toggleAvailability}
-								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
-									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
-								title={coffee.is_available ? 'Available' : 'Unavailable'}>
-								<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
-									{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
-							</button>
+							<div class="flex items-center gap-6">
+								<div class="flex items-center gap-2">
+									<button onclick={toggleInStock}
+										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
+											{coffee.in_stock ? 'bg-amber-600' : 'bg-stone-300'}">
+										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
+											{coffee.in_stock ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
+									</button>
+									<span class="text-xs text-stone-500">{$t('detail.in_stock')}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<button onclick={coffee.roastery_url ? undefined : toggleInStore}
+										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
+											{coffee.in_store ? 'bg-amber-600' : 'bg-stone-300'}
+											{coffee.roastery_url ? 'opacity-50 cursor-not-allowed' : ''}">
+										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
+											{coffee.in_store ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
+									</button>
+									<span class="text-xs text-stone-500">{$t('detail.in_store')}</span>
+								</div>
+							</div>
 						</div>
 						<div class="grid grid-cols-3 gap-3">
 							<div>
@@ -368,13 +389,27 @@
 						<!-- Display mode -->
 						<div class="flex items-center justify-between">
 							<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
-							<button onclick={toggleAvailability}
-								class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
-									{coffee.is_available ? 'bg-amber-600' : 'bg-stone-300'}"
-								title={coffee.is_available ? 'Available' : 'Unavailable'}>
-								<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
-									{coffee.is_available ? 'translate-x-7' : 'translate-x-1'}"></span>
-							</button>
+							<div class="flex items-center gap-6">
+								<div class="flex items-center gap-2">
+									<button onclick={toggleInStock}
+										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
+											{coffee.in_stock ? 'bg-amber-600' : 'bg-stone-300'}">
+										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
+											{coffee.in_stock ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
+									</button>
+									<span class="text-xs text-stone-500">{$t('detail.in_stock')}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<button onclick={coffee.roastery_url ? undefined : toggleInStore}
+										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
+											{coffee.in_store ? 'bg-amber-600' : 'bg-stone-300'}
+											{coffee.roastery_url ? 'opacity-50 cursor-not-allowed' : ''}">
+										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
+											{coffee.in_store ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
+									</button>
+									<span class="text-xs text-stone-500">{$t('detail.in_store')}</span>
+								</div>
+							</div>
 						</div>
 						<div class="flex gap-6">
 							<!-- Left: details -->
