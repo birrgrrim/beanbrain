@@ -4,15 +4,14 @@ from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..models import Coffee, GrinderSetting
 from ..schemas import GrinderSettingCreate, GrinderSettingOut
+from ._helpers import get_or_404
 
 router = APIRouter(prefix="/coffees/{coffee_id}/settings", tags=["grinder settings"])
 
 
 @router.get("/", response_model=list[GrinderSettingOut])
 def list_grinder_settings(coffee_id: int, db: Session = Depends(get_db)):
-    coffee = db.query(Coffee).filter(Coffee.id == coffee_id).first()
-    if not coffee:
-        raise HTTPException(status_code=404, detail="Coffee not found")
+    get_or_404(db, Coffee, coffee_id, "Coffee not found")
 
     return (
         db.query(GrinderSetting)
@@ -29,9 +28,7 @@ def list_grinder_settings(coffee_id: int, db: Session = Depends(get_db)):
 def create_grinder_setting(
     coffee_id: int, data: GrinderSettingCreate, db: Session = Depends(get_db)
 ):
-    coffee = db.query(Coffee).filter(Coffee.id == coffee_id).first()
-    if not coffee:
-        raise HTTPException(status_code=404, detail="Coffee not found")
+    get_or_404(db, Coffee, coffee_id, "Coffee not found")
 
     setting = GrinderSetting(
         coffee_id=coffee_id,

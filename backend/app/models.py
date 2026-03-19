@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Table, Boolean, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, Table, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -68,7 +68,7 @@ class Coffee(Base):
     acidity = Column(Integer, nullable=True)
     bitterness = Column(Integer, nullable=True)
     notes = Column(String, nullable=True)
-    roaster_comment = Column(String, nullable=True)  # JSON: {"en": "...", "uk": "..."}
+    roaster_comment = Column(JSON, nullable=True)
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

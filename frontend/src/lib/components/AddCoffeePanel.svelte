@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { api, type Descriptor, type ScrapeResult, type Origin, type Roastery } from '$lib/api';
+	import { refData } from '$lib/refData';
+	import { toggleId } from '$lib/utils';
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
@@ -45,9 +47,9 @@
 
 	$effect(() => {
 		Promise.all([
-			api.descriptors.list(),
-			api.origins.list(),
-			api.roasteries.list(),
+			refData.descriptors(),
+			refData.origins(),
+			refData.roasteries(),
 		]).then(([d, o, r]) => {
 			descriptors = d;
 			originsList = o;
@@ -84,7 +86,8 @@
 				} else {
 					// Auto-create new roastery
 					const newR = await api.roasteries.create({ name: result.roastery });
-					roasteriesList = await api.roasteries.list();
+					refData.invalidate('roasteries');
+					roasteriesList = await refData.roasteries();
 					roasteryId = newR.id;
 				}
 			}
@@ -114,11 +117,7 @@
 	}
 
 	function toggleDescriptor(id: number) {
-		if (selectedDescriptors.includes(id)) {
-			selectedDescriptors = selectedDescriptors.filter(d => d !== id);
-		} else {
-			selectedDescriptors = [...selectedDescriptors, id];
-		}
+		selectedDescriptors = toggleId(selectedDescriptors, id);
 	}
 
 	async function createNewRoastery() {
@@ -128,7 +127,8 @@
 			name: newRoasteryName.trim(),
 			website: newRoasteryWebsite.trim() || undefined,
 		});
-		roasteriesList = await api.roasteries.list();
+		refData.invalidate('roasteries');
+		roasteriesList = await refData.roasteries();
 		roasteryId = r.id;
 		showNewRoastery = false;
 		newRoasteryName = '';
@@ -154,7 +154,7 @@
 			acidity,
 			bitterness,
 			notes: notes.trim() || undefined,
-			roaster_comment: Object.keys(roasterComment).length > 0 ? JSON.stringify(roasterComment) : undefined,
+			roaster_comment: Object.keys(roasterComment).length > 0 ? roasterComment : undefined,
 			roastery_descriptor_ids: selectedDescriptors.length > 0 ? selectedDescriptors : undefined,
 		});
 		onCreated(coffee.id);

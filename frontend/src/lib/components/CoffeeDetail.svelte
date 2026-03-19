@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { api, type Coffee, type Descriptor, type Grinder, type BrewSetup, type Taster, type Origin, type Roastery } from '$lib/api';
+	import { refData } from '$lib/refData';
+	import { toggleId } from '$lib/utils';
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
 	import StarRating from './StarRating.svelte';
@@ -58,12 +60,12 @@
 		loading = true;
 		const [c, d, gr, bs, ta, ori, roast] = await Promise.all([
 			api.coffees.get(coffeeId),
-			api.descriptors.list(),
-			api.grinders.list(),
-			api.brewSetups.list(),
-			api.tasters.list(),
-			api.origins.list(),
-			api.roasteries.list(),
+			refData.descriptors(),
+			refData.grinders(),
+			refData.brewSetups(),
+			refData.tasters(),
+			refData.origins(),
+			refData.roasteries(),
 		]);
 		coffee = c;
 		descriptors = d;
@@ -85,18 +87,8 @@
 		coffee?.roastery_descriptors.map(d => d.id) ?? []
 	);
 
-	function parseRoasterComment(raw: string | null, lang: string): string | null {
-		if (!raw) return null;
-		try {
-			const parsed = JSON.parse(raw);
-			return parsed[lang] || parsed['en'] || null;
-		} catch {
-			return raw;
-		}
-	}
-
 	const roasterCommentText = $derived(
-		parseRoasterComment(coffee?.roaster_comment ?? null, currentLang)
+		coffee?.roaster_comment?.[currentLang] ?? coffee?.roaster_comment?.['en'] ?? null
 	);
 
 	const unreviewedTasters = $derived(
@@ -125,11 +117,7 @@
 	}
 
 	function toggleEditDescriptor(id: number) {
-		if (editDescriptorIds.includes(id)) {
-			editDescriptorIds = editDescriptorIds.filter(d => d !== id);
-		} else {
-			editDescriptorIds = [...editDescriptorIds, id];
-		}
+		editDescriptorIds = toggleId(editDescriptorIds, id);
 	}
 
 	async function saveEditing() {
@@ -173,11 +161,7 @@
 	}
 
 	function toggleReviewDescriptor(id: number) {
-		if (reviewDescriptors.includes(id)) {
-			reviewDescriptors = reviewDescriptors.filter(d => d !== id);
-		} else {
-			reviewDescriptors = [...reviewDescriptors, id];
-		}
+		reviewDescriptors = toggleId(reviewDescriptors, id);
 	}
 
 	async function saveReview() {

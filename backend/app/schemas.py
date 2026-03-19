@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -67,14 +69,14 @@ class RoasteryOut(BaseModel):
 class GrinderCreate(BaseModel):
     name: str
     model: str | None = None
-    kind: str = "auto"
+    kind: Literal["auto", "manual"] = "auto"
     is_default: bool = False
 
 
 class GrinderUpdate(BaseModel):
     name: str | None = None
     model: str | None = None
-    kind: str | None = None
+    kind: Literal["auto", "manual"] | None = None
     is_default: bool | None = None
 
 
@@ -91,7 +93,7 @@ class GrinderOut(BaseModel):
 # --- Brew Setup ---
 
 class BrewSetupCreate(BaseModel):
-    method_type: str
+    method_type: Literal["espresso", "pourover", "aeropress", "frenchpress", "moka", "cezve"]
     name: str
     basket_grams: int | None = None
     is_default: bool = False
@@ -180,7 +182,7 @@ class CoffeeCreate(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
-    roaster_comment: str | None = None  # JSON string: {"en": "...", "uk": "..."}
+    roaster_comment: dict[str, str] | None = None
     is_available: bool = True
     roastery_descriptor_ids: list[int] = []
 
@@ -198,7 +200,7 @@ class CoffeeUpdate(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
-    roaster_comment: str | None = None
+    roaster_comment: dict[str, str] | None = None
     is_available: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
 
@@ -219,7 +221,7 @@ class CoffeeOut(BaseModel):
     acidity: int | None = None
     bitterness: int | None = None
     notes: str | None = None
-    roaster_comment: str | None = None
+    roaster_comment: dict[str, str] | None = None
     is_available: bool
     created_at: datetime
     roastery_descriptors: list[DescriptorOut] = []

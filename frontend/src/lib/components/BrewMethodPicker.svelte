@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, type BrewMethodType } from '$lib/api';
+	import { BREW_METHOD_TYPES } from '$lib/api';
 	import { t } from '$lib/i18n';
 	import Icons from './Icons.svelte';
 
@@ -8,13 +8,7 @@
 		onCancel: () => void;
 	} = $props();
 
-	let methodTypes = $state<BrewMethodType[]>([]);
-
-	async function load() {
-		methodTypes = await api.brewMethodTypes.list();
-	}
-
-	$effect(() => { load(); });
+	const methodTypes = BREW_METHOD_TYPES;
 </script>
 
 <div class="max-w-2xl mx-auto p-10 space-y-6">

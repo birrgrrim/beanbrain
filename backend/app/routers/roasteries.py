@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import Roastery
 from ..schemas import RoasteryCreate, RoasteryOut, RoasteryUpdate
+from ._helpers import get_or_404
 
 router = APIRouter(prefix="/roasteries", tags=["roasteries"])
 
@@ -24,9 +25,7 @@ def create_roastery(data: RoasteryCreate, db: Session = Depends(get_db)):
 
 @router.put("/{roastery_id}", response_model=RoasteryOut)
 def update_roastery(roastery_id: int, data: RoasteryUpdate, db: Session = Depends(get_db)):
-    roastery = db.query(Roastery).filter(Roastery.id == roastery_id).first()
-    if not roastery:
-        raise HTTPException(status_code=404, detail="Roastery not found")
+    roastery = get_or_404(db, Roastery, roastery_id, "Roastery not found")
     for k, v in data.model_dump(exclude_unset=True).items():
         setattr(roastery, k, v)
     db.commit()
@@ -36,8 +35,6 @@ def update_roastery(roastery_id: int, data: RoasteryUpdate, db: Session = Depend
 
 @router.delete("/{roastery_id}", status_code=204)
 def delete_roastery(roastery_id: int, db: Session = Depends(get_db)):
-    roastery = db.query(Roastery).filter(Roastery.id == roastery_id).first()
-    if not roastery:
-        raise HTTPException(status_code=404, detail="Roastery not found")
+    roastery = get_or_404(db, Roastery, roastery_id, "Roastery not found")
     roastery.is_active = False
     db.commit()

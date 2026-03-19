@@ -98,7 +98,7 @@ export interface Coffee {
 	acidity: number | null;
 	bitterness: number | null;
 	notes: string | null;
-	roaster_comment: string | null;
+	roaster_comment: Record<string, string> | null;
 	is_available: boolean;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
@@ -140,6 +140,15 @@ export interface ScrapeResult {
 	roaster_comment: Record<string, string>;
 }
 
+export const BREW_METHOD_TYPES: BrewMethodType[] = [
+	{ key: 'espresso', icon: 'method-espresso.png', has_basket: true },
+	{ key: 'pourover', icon: 'method-pourover.png', has_basket: false },
+	{ key: 'aeropress', icon: 'method-aeropress.png', has_basket: false },
+	{ key: 'frenchpress', icon: 'method-frenchpress.png', has_basket: false },
+	{ key: 'moka', icon: 'method-moka.png', has_basket: false },
+	{ key: 'cezve', icon: 'method-cezve.png', has_basket: false },
+];
+
 export const api = {
 	coffees: {
 		list: (search?: string, tasterId?: number | null) => {
@@ -163,7 +172,7 @@ export const api = {
 			acidity?: number;
 			bitterness?: number;
 			notes?: string;
-			roaster_comment?: string;
+			roaster_comment?: Record<string, string>;
 			is_available?: boolean;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),

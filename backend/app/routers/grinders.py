@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import Grinder
 from ..schemas import GrinderCreate, GrinderOut, GrinderUpdate
+from ._helpers import clear_default, get_or_404
 
 router = APIRouter(prefix="/grinders", tags=["grinders"])
 
@@ -16,7 +17,7 @@ def list_grinders(db: Session = Depends(get_db)):
 @router.post("/", response_model=GrinderOut, status_code=201)
 def create_grinder(data: GrinderCreate, db: Session = Depends(get_db)):
     if data.is_default:
-        db.query(Grinder).filter(Grinder.is_default == True).update({"is_default": False})
+        clear_default(db, Grinder)
     grinder = Grinder(**data.model_dump())
     db.add(grinder)
     db.commit()
@@ -26,12 +27,10 @@ def create_grinder(data: GrinderCreate, db: Session = Depends(get_db)):
 
 @router.put("/{grinder_id}", response_model=GrinderOut)
 def update_grinder(grinder_id: int, data: GrinderUpdate, db: Session = Depends(get_db)):
-    grinder = db.query(Grinder).filter(Grinder.id == grinder_id).first()
-    if not grinder:
-        raise HTTPException(status_code=404, detail="Grinder not found")
+    grinder = get_or_404(db, Grinder, grinder_id, "Grinder not found")
     update = data.model_dump(exclude_unset=True)
     if update.get("is_default"):
-        db.query(Grinder).filter(Grinder.is_default == True).update({"is_default": False})
+        clear_default(db, Grinder)
     for k, v in update.items():
         setattr(grinder, k, v)
     db.commit()
@@ -41,8 +40,6 @@ def update_grinder(grinder_id: int, data: GrinderUpdate, db: Session = Depends(g
 
 @router.delete("/{grinder_id}", status_code=204)
 def delete_grinder(grinder_id: int, db: Session = Depends(get_db)):
-    grinder = db.query(Grinder).filter(Grinder.id == grinder_id).first()
-    if not grinder:
-        raise HTTPException(status_code=404, detail="Grinder not found")
+    grinder = get_or_404(db, Grinder, grinder_id, "Grinder not found")
     db.delete(grinder)
     db.commit()
