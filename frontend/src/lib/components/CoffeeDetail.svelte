@@ -302,7 +302,7 @@
 							</select>
 							<div class="flex items-center gap-6">
 								<div class="flex items-center gap-2">
-									<button onclick={toggleInStock}
+									<button onclick={toggleInStock} aria-label="Toggle in stock"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
 											{coffee.in_stock ? 'bg-amber-600' : 'bg-stone-300'}">
 										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
@@ -311,7 +311,7 @@
 									<span class="text-xs text-stone-500">{$t('detail.in_stock')}</span>
 								</div>
 								<div class="flex items-center gap-2">
-									<button onclick={coffee.roastery_url ? undefined : toggleInStore}
+									<button onclick={coffee.roastery_url ? undefined : toggleInStore} aria-label="Toggle in store"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
 											{coffee.in_store ? 'bg-amber-600' : 'bg-stone-300'}
 											{coffee.roastery_url ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -391,7 +391,7 @@
 							<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
 							<div class="flex items-center gap-6">
 								<div class="flex items-center gap-2">
-									<button onclick={toggleInStock}
+									<button onclick={toggleInStock} aria-label="Toggle in stock"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
 											{coffee.in_stock ? 'bg-amber-600' : 'bg-stone-300'}">
 										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
@@ -400,7 +400,7 @@
 									<span class="text-xs text-stone-500">{$t('detail.in_stock')}</span>
 								</div>
 								<div class="flex items-center gap-2">
-									<button onclick={coffee.roastery_url ? undefined : toggleInStore}
+									<button onclick={coffee.roastery_url ? undefined : toggleInStore} aria-label="Toggle in store"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
 											{coffee.in_store ? 'bg-amber-600' : 'bg-stone-300'}
 											{coffee.roastery_url ? 'opacity-50 cursor-not-allowed' : ''}">

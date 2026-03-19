@@ -7,7 +7,7 @@
 	} = $props();
 
 	// Default: xl for interactive (easier to tap half-beans), md for display
-	const effectiveSize = size ?? (interactive ? 'xl' : 'md');
+	const effectiveSize = $derived(size ?? (interactive ? 'xl' : 'md'));
 
 	let hoverRating = $state(0);
 
