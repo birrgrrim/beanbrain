@@ -67,7 +67,6 @@
 		class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
 			bg-card-inset hover:bg-parchment transition-colors text-stone-500"
 	>
-		<img src="/img/tab-person.png" alt="" class="w-6 h-6 {currentPerson ? 'opacity-80' : 'opacity-40'}" />
 		<span class="max-w-[120px] truncate">{currentPerson ? currentPerson.name : $t('person.everyone')}</span>
 		<Icons icon="chevron" size={12} className="text-stone-400" />
 	</button>

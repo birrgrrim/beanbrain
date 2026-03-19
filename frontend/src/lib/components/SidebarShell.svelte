@@ -13,7 +13,7 @@
 	} = $props();
 </script>
 
-<aside class="w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
+<aside class="w-full md:w-[320px] lg:w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
 	<div class="p-4 border-b border-stone-100">
 		<div class="relative">
 			<Icons icon="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" />

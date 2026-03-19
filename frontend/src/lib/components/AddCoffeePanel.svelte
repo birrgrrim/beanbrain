@@ -167,7 +167,7 @@
 	}
 </script>
 
-<div class="max-w-2xl mx-auto p-6 space-y-6">
+<div class="max-w-2xl mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
 			{$t('add.title')}

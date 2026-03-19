@@ -6,9 +6,15 @@
 	--color-card-inset: #f0e8d6;
 }
 
-/* Scale up for high-DPI displays */
+/* Scale up for high-DPI displays, smaller on mobile */
 html {
-	font-size: 18px;
+	font-size: 16px;
+}
+
+@media (min-width: 768px) {
+	html {
+		font-size: 18px;
+	}
 }
 
 /* Smooth transitions on interactive elements */

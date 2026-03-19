@@ -176,49 +176,68 @@
 	const selectedRoastery = $derived(
 		selectedRoasteryId != null ? roasteriesList.find(r => r.id === selectedRoasteryId) ?? null : null
 	);
+
+	// Responsive: track if we're in mobile mode
+	let innerWidth = $state(0);
+	const isMobile = $derived(innerWidth < 768);
+
+	// On mobile, detail panel is shown = sidebar hidden
+	const showingDetail = $derived(
+		(activeTab === 'coffee' && coffeePanel.type !== 'empty') ||
+		(activeTab === 'grinding' && grinderPanel.type !== 'empty') ||
+		(activeTab === 'brewing' && brewPanel.type !== 'empty') ||
+		(activeTab === 'roasteries' && roasteryPanel.type !== 'empty')
+	);
+
+	function mobileBack() {
+		if (activeTab === 'coffee') coffeePanel = { type: 'empty' };
+		else if (activeTab === 'grinding') grinderPanel = { type: 'empty' };
+		else if (activeTab === 'brewing') brewPanel = { type: 'empty' };
+		else if (activeTab === 'roasteries') roasteryPanel = { type: 'empty' };
+	}
 </script>
+
+<svelte:window bind:innerWidth />
 
 <div class="flex flex-col h-screen overflow-hidden text-base">
 	<!-- Top bar -->
 	<header class="bg-card border-b border-stone-200 flex-shrink-0">
-		<div class="flex items-center justify-between px-5">
-			<div class="flex items-center gap-8">
-				<div class="flex items-center gap-3 py-4">
-					<img src="/img/logo.png" alt="BeanBrain" class="h-12 w-12" />
-					<span class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">BeanBrain</span>
-				</div>
+		<div class="flex items-center justify-between px-2 xl:px-5">
+			<div class="flex items-center gap-2 xl:gap-8">
+				<!-- Logo: icon only below xl -->
+				<img src="/img/logo-text.png" alt="BeanBrain" class="self-stretch py-1 object-contain max-w-[80px] md:max-w-[120px] xl:max-w-[180px]" />
 
 				<nav class="flex">
 					{#each tabDefs as tab}
 						<button
 							onclick={() => activeTab = tab.id}
-							class="flex items-center gap-3 px-7 py-5 text-lg font-medium transition-colors
+							class="flex items-center gap-1 xl:gap-3 px-2 md:px-4 xl:px-7 py-3 xl:py-5 text-lg font-medium transition-colors
 								border-b-2 -mb-px
 								{activeTab === tab.id
 									? 'border-amber-600 text-amber-700'
 									: 'border-transparent text-stone-400 hover:text-stone-600'}"
 						>
-							<img src={tab.img} alt="" class="w-12 h-12 {activeTab === tab.id ? 'opacity-90' : 'opacity-40'}" />
-							{$t(tab.key)}
+							<img src={tab.img} alt="" class="w-7 h-7 md:w-9 md:h-9 xl:w-12 xl:h-12 {activeTab === tab.id ? 'opacity-90' : 'opacity-40'}" />
+							<span class="hidden xl:inline">{$t(tab.key)}</span>
 						</button>
 					{/each}
 				</nav>
 			</div>
 
-			<div class="flex items-center gap-3">
+			<div class="flex items-center gap-2 xl:gap-3">
 				<PersonSwitcher onChange={loadCoffees} />
 				<button
 					onclick={toggleLang}
-					class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
+					class="flex items-center gap-1.5 px-2 xl:px-3 py-2 rounded-lg text-sm font-medium
 						bg-card-inset hover:bg-parchment transition-colors text-stone-500"
 					title="Switch language"
 				>
 					{#if currentLang === 'en'}
 						<span class="text-lg leading-none">🇬🇧</span>
-						<span>EN</span>
+						<span class="hidden xl:inline">EN</span>
 					{:else}
 						<span class="text-lg leading-none">🇺🇦</span>
-						<span>UA</span>
+						<span class="hidden xl:inline">UA</span>
 					{/if}
 				</button>
 			</div>
@@ -228,74 +247,91 @@
 	<!-- Content -->
 	<div class="flex flex-1 overflow-hidden">
 		{#if activeTab === 'coffee'}
-			<CoffeeSidebar
-				{coffees}
-				selectedId={selectedCoffeeId}
-				onSelect={selectCoffee}
-				onAdd={() => coffeePanel = { type: 'new' }}
-				onRefresh={loadCoffees}
-			/>
-			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
-				{#if coffeePanel.type === 'empty'}
-					<EmptyState img="choose-coffee.png" title={$t('empty.title')} subtitle={$t('empty.subtitle')} />
-				{:else if coffeePanel.type === 'detail'}
-					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} onBack={() => coffeePanel = { type: 'empty' }} />
-				{:else if coffeePanel.type === 'new'}
-					<AddCoffeePanel onCreated={onCoffeeCreated} onCancel={() => coffeePanel = { type: 'empty' }} />
-				{/if}
-			</div>
+			{#if !isMobile || !showingDetail}
+				<CoffeeSidebar
+					{coffees}
+					selectedId={selectedCoffeeId}
+					onSelect={selectCoffee}
+					onAdd={() => coffeePanel = { type: 'new' }}
+					onRefresh={loadCoffees}
+				/>
+			{/if}
+			{#if !isMobile || showingDetail}
+				<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
+					{#if coffeePanel.type === 'empty'}
+						<EmptyState img="choose-coffee.png" title={$t('empty.title')} subtitle={$t('empty.subtitle')} />
+					{:else if coffeePanel.type === 'detail'}
+						<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} onBack={isMobile ? mobileBack : () => coffeePanel = { type: 'empty' }} />
+					{:else if coffeePanel.type === 'new'}
+						<AddCoffeePanel onCreated={onCoffeeCreated} onCancel={isMobile ? mobileBack : () => coffeePanel = { type: 'empty' }} />
+					{/if}
+				</div>
+			{/if}
 
 		{:else if activeTab === 'grinding'}
-			<GrindingSidebar
-				{grinders}
-				selectedId={selectedGrinderId}
-				onSelect={selectGrinder}
-				onAdd={() => grinderPanel = { type: 'new' }}
-			/>
-			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
-				{#if grinderPanel.type === 'empty'}
-					<EmptyState img="many-grinders.png" title={$t('grinding.select')} />
-				{:else if grinderPanel.type === 'detail' && selectedGrinder}
-					<GrinderDetail grinder={selectedGrinder} onUpdated={onGrinderUpdated} onDeleted={onGrinderDeleted} onBack={() => grinderPanel = { type: 'empty' }} />
-				{:else if grinderPanel.type === 'new'}
-					<AddGrinderPanel onCreated={onGrinderCreated} onCancel={() => grinderPanel = { type: 'empty' }} />
-				{/if}
-			</div>
+			{#if !isMobile || !showingDetail}
+				<GrindingSidebar
+					{grinders}
+					selectedId={selectedGrinderId}
+					onSelect={selectGrinder}
+					onAdd={() => grinderPanel = { type: 'new' }}
+				/>
+			{/if}
+			{#if !isMobile || showingDetail}
+				<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
+					{#if grinderPanel.type === 'empty'}
+						<EmptyState img="many-grinders.png" title={$t('grinding.select')} />
+					{:else if grinderPanel.type === 'detail' && selectedGrinder}
+						<GrinderDetail grinder={selectedGrinder} onUpdated={onGrinderUpdated} onDeleted={onGrinderDeleted} onBack={isMobile ? mobileBack : () => grinderPanel = { type: 'empty' }} />
+					{:else if grinderPanel.type === 'new'}
+						<AddGrinderPanel onCreated={onGrinderCreated} onCancel={isMobile ? mobileBack : () => grinderPanel = { type: 'empty' }} />
+					{/if}
+				</div>
+			{/if}
 
 		{:else if activeTab === 'brewing'}
-			<BrewingSidebar
-				{brewSetups}
-				selectedId={selectedBrewSetupId}
-				onSelect={selectBrewSetup}
-				onAdd={() => brewPanel = { type: 'pick_method' }}
-			/>
-			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
-				{#if brewPanel.type === 'empty'}
-					<EmptyState img="many-brewmethods.png" title={$t('brewing.select')} />
-				{:else if brewPanel.type === 'detail' && selectedBrewSetup}
-					<BrewSetupDetail brewSetup={selectedBrewSetup} onUpdated={onBrewSetupUpdated} onDeleted={onBrewSetupDeleted} onBack={() => brewPanel = { type: 'empty' }} />
-				{:else if brewPanel.type === 'pick_method'}
-					<BrewMethodPicker onPicked={onMethodPicked} onCancel={() => brewPanel = { type: 'empty' }} />
-				{:else if brewPanel.type === 'new'}
-					<AddBrewSetupPanel methodType={brewPanel.methodType} hasBasket={brewPanel.hasBasket} onCreated={onBrewSetupCreated} onCancel={() => brewPanel = { type: 'empty' }} />
-				{/if}
-			</div>
+			{#if !isMobile || !showingDetail}
+				<BrewingSidebar
+					{brewSetups}
+					selectedId={selectedBrewSetupId}
+					onSelect={selectBrewSetup}
+					onAdd={() => brewPanel = { type: 'pick_method' }}
+				/>
+			{/if}
+			{#if !isMobile || showingDetail}
+				<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
+					{#if brewPanel.type === 'empty'}
+						<EmptyState img="many-brewmethods.png" title={$t('brewing.select')} />
+					{:else if brewPanel.type === 'detail' && selectedBrewSetup}
+						<BrewSetupDetail brewSetup={selectedBrewSetup} onUpdated={onBrewSetupUpdated} onDeleted={onBrewSetupDeleted} onBack={isMobile ? mobileBack : () => brewPanel = { type: 'empty' }} />
+					{:else if brewPanel.type === 'pick_method'}
+						<BrewMethodPicker onPicked={onMethodPicked} onCancel={isMobile ? mobileBack : () => brewPanel = { type: 'empty' }} />
+					{:else if brewPanel.type === 'new'}
+						<AddBrewSetupPanel methodType={brewPanel.methodType} hasBasket={brewPanel.hasBasket} onCreated={onBrewSetupCreated} onCancel={isMobile ? mobileBack : () => brewPanel = { type: 'empty' }} />
+					{/if}
+				</div>
+			{/if}
+
 		{:else if activeTab === 'roasteries'}
-			<RoasterySidebar
-				roasteries={roasteriesList}
-				selectedId={selectedRoasteryId}
-				onSelect={selectRoastery}
-				onAdd={() => roasteryPanel = { type: 'new' }}
-			/>
-			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
-				{#if roasteryPanel.type === 'empty'}
-					<EmptyState img="many-roasteries.png" title={$t('roastery.select')} />
-				{:else if roasteryPanel.type === 'detail' && selectedRoastery}
-					<RoasteryDetail roastery={selectedRoastery} onUpdated={onRoasteryUpdated} onDeleted={onRoasteryDeleted} onBack={() => roasteryPanel = { type: 'empty' }} />
-				{:else if roasteryPanel.type === 'new'}
-					<AddRoasteryPanel onCreated={onRoasteryCreated} onCancel={() => roasteryPanel = { type: 'empty' }} />
-				{/if}
-			</div>
+			{#if !isMobile || !showingDetail}
+				<RoasterySidebar
+					roasteries={roasteriesList}
+					selectedId={selectedRoasteryId}
+					onSelect={selectRoastery}
+					onAdd={() => roasteryPanel = { type: 'new' }}
+				/>
+			{/if}
+			{#if !isMobile || showingDetail}
+				<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
+					{#if roasteryPanel.type === 'empty'}
+						<EmptyState img="many-roasteries.png" title={$t('roastery.select')} />
+					{:else if roasteryPanel.type === 'detail' && selectedRoastery}
+						<RoasteryDetail roastery={selectedRoastery} onUpdated={onRoasteryUpdated} onDeleted={onRoasteryDeleted} onBack={isMobile ? mobileBack : () => roasteryPanel = { type: 'empty' }} />
+					{:else if roasteryPanel.type === 'new'}
+						<AddRoasteryPanel onCreated={onRoasteryCreated} onCancel={isMobile ? mobileBack : () => roasteryPanel = { type: 'empty' }} />
+					{/if}
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>

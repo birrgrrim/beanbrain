@@ -169,7 +169,7 @@
 	);
 </script>
 
-<aside class="w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
+<aside class="w-full md:w-[320px] lg:w-[420px] flex-shrink-0 bg-card border-r border-stone-200 flex flex-col">
 	<!-- Search + sort/filter toggles -->
 	<div class="p-4 border-b border-stone-100 space-y-2">
 		<div class="flex gap-2">

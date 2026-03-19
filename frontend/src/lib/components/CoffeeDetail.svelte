@@ -249,7 +249,7 @@
 		<div class="text-stone-300">Loading...</div>
 	</div>
 {:else if coffee}
-	<div class="max-w-6xl mx-auto p-10 space-y-8">
+	<div class="max-w-6xl mx-auto p-4 md:p-10 space-y-6 md:space-y-8">
 		<!-- Header -->
 		<div class="flex items-start justify-between">
 			<div class="flex items-center gap-3">
@@ -258,13 +258,12 @@
 					title="Back">
 					<Icons icon="back" size={18} />
 				</button>
-				<img src="/img/header-coffee.png" alt="" class="w-8 h-8 opacity-70" />
 				{#if editing}
 					<input type="text" bind:value={editName}
-						class="text-3xl font-bold text-stone-800 bg-transparent border-b-2 border-amber-300 focus:outline-none focus:border-amber-500 px-1"
+						class="text-xl md:text-3xl font-bold text-stone-800 bg-transparent border-b-2 border-amber-300 focus:outline-none focus:border-amber-500 px-1 min-w-0"
 						style="font-family: 'DM Serif Display', serif;" />
 				{:else}
-					<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
+					<h2 class="text-xl md:text-3xl font-bold text-stone-800 break-words" style="font-family: 'DM Serif Display', serif;">
 						{coffee.name}
 					</h2>
 				{/if}
@@ -282,25 +281,25 @@
 			</div>
 		</div>
 
-		<!-- Coffee info card -->
-		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
-			<div class="flex">
-				{#if coffee.image_url}
-					<div class="bg-card-inset p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 240px;">
-						<img src={coffee.image_url} alt={coffee.name} class="h-full max-h-64 object-contain" />
-					</div>
-				{/if}
-				<div class="p-6 flex-1 space-y-4">
+		<!-- Photo + Details row -->
+		<div class="grid grid-cols-1 {coffee.image_url ? 'xl:grid-cols-[1fr_2fr]' : ''} gap-4 md:gap-6">
+			{#if coffee.image_url}
+				<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6 flex items-center justify-center">
+					<img src={coffee.image_url} alt={coffee.name} class="max-h-64 object-contain" />
+				</div>
+			{/if}
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
+				<div class="p-4 md:p-6 space-y-3 md:space-y-4 min-w-0">
 					{#if editing}
 						<!-- Edit mode -->
-						<div class="flex items-center justify-between">
+						<div class="flex flex-wrap items-center justify-between gap-3">
 							<select bind:value={editRoasteryId}
-								class="{inputClass}" style="max-width: 250px;">
+								class="{inputClass} max-w-[250px]">
 								{#each roasteriesList as r}
 									<option value={r.id}>{r.name}</option>
 								{/each}
 							</select>
-							<div class="flex items-center gap-6">
+							<div class="flex items-center gap-4 md:gap-6">
 								<div class="flex items-center gap-2">
 									<button onclick={toggleInStock} aria-label="Toggle in stock"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
@@ -322,7 +321,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="grid grid-cols-3 gap-3">
+						<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 							<div>
 								<label for="edit-origin" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</label>
 								<select id="edit-origin" bind:value={editOriginId} class={inputClass}>
@@ -341,7 +340,7 @@
 								<input id="edit-roast" type="text" bind:value={editRoastLevel} placeholder="Light" class={inputClass} />
 							</div>
 						</div>
-						<div class="flex gap-4 items-end">
+						<div class="flex flex-wrap gap-3 md:gap-4 items-end">
 							<div>
 								<label for="edit-score" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.score')}</label>
 								<input id="edit-score" type="number" min="0" max="100" step="0.25" bind:value={editScore} placeholder="—" class={smallInputClass} />
@@ -387,9 +386,13 @@
 						</div>
 					{:else}
 						<!-- Display mode -->
-						<div class="flex items-center justify-between">
-							<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
-							<div class="flex items-center gap-6">
+						<!-- Row 1: Roastery + toggles -->
+						<div class="flex flex-wrap items-center justify-between gap-2">
+							<div class="flex items-center gap-2">
+								<img src="/img/header-detail.png" alt="" class="w-12 h-12 opacity-60" />
+								<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
+							</div>
+							<div class="flex items-center gap-4 md:gap-6">
 								<div class="flex items-center gap-2">
 									<button onclick={toggleInStock} aria-label="Toggle in stock"
 										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
@@ -411,78 +414,117 @@
 								</div>
 							</div>
 						</div>
-						<div class="flex gap-6">
-							<!-- Left: details -->
-							<div class="flex-1 space-y-4">
-								<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
-									{#if coffee.origin_ref}
-										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin_ref.flag ? coffee.origin_ref.flag + ' ' : ''}{currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p></div>
-									{/if}
-									{#if coffee.process}
-										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
-									{/if}
-									{#if coffee.roast_level}
-										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
-									{/if}
-								</div>
-								{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null || coffee.price != null}
-									<div class="flex gap-5">
-										{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
-										{#if coffee.sweetness != null}<div><span class="text-sm font-semibold">{coffee.sweetness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
-										{#if coffee.acidity != null}<div><span class="text-sm font-semibold">{coffee.acidity}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
-										{#if coffee.bitterness != null}<div><span class="text-sm font-semibold">{coffee.bitterness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
-										{#if coffee.price != null}<div><span class="text-sm font-semibold">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴</span>{#if coffee.price_wholesale != null}<span class="text-xs text-stone-300 line-through ml-1">{coffee.price}₴</span>{/if}<span class="text-xs text-stone-400 ml-1">{$t('detail.price')}</span></div>{/if}
-									</div>
-								{/if}
-								{#if coffee.roastery_descriptors.length > 0}
-									<div class="flex flex-wrap gap-1.5">
-										{#each coffee.roastery_descriptors as desc}
-											<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
-										{/each}
-									</div>
-								{/if}
-								{#if coffee.roastery_url}
-									<div class="flex items-center gap-3">
-										<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
-											<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
-										</a>
-										<button onclick={refreshCoffee} disabled={refreshing}
-											class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-amber-600 transition-colors disabled:opacity-50">
-											{refreshing ? $t('detail.refreshing') : $t('detail.refresh')}
-										</button>
-										{#if coffee.fetched_at}
-											<span class="text-[10px] text-stone-300">{$t('detail.fetched_at')} {new Date(coffee.fetched_at).toLocaleDateString()}</span>
-										{/if}
-									</div>
-								{/if}
-								{#if !coffee.roastery_url && coffee.updated_at}
-									<span class="text-[10px] text-stone-300">{$t('detail.updated_at')} {new Date(coffee.updated_at).toLocaleDateString()}</span>
-								{/if}
-							</div>
-							<!-- Right: roaster comment -->
-							{#if roasterCommentText || coffee.notes}
-								<div class="w-80 flex-shrink-0 space-y-3">
-									{#if roasterCommentText}
-										<div class="bg-card-inset rounded-xl px-4 py-3">
-											<p class="text-xs text-stone-400 uppercase tracking-wide mb-1">{$t('detail.notes')}</p>
-											<p class="text-sm text-stone-600 italic leading-relaxed">{roasterCommentText}</p>
-										</div>
-									{/if}
-									{#if coffee.notes}
-										<p class="text-sm text-stone-400 italic px-1">{coffee.notes}</p>
-									{/if}
-								</div>
+
+						<!-- Row 2: Origin / Process / Roast — always together -->
+						<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
+							{#if coffee.origin_ref}
+								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin_ref.flag ? coffee.origin_ref.flag + ' ' : ''}{currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p></div>
+							{/if}
+							{#if coffee.process}
+								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
+							{/if}
+							{#if coffee.roast_level}
+								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
 							{/if}
 						</div>
+
+						<!-- Row 3: Score + Price -->
+						{#if coffee.score != null || coffee.price != null}
+							<div class="flex flex-wrap items-end gap-4 md:gap-6">
+								{#if coffee.score != null}
+									<div>
+										<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.score')}</span>
+										<p class="text-2xl font-bold text-amber-700">{coffee.score}</p>
+									</div>
+								{/if}
+								{#if coffee.price != null}
+									<div>
+										<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.price')}</span>
+										<p class="text-2xl font-bold text-stone-700">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴
+											{#if coffee.price_wholesale != null}<span class="text-sm text-stone-300 line-through font-normal ml-1">{coffee.price}₴</span>{/if}
+										</p>
+									</div>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Row 4: Taste profile — boxed grid -->
+						{#if coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
+							<div class="bg-card-inset rounded-xl px-4 py-3">
+								<div class="grid grid-cols-3 gap-3 text-center">
+									{#if coffee.sweetness != null}
+										<div>
+											<p class="text-lg font-bold text-stone-700">{coffee.sweetness}<span class="text-xs text-stone-400 font-normal">/10</span></p>
+											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.sweet')}</p>
+										</div>
+									{/if}
+									{#if coffee.acidity != null}
+										<div>
+											<p class="text-lg font-bold text-stone-700">{coffee.acidity}<span class="text-xs text-stone-400 font-normal">/10</span></p>
+											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.acid')}</p>
+										</div>
+									{/if}
+									{#if coffee.bitterness != null}
+										<div>
+											<p class="text-lg font-bold text-stone-700">{coffee.bitterness}<span class="text-xs text-stone-400 font-normal">/10</span></p>
+											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.bitter')}</p>
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/if}
+
+						<!-- Row 4: Descriptors -->
+						{#if coffee.roastery_descriptors.length > 0}
+							<div class="flex flex-wrap gap-1.5">
+								{#each coffee.roastery_descriptors as desc}
+									<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
+								{/each}
+							</div>
+						{/if}
+
+						<!-- Row 5: Roaster comment + notes (full width, below everything) -->
+						{#if roasterCommentText || coffee.notes}
+							<div class="space-y-2">
+								{#if roasterCommentText}
+									<div class="bg-card-inset rounded-xl px-4 py-3">
+										<p class="text-xs text-stone-400 uppercase tracking-wide mb-1">{$t('detail.notes')}</p>
+										<p class="text-sm text-stone-600 italic leading-relaxed">{roasterCommentText}</p>
+									</div>
+								{/if}
+								{#if coffee.notes}
+									<p class="text-sm text-stone-400 italic px-1">{coffee.notes}</p>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Row 6: Link + refresh + timestamp -->
+						{#if coffee.roastery_url}
+							<div class="flex flex-wrap items-center gap-2 md:gap-3">
+								<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
+									<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
+								</a>
+								<button onclick={refreshCoffee} disabled={refreshing}
+									class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-amber-600 transition-colors disabled:opacity-50">
+									{refreshing ? $t('detail.refreshing') : $t('detail.refresh')}
+								</button>
+								{#if coffee.fetched_at}
+									<span class="text-[10px] text-stone-300">{$t('detail.fetched_at')} {new Date(coffee.fetched_at).toLocaleDateString()}</span>
+								{/if}
+							</div>
+						{/if}
+						{#if !coffee.roastery_url && coffee.updated_at}
+							<span class="text-[10px] text-stone-300">{$t('detail.updated_at')} {new Date(coffee.updated_at).toLocaleDateString()}</span>
+						{/if}
 					{/if}
 				</div>
 			</div>
 		</div>
 
-		<!-- Two-column: Grinder + Reviews -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<!-- Grinder + Reviews row -->
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
 			<!-- Grinder Settings -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-4 md:p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/burr-icon.png" alt="" class="w-12 h-12 opacity-60" />
@@ -499,22 +541,22 @@
 					</div>
 				{/if}
 				{#each coffee.grinder_settings as setting}
-					<div class="flex items-center gap-3 py-2 border-b border-stone-50 last:border-0">
-						<span class="text-3xl font-bold text-amber-700 tabular-nums flex-shrink-0">{setting.setting}</span>
-						<div class="flex gap-2 flex-1 min-w-0">
-							<div class="flex items-center gap-2 px-3 py-1.5 bg-card-inset rounded-lg">
-								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-5 h-5 opacity-50" />
-								<span class="text-sm text-stone-600">{setting.grinder.name}</span>
-								{#if setting.grinder.model}<span class="text-sm text-stone-400">{setting.grinder.model}</span>{/if}
+					<div class="flex flex-wrap items-center gap-2 md:gap-3 py-2 border-b border-stone-50 last:border-0">
+						<span class="text-2xl md:text-3xl font-bold text-amber-700 tabular-nums flex-shrink-0">{setting.setting}</span>
+						<div class="flex flex-wrap gap-2 flex-1 min-w-0">
+							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
+								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+								<span class="text-xs md:text-sm text-stone-600">{setting.grinder.name}</span>
+								{#if setting.grinder.model}<span class="text-xs md:text-sm text-stone-400">{setting.grinder.model}</span>{/if}
 							</div>
-							<div class="flex items-center gap-2 px-3 py-1.5 bg-card-inset rounded-lg">
-								<img src="/img/method-{setting.brew_setup.method_type}.png" alt="" class="w-5 h-5 opacity-50" />
-								<span class="text-sm text-stone-600">{setting.brew_setup.name}</span>
-								{#if setting.brew_setup.basket_grams}<span class="text-sm text-stone-400">{setting.brew_setup.basket_grams}g</span>{/if}
+							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
+								<img src="/img/method-{setting.brew_setup.method_type}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+								<span class="text-xs md:text-sm text-stone-600">{setting.brew_setup.name}</span>
+								{#if setting.brew_setup.basket_grams}<span class="text-xs md:text-sm text-stone-400">{setting.brew_setup.basket_grams}g</span>{/if}
 							</div>
 						</div>
-						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1.5 flex-shrink-0 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-							<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
+						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1 md:p-1.5 flex-shrink-0 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
+							<img src="/img/knockbox.png" alt="delete" class="w-5 h-5 md:w-7 md:h-7 opacity-50" />
 						</button>
 					</div>
 				{/each}
@@ -568,7 +610,7 @@
 			</div>
 
 			<!-- Reviews -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-4 md:p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/coffee-cup.png" alt="" class="w-12 h-12 opacity-60" />
@@ -644,7 +686,7 @@
 					/>
 				{/if}
 			</div>
-		</div>
 
+		</div>
 	</div>
 {/if}
