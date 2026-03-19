@@ -11,8 +11,7 @@ build/
 venv/
 env/
 
-# uv
-uv.lock
+# uv (uv.lock is committed for reproducible deploys)
 
 # SQLite
 *.db
@@ -40,6 +39,16 @@ Thumbs.db
 
 # Planning (local only)
 PLAN.md
+
+# Deploy (local only)
+deploy.sh
+deploy/
+Caddyfile
+*.plist
+
+# Release artifacts
+release/
+*.tar.gz
 
 # Original art sources
 art/
