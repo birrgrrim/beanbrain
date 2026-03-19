@@ -113,6 +113,14 @@ class MadHeadsScraper(BaseScraper):
             else:
                 product["characteristics"][prop_name] = {"en": en_val, "uk": uk_val}
 
+        # Prices — product-level price + first variant's retail/wholesale
+        price_match = re.search(r'price:(\d+)', raw)
+        if price_match:
+            product["price"] = int(price_match.group(1))
+        wholesale_match = re.search(r'price_wholesale:(\d+)', raw)
+        if wholesale_match:
+            product["price_wholesale"] = int(wholesale_match.group(1))
+
         return product
 
     async def scrape(self, url: str) -> ScrapeResult:
@@ -153,6 +161,8 @@ class MadHeadsScraper(BaseScraper):
         return ScrapeResult(
             name=data.get("label", ""),
             roastery="MadHeads",
+            price=data.get("price"),
+            price_wholesale=data.get("price_wholesale"),
             origin=chars.get("country", {}).get("en"),
             process=chars.get("processing", {}).get("en"),
             roast_level=roast,

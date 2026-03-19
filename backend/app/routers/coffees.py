@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -5,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..models import Coffee, Descriptor, GrinderSetting, Review, Grinder, BrewSetup
 from ..schemas import CoffeeCreate, CoffeeListOut, CoffeeOut, CoffeeUpdate
+from ..scrapers.registry import scrape_url
 
 router = APIRouter(prefix="/coffees", tags=["coffees"])
 
@@ -145,7 +148,10 @@ def create_coffee(data: CoffeeCreate, db: Session = Depends(get_db)):
         bitterness=data.bitterness,
         notes=data.notes,
         roaster_comment=data.roaster_comment,
+        price=data.price,
+        price_wholesale=data.price_wholesale,
         is_available=data.is_available,
+        fetched_at=datetime.now(timezone.utc) if data.roastery_url else None,
     )
 
     if data.roastery_descriptor_ids:
@@ -171,12 +177,67 @@ def update_coffee(coffee_id: int, data: CoffeeUpdate, db: Session = Depends(get_
 
     for key, value in update_data.items():
         setattr(coffee, key, value)
+    coffee.updated_at = datetime.now(timezone.utc)
 
     if descriptor_ids is not None:
         descriptors = db.query(Descriptor).filter(
             Descriptor.id.in_(descriptor_ids)
         ).all()
         coffee.roastery_descriptors = descriptors
+
+    db.commit()
+    db.refresh(coffee)
+    return coffee
+
+
+@router.post("/{coffee_id}/refresh", response_model=CoffeeOut)
+async def refresh_coffee(coffee_id: int, db: Session = Depends(get_db)):
+    """Re-scrape a coffee from its roastery URL and update all scraped fields."""
+    coffee = (
+        db.query(Coffee)
+        .options(
+            joinedload(Coffee.origin_ref),
+            joinedload(Coffee.roastery_ref),
+            joinedload(Coffee.roastery_descriptors),
+            joinedload(Coffee.reviews).joinedload(Review.descriptors),
+            joinedload(Coffee.reviews).joinedload(Review.taster),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.grinder),
+            joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_setup),
+        )
+        .filter(Coffee.id == coffee_id)
+        .first()
+    )
+    if not coffee:
+        raise HTTPException(status_code=404, detail="Coffee not found")
+    if not coffee.roastery_url:
+        raise HTTPException(status_code=400, detail="Coffee has no roastery URL to refresh from")
+
+    try:
+        result = await scrape_url(coffee.roastery_url)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to scrape: {e}")
+
+    coffee.name = result.name or coffee.name
+    coffee.process = result.process
+    coffee.roast_level = result.roast_level
+    coffee.image_url = result.image_url
+    coffee.score = result.score
+    coffee.sweetness = result.sweetness
+    coffee.acidity = result.acidity
+    coffee.bitterness = result.bitterness
+    coffee.roaster_comment = result.roaster_comment or coffee.roaster_comment
+    coffee.price = result.price
+    coffee.price_wholesale = result.price_wholesale
+    coffee.fetched_at = datetime.now(timezone.utc)
+
+    # Update roastery descriptors from scrape
+    if result.flavor_descriptors:
+        en_descriptors = result.flavor_descriptors.get("en", [])
+        if en_descriptors:
+            matched = db.query(Descriptor).filter(
+                func.lower(Descriptor.name).in_([d.lower() for d in en_descriptors])
+            ).all()
+            coffee.roastery_descriptors = matched
 
     db.commit()
     db.refresh(coffee)

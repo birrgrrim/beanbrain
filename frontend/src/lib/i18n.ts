@@ -25,11 +25,17 @@ const translations: Record<string, Record<string, string>> = {
 	'detail.sweet': { en: 'Sweet', uk: 'Солодкість' },
 	'detail.acid': { en: 'Acid', uk: 'Кислотність' },
 	'detail.bitter': { en: 'Bitter', uk: 'Гіркота' },
+	'detail.price': { en: 'Price', uk: 'Ціна' },
+	'detail.price_wholesale': { en: 'Bulk', uk: 'Опт' },
 	'detail.flavor_profile': { en: 'Flavor profile', uk: 'Профіль смаку' },
 	'detail.roastery_link': { en: 'View on roastery site', uk: 'Переглянути на сайті' },
 	'detail.edit': { en: 'edit', uk: 'змінити' },
 	'detail.delete': { en: 'Delete', uk: 'Видалити' },
 	'detail.notes': { en: 'Roaster comment', uk: 'Коментар обсмажувача' },
+	'detail.fetched_at': { en: 'Fetched', uk: 'Завантажено' },
+	'detail.updated_at': { en: 'Updated', uk: 'Оновлено' },
+	'detail.refresh': { en: 'Refresh', uk: 'Оновити' },
+	'detail.refreshing': { en: 'Refreshing...', uk: 'Оновлення...' },
 	'detail.delete_confirm': { en: 'Delete this coffee and all its tastings?', uk: 'Видалити цю каву та всі дегустації?' },
 
 	// Grinder settings (in coffee detail)
@@ -121,6 +127,8 @@ const translations: Record<string, Record<string, string>> = {
 	'roastery.search': { en: 'Search roasteries...', uk: 'Пошук обсмажувачів...' },
 	'roastery.empty': { en: 'No roasteries yet', uk: 'Обсмажувачів ще немає' },
 	'roastery.select': { en: 'Select a roastery', uk: 'Оберіть ростерню' },
+	'roastery.refresh': { en: 'Refresh all coffees', uk: 'Оновити всю каву' },
+	'roastery.refreshing': { en: 'Refreshing...', uk: 'Оновлення...' },
 
 	// Common
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },

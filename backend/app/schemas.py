@@ -183,6 +183,8 @@ class CoffeeCreate(BaseModel):
     bitterness: int | None = None
     notes: str | None = None
     roaster_comment: dict[str, str] | None = None
+    price: int | None = None
+    price_wholesale: int | None = None
     is_available: bool = True
     roastery_descriptor_ids: list[int] = []
 
@@ -201,6 +203,8 @@ class CoffeeUpdate(BaseModel):
     bitterness: int | None = None
     notes: str | None = None
     roaster_comment: dict[str, str] | None = None
+    price: int | None = None
+    price_wholesale: int | None = None
     is_available: bool | None = None
     roastery_descriptor_ids: list[int] | None = None
 
@@ -222,8 +226,12 @@ class CoffeeOut(BaseModel):
     bitterness: int | None = None
     notes: str | None = None
     roaster_comment: dict[str, str] | None = None
+    price: int | None = None
+    price_wholesale: int | None = None
     is_available: bool
     created_at: datetime
+    updated_at: datetime | None = None
+    fetched_at: datetime | None = None
     roastery_descriptors: list[DescriptorOut] = []
     reviews: list[ReviewOut] = []
     grinder_settings: list[GrinderSettingOut] = []
@@ -240,6 +248,8 @@ class CoffeeListOut(BaseModel):
     roastery_ref: RoasteryOut | None = None
     roast_level: str | None = None
     image_url: str | None = None
+    price: int | None = None
+    price_wholesale: int | None = None
     is_available: bool
     created_at: datetime
     avg_rating: float | None = None
@@ -264,6 +274,8 @@ class ScrapeResult(BaseModel):
     sweetness: int | None = None
     acidity: int | None = None
     bitterness: int | None = None
+    price: int | None = None
+    price_wholesale: int | None = None
     flavor_descriptors: dict[str, list[str]] = {}
     name_i18n: dict[str, str] = {}
     roaster_comment: dict[str, str] = {}

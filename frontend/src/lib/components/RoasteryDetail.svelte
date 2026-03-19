@@ -10,6 +10,21 @@
 		onBack: () => void;
 	} = $props();
 
+	let refreshing = $state(false);
+	let refreshResult = $state<{ refreshed: number; failed: number } | null>(null);
+
+	async function refreshAllCoffees() {
+		refreshing = true;
+		refreshResult = null;
+		try {
+			const result = await api.roasteries.refresh(roastery.id);
+			refreshResult = result;
+			onUpdated();
+		} finally {
+			refreshing = false;
+		}
+	}
+
 	async function deleteRoastery() {
 		if (!confirm(`Delete "${roastery.name}"?`)) return;
 		await api.roasteries.delete(roastery.id);
@@ -49,6 +64,19 @@
 					</a>
 				{/if}
 			</div>
+		</div>
+
+		<!-- Refresh -->
+		<div class="pt-2 flex items-center gap-3">
+			<button onclick={refreshAllCoffees} disabled={refreshing}
+				class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition-colors disabled:opacity-50">
+				{refreshing ? $t('roastery.refreshing') : $t('roastery.refresh')}
+			</button>
+			{#if refreshResult}
+				<span class="text-sm text-stone-500">
+					{refreshResult.refreshed} updated{#if refreshResult.failed}, {refreshResult.failed} failed{/if}
+				</span>
+			{/if}
 		</div>
 	</div>
 </div>

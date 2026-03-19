@@ -65,7 +65,7 @@
 						{#if coffee.origin_ref}
 							<p class="text-sm text-stone-500 truncate">{coffee.origin_ref.flag ?? ''} {currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p>
 						{/if}
-						<p class="text-sm text-stone-400 truncate">{coffee.roastery_ref?.name}</p>
+						<p class="text-sm text-stone-400 truncate">{coffee.roastery_ref?.name}{#if coffee.price != null} · {coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴{/if}</p>
 					</div>
 					<!-- Right: rating + grind -->
 					{#if coffee.person_rating != null || coffee.avg_rating != null || coffee.default_grind != null}

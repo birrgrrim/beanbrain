@@ -41,8 +41,11 @@
 	let editSweetness = $state<number | undefined>();
 	let editAcidity = $state<number | undefined>();
 	let editBitterness = $state<number | undefined>();
+	let editPrice = $state<number | undefined>();
+	let editPriceWholesale = $state<number | undefined>();
 	let editDescriptorIds = $state<number[]>([]);
 	let saving = $state(false);
+	let refreshing = $state(false);
 
 	// Review form
 	let editingReviewTasterId = $state<number | null>(null);
@@ -89,7 +92,7 @@
 	);
 
 	const roasterCommentText = $derived(
-		coffee?.roaster_comment?.[currentLang] ?? coffee?.roaster_comment?.['en'] ?? null
+		coffee?.roaster_comment?.[currentLang] || coffee?.roaster_comment?.['uk'] || coffee?.roaster_comment?.['en'] || null
 	);
 
 	const unreviewedTasters = $derived(
@@ -109,6 +112,8 @@
 		editSweetness = coffee.sweetness ?? undefined;
 		editAcidity = coffee.acidity ?? undefined;
 		editBitterness = coffee.bitterness ?? undefined;
+		editPrice = coffee.price ?? undefined;
+		editPriceWholesale = coffee.price_wholesale ?? undefined;
 		editDescriptorIds = coffee.roastery_descriptors.map(d => d.id);
 		editing = true;
 	}
@@ -136,6 +141,8 @@
 				sweetness: editSweetness != null ? Math.round(editSweetness) : null,
 				acidity: editAcidity != null ? Math.round(editAcidity) : null,
 				bitterness: editBitterness != null ? Math.round(editBitterness) : null,
+				price: editPrice != null ? Math.round(editPrice) : null,
+				price_wholesale: editPriceWholesale != null ? Math.round(editPriceWholesale) : null,
 				roastery_descriptor_ids: editDescriptorIds,
 			});
 			editing = false;
@@ -208,6 +215,18 @@
 		onUpdated();
 	}
 
+	async function refreshCoffee() {
+		if (!coffee?.roastery_url) return;
+		refreshing = true;
+		try {
+			await api.coffees.refresh(coffeeId);
+			await loadData();
+			onUpdated();
+		} finally {
+			refreshing = false;
+		}
+	}
+
 	async function deleteCoffee() {
 		if (!confirm($t('detail.delete_confirm'))) return;
 		await api.coffees.delete(coffeeId);
@@ -260,8 +279,8 @@
 		<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
 			<div class="flex">
 				{#if coffee.image_url}
-					<div class="bg-card-inset p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 200px;">
-						<img src={coffee.image_url} alt={coffee.name} class="max-h-40 object-contain" />
+					<div class="bg-card-inset p-5 flex items-center justify-center border-r border-stone-100 flex-shrink-0" style="width: 240px;">
+						<img src={coffee.image_url} alt={coffee.name} class="h-full max-h-64 object-contain" />
 					</div>
 				{/if}
 				<div class="p-6 flex-1 space-y-4">
@@ -318,6 +337,14 @@
 								<label for="edit-bitter" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.bitter')}</label>
 								<input id="edit-bitter" type="number" min="1" max="10" bind:value={editBitterness} placeholder="—" class={smallInputClass} />
 							</div>
+							<div>
+								<label for="edit-price" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.price')}</label>
+								<input id="edit-price" type="number" min="0" bind:value={editPrice} placeholder="₴" class={smallInputClass} />
+							</div>
+							<div>
+								<label for="edit-price-ws" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.price_wholesale')}</label>
+								<input id="edit-price-ws" type="number" min="0" bind:value={editPriceWholesale} placeholder="₴" class={smallInputClass} />
+							</div>
 						</div>
 						<div>
 							<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('add.descriptors')}</span>
@@ -363,12 +390,13 @@
 										<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
 									{/if}
 								</div>
-								{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
+								{#if coffee.score || coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null || coffee.price != null}
 									<div class="flex gap-5">
 										{#if coffee.score}<div><span class="text-xl font-bold text-amber-700">{coffee.score}</span><span class="text-xs text-stone-400 ml-1">{$t('detail.score')}</span></div>{/if}
 										{#if coffee.sweetness != null}<div><span class="text-sm font-semibold">{coffee.sweetness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.sweet')}</span></div>{/if}
 										{#if coffee.acidity != null}<div><span class="text-sm font-semibold">{coffee.acidity}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.acid')}</span></div>{/if}
 										{#if coffee.bitterness != null}<div><span class="text-sm font-semibold">{coffee.bitterness}/10</span><span class="text-xs text-stone-400 ml-1">{$t('detail.bitter')}</span></div>{/if}
+										{#if coffee.price != null}<div><span class="text-sm font-semibold">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴</span>{#if coffee.price_wholesale != null}<span class="text-xs text-stone-300 line-through ml-1">{coffee.price}₴</span>{/if}<span class="text-xs text-stone-400 ml-1">{$t('detail.price')}</span></div>{/if}
 									</div>
 								{/if}
 								{#if coffee.roastery_descriptors.length > 0}
@@ -379,9 +407,21 @@
 									</div>
 								{/if}
 								{#if coffee.roastery_url}
-									<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
-										<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
-									</a>
+									<div class="flex items-center gap-3">
+										<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
+											<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
+										</a>
+										<button onclick={refreshCoffee} disabled={refreshing}
+											class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-amber-600 transition-colors disabled:opacity-50">
+											{refreshing ? $t('detail.refreshing') : $t('detail.refresh')}
+										</button>
+										{#if coffee.fetched_at}
+											<span class="text-[10px] text-stone-300">{$t('detail.fetched_at')} {new Date(coffee.fetched_at).toLocaleDateString()}</span>
+										{/if}
+									</div>
+								{/if}
+								{#if !coffee.roastery_url && coffee.updated_at}
+									<span class="text-[10px] text-stone-300">{$t('detail.updated_at')} {new Date(coffee.updated_at).toLocaleDateString()}</span>
 								{/if}
 							</div>
 							<!-- Right: roaster comment -->

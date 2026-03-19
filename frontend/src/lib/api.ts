@@ -99,8 +99,12 @@ export interface Coffee {
 	bitterness: number | null;
 	notes: string | null;
 	roaster_comment: Record<string, string> | null;
+	price: number | null;
+	price_wholesale: number | null;
 	is_available: boolean;
 	created_at: string;
+	updated_at: string | null;
+	fetched_at: string | null;
 	roastery_descriptors: Descriptor[];
 	reviews: Review[];
 	grinder_settings: GrinderSetting[];
@@ -115,6 +119,8 @@ export interface CoffeeListItem {
 	origin_ref: Origin | null;
 	roast_level: string | null;
 	image_url: string | null;
+	price: number | null;
+	price_wholesale: number | null;
 	is_available: boolean;
 	avg_rating: number | null;
 	person_rating: number | null;
@@ -135,6 +141,8 @@ export interface ScrapeResult {
 	sweetness: number | null;
 	acidity: number | null;
 	bitterness: number | null;
+	price: number | null;
+	price_wholesale: number | null;
 	flavor_descriptors: Record<string, string[]>;
 	name_i18n: Record<string, string>;
 	roaster_comment: Record<string, string>;
@@ -173,12 +181,15 @@ export const api = {
 			bitterness?: number;
 			notes?: string;
 			roaster_comment?: Record<string, string>;
+			price?: number;
+			price_wholesale?: number;
 			is_available?: boolean;
 			roastery_descriptor_ids?: number[];
 		}) => request<Coffee>('/coffees/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Coffee>(`/coffees/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/coffees/${id}`, { method: 'DELETE' }),
+		refresh: (id: number) => request<Coffee>(`/coffees/${id}/refresh`, { method: 'POST' }),
 	},
 	reviews: {
 		upsert: (coffeeId: number, data: {
@@ -243,6 +254,8 @@ export const api = {
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Roastery>(`/roasteries/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/roasteries/${id}`, { method: 'DELETE' }),
+		refresh: (id: number) => request<{ refreshed: number; failed: number; errors: string[] }>(
+			`/roasteries/${id}/refresh`, { method: 'POST' }),
 	},
 	scrape: (url: string) =>
 		request<ScrapeResult>(`/scrape/?url=${encodeURIComponent(url)}`),

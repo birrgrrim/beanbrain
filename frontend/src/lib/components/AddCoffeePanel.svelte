@@ -31,6 +31,8 @@
 	let sweetness = $state<number | undefined>();
 	let acidity = $state<number | undefined>();
 	let bitterness = $state<number | undefined>();
+	let price = $state<number | undefined>();
+	let priceWholesale = $state<number | undefined>();
 	let notes = $state('');
 	let roasterComment = $state<Record<string, string>>({});
 	let selectedDescriptors = $state<number[]>([]);
@@ -73,6 +75,8 @@
 			sweetness = result.sweetness ?? undefined;
 			acidity = result.acidity ?? undefined;
 			bitterness = result.bitterness ?? undefined;
+			price = result.price ?? undefined;
+			priceWholesale = result.price_wholesale ?? undefined;
 
 			roasterComment = result.roaster_comment || {};
 
@@ -153,6 +157,8 @@
 			sweetness,
 			acidity,
 			bitterness,
+			price,
+			price_wholesale: priceWholesale,
 			notes: notes.trim() || undefined,
 			roaster_comment: Object.keys(roasterComment).length > 0 ? roasterComment : undefined,
 			roastery_descriptor_ids: selectedDescriptors.length > 0 ? selectedDescriptors : undefined,
@@ -276,12 +282,13 @@
 			</div>
 		</div>
 
-		{#if score || sweetness != null || acidity != null || bitterness != null}
+		{#if score || sweetness != null || acidity != null || bitterness != null || price != null}
 			<div class="flex gap-6 p-3 bg-card-inset rounded-xl">
 				{#if score}<div class="text-center"><p class="text-lg font-bold text-amber-700">{score}</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.score')}</p></div>{/if}
 				{#if sweetness != null}<div class="text-center"><p class="text-sm font-semibold">{sweetness}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.sweet')}</p></div>{/if}
 				{#if acidity != null}<div class="text-center"><p class="text-sm font-semibold">{acidity}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.acid')}</p></div>{/if}
 				{#if bitterness != null}<div class="text-center"><p class="text-sm font-semibold">{bitterness}/10</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.bitter')}</p></div>{/if}
+				{#if price != null}<div class="text-center"><p class="text-sm font-semibold">{priceWholesale != null ? priceWholesale : price}₴{#if priceWholesale != null} <span class="text-stone-300 line-through">{price}₴</span>{/if}</p><p class="text-[10px] text-stone-300 uppercase">{$t('detail.price')}</p></div>{/if}
 			</div>
 		{/if}
 

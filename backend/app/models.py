@@ -69,8 +69,12 @@ class Coffee(Base):
     bitterness = Column(Integer, nullable=True)
     notes = Column(String, nullable=True)
     roaster_comment = Column(JSON, nullable=True)
+    price = Column(Integer, nullable=True)  # retail price (whole UAH)
+    price_wholesale = Column(Integer, nullable=True)  # bulk/discount price (whole UAH)
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=True)
+    fetched_at = Column(DateTime, nullable=True)
 
     origin_ref = relationship("Origin")
     roastery_ref = relationship("Roastery")
