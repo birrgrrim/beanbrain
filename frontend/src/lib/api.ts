@@ -93,7 +93,7 @@ export interface Coffee {
 	roast_level: string | null;
 	roastery_url: string | null;
 	image_url: string | null;
-	score: number | null;
+	score: number | null; // float, e.g. 83.5
 	sweetness: number | null;
 	acidity: number | null;
 	bitterness: number | null;
@@ -139,7 +139,7 @@ export interface ScrapeResult {
 	roast_level: string | null;
 	roastery_url: string;
 	image_url: string | null;
-	score: number | null;
+	score: number | null; // float, e.g. 83.5
 	sweetness: number | null;
 	acidity: number | null;
 	bitterness: number | null;

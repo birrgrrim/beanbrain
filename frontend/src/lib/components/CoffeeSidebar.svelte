@@ -128,9 +128,15 @@
 			filterDescriptorIds.some(did => c.roastery_descriptors.some(d => d.id === did))
 		);
 
-		// Sort
+		// Sort: stock priority first, then by selected sort key within each group
 		const sorted = [...list];
 		sorted.sort((a, b) => {
+			// Primary: in_stock > in_store > archive
+			const stockRank = (c: typeof a) => c.in_stock ? 2 : c.in_store ? 1 : 0;
+			const stockDiff = stockRank(b) - stockRank(a);
+			if (stockDiff !== 0) return stockDiff;
+
+			// Secondary: sort key
 			let cmp = 0;
 			if (sortKey === 'date') {
 				cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
@@ -147,14 +153,6 @@
 			}
 			return sortAsc ? cmp : -cmp;
 		});
-
-		// Always group: in_stock first, then in_store only, then archive
-		if (sortKey !== 'date') {
-			const inStock = sorted.filter(c => c.in_stock);
-			const inStoreOnly = sorted.filter(c => !c.in_stock && c.in_store);
-			const archive = sorted.filter(c => !c.in_stock && !c.in_store);
-			return [...inStock, ...inStoreOnly, ...archive];
-		}
 
 		return sorted;
 	});

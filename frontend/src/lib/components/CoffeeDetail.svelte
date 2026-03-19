@@ -137,7 +137,7 @@
 				process: editProcess.trim() || null,
 				roast_level: editRoastLevel.trim() || null,
 				notes: editNotes.trim() || null,
-				score: editScore != null ? Math.round(editScore) : null,
+				score: editScore ?? null,
 				sweetness: editSweetness != null ? Math.round(editSweetness) : null,
 				acidity: editAcidity != null ? Math.round(editAcidity) : null,
 				bitterness: editBitterness != null ? Math.round(editBitterness) : null,
@@ -344,7 +344,7 @@
 						<div class="flex gap-4 items-end">
 							<div>
 								<label for="edit-score" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.score')}</label>
-								<input id="edit-score" type="number" min="0" max="100" bind:value={editScore} placeholder="—" class={smallInputClass} />
+								<input id="edit-score" type="number" min="0" max="100" step="0.25" bind:value={editScore} placeholder="—" class={smallInputClass} />
 							</div>
 							<div>
 								<label for="edit-sweet" class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.sweet')}</label>

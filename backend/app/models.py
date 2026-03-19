@@ -63,7 +63,7 @@ class Coffee(Base):
     roast_level = Column(String, nullable=True)
     roastery_url = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
-    score = Column(Integer, nullable=True)
+    score = Column(Float, nullable=True)
     sweetness = Column(Integer, nullable=True)
     acidity = Column(Integer, nullable=True)
     bitterness = Column(Integer, nullable=True)

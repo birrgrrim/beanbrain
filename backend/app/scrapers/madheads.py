@@ -141,22 +141,22 @@ class MadHeadsScraper(BaseScraper):
         # Determine roast level from roast_type characteristic
         roast = chars.get("roast_type", {}).get("en")
 
-        # Parse score as int
-        score = None
-        score_str = chars.get("score", {}).get("en", "")
-        if score_str:
-            try:
-                score = int(score_str.split("/")[0])
-            except (ValueError, IndexError):
-                pass
-
         def _parse_metric(val: str | None) -> int | None:
             if not val:
                 return None
             try:
-                return int(val.split("/")[0])
+                return round(float(val.split("/")[0]))
             except (ValueError, IndexError):
                 return None
+
+        # Parse score as float (handles "84", "83.5", "85.75")
+        score = None
+        score_str = chars.get("score", {}).get("en", "")
+        if score_str:
+            try:
+                score = float(score_str.split("/")[0])
+            except (ValueError, IndexError):
+                pass
 
         return ScrapeResult(
             name=data.get("label", ""),

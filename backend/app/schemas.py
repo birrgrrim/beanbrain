@@ -177,7 +177,7 @@ class CoffeeCreate(BaseModel):
     roast_level: str | None = None
     roastery_url: str | None = None
     image_url: str | None = None
-    score: int | None = None
+    score: float | None = None
     sweetness: int | None = None
     acidity: int | None = None
     bitterness: int | None = None
@@ -198,7 +198,7 @@ class CoffeeUpdate(BaseModel):
     roast_level: str | None = None
     roastery_url: str | None = None
     image_url: str | None = None
-    score: int | None = None
+    score: float | None = None
     sweetness: int | None = None
     acidity: int | None = None
     bitterness: int | None = None
@@ -222,7 +222,7 @@ class CoffeeOut(BaseModel):
     roast_level: str | None = None
     roastery_url: str | None = None
     image_url: str | None = None
-    score: int | None = None
+    score: float | None = None
     sweetness: int | None = None
     acidity: int | None = None
     bitterness: int | None = None
@@ -274,7 +274,7 @@ class ScrapeResult(BaseModel):
     roast_level: str | None = None
     roastery_url: str
     image_url: str | None = None
-    score: int | None = None
+    score: float | None = None
     sweetness: int | None = None
     acidity: int | None = None
     bitterness: int | None = None
