@@ -6,6 +6,7 @@
 	import { lang } from '$lib/lang';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
+	import ReviewForm from './ReviewForm.svelte';
 	import Icons from './Icons.svelte';
 
 	let currentLang = $state('en');
@@ -158,10 +159,6 @@
 		reviewRating = 0;
 		reviewComment = '';
 		reviewDescriptors = [];
-	}
-
-	function toggleReviewDescriptor(id: number) {
-		reviewDescriptors = toggleId(reviewDescriptors, id);
 	}
 
 	async function saveReview() {
@@ -522,21 +519,16 @@
 
 				{#each coffee.reviews as review}
 					{#if editingReviewTasterId === review.taster_id}
-						<div class="py-2 space-y-2">
-							<div class="flex items-center gap-3">
-								<p class="text-lg font-semibold text-stone-700">{review.taster.name}</p>
-								<StarRating rating={reviewRating} interactive onRate={(v) => reviewRating = v} />
-								{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
-							</div>
-							<textarea bind:value={reviewComment} rows={2} placeholder={$t('tasting.comment_placeholder')}
-								class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
-							<DescriptorAutocomplete {descriptors} selected={reviewDescriptors} suggested={suggestedDescriptorIds} onToggle={toggleReviewDescriptor} />
-							<div class="flex gap-2">
-								<button onclick={saveReview} disabled={reviewRating === 0}
-									class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
-								<button onclick={cancelReview} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
-							</div>
-						</div>
+						<ReviewForm
+							tasterName={review.taster.name}
+							bind:rating={reviewRating}
+							bind:comment={reviewComment}
+							bind:descriptorIds={reviewDescriptors}
+							{descriptors}
+							{suggestedDescriptorIds}
+							onSave={saveReview}
+							onCancel={cancelReview}
+						/>
 					{:else}
 						<div class="py-2 border-b border-stone-50 last:border-0">
 							<div class="flex items-center justify-between">
@@ -565,21 +557,16 @@
 				{/each}
 
 				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId)}
-					<div class="py-2 space-y-2">
-						<div class="flex items-center gap-3">
-							<p class="text-lg font-semibold text-stone-700">{tasters.find(ta => ta.id === editingReviewTasterId)?.name}</p>
-							<StarRating rating={reviewRating} interactive onRate={(v) => reviewRating = v} />
-							{#if reviewRating > 0}<span class="text-xs text-stone-400 tabular-nums">{reviewRating}/10</span>{/if}
-						</div>
-						<textarea bind:value={reviewComment} rows={2} placeholder={$t('tasting.comment_placeholder')}
-							class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
-						<DescriptorAutocomplete {descriptors} selected={reviewDescriptors} suggested={suggestedDescriptorIds} onToggle={toggleReviewDescriptor} />
-						<div class="flex gap-2">
-							<button onclick={saveReview} disabled={reviewRating === 0}
-								class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
-							<button onclick={cancelReview} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
-						</div>
-					</div>
+					<ReviewForm
+						tasterName={tasters.find(ta => ta.id === editingReviewTasterId)?.name ?? ''}
+						bind:rating={reviewRating}
+						bind:comment={reviewComment}
+						bind:descriptorIds={reviewDescriptors}
+						{descriptors}
+						{suggestedDescriptorIds}
+						onSave={saveReview}
+						onCancel={cancelReview}
+					/>
 				{/if}
 			</div>
 		</div>

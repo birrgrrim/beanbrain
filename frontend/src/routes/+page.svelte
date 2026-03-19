@@ -17,6 +17,7 @@
 	import RoasteryDetail from '$lib/components/RoasteryDetail.svelte';
 	import AddRoasteryPanel from '$lib/components/AddRoasteryPanel.svelte';
 	import PersonSwitcher from '$lib/components/PersonSwitcher.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
 
 	type Tab = 'coffee' | 'grinding' | 'brewing' | 'roasteries';
 	type CoffeePanel = { type: 'empty' } | { type: 'detail'; id: number } | { type: 'new' };
@@ -236,14 +237,7 @@
 			/>
 			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				{#if coffeePanel.type === 'empty'}
-					<div class="flex flex-col items-center justify-center h-full text-center">
-						<div class="rounded-full bg-parchment p-8 mb-4"
-							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
-							<img src="/img/choose-coffee.png" alt="" class="opacity-70" style="max-width: 220px;" />
-						</div>
-						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('empty.title')}</p>
-						<p class="text-stone-400 text-base mt-2">{$t('empty.subtitle')}</p>
-					</div>
+					<EmptyState img="choose-coffee.png" title={$t('empty.title')} subtitle={$t('empty.subtitle')} />
 				{:else if coffeePanel.type === 'detail'}
 					<CoffeeDetail coffeeId={coffeePanel.id} onDeleted={onCoffeeDeleted} onUpdated={loadCoffees} onBack={() => coffeePanel = { type: 'empty' }} />
 				{:else if coffeePanel.type === 'new'}
@@ -260,13 +254,7 @@
 			/>
 			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				{#if grinderPanel.type === 'empty'}
-					<div class="flex flex-col items-center justify-center h-full text-center">
-						<div class="rounded-full bg-parchment p-8 mb-4"
-							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
-							<img src="/img/many-grinders.png" alt="" class="opacity-70" style="max-width: 220px;" />
-						</div>
-						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('grinding.select')}</p>
-					</div>
+					<EmptyState img="many-grinders.png" title={$t('grinding.select')} />
 				{:else if grinderPanel.type === 'detail' && selectedGrinder}
 					<GrinderDetail grinder={selectedGrinder} onUpdated={onGrinderUpdated} onDeleted={onGrinderDeleted} onBack={() => grinderPanel = { type: 'empty' }} />
 				{:else if grinderPanel.type === 'new'}
@@ -283,13 +271,7 @@
 			/>
 			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				{#if brewPanel.type === 'empty'}
-					<div class="flex flex-col items-center justify-center h-full text-center">
-						<div class="rounded-full bg-parchment p-8 mb-4"
-							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
-							<img src="/img/many-brewmethods.png" alt="" class="opacity-70" style="max-width: 220px;" />
-						</div>
-						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('brewing.select')}</p>
-					</div>
+					<EmptyState img="many-brewmethods.png" title={$t('brewing.select')} />
 				{:else if brewPanel.type === 'detail' && selectedBrewSetup}
 					<BrewSetupDetail brewSetup={selectedBrewSetup} onUpdated={onBrewSetupUpdated} onDeleted={onBrewSetupDeleted} onBack={() => brewPanel = { type: 'empty' }} />
 				{:else if brewPanel.type === 'pick_method'}
@@ -307,13 +289,7 @@
 			/>
 			<div class="flex-1 overflow-y-auto bg-parchment" style="background-image: url('/img/bg-pattern.png'); background-repeat: repeat;">
 				{#if roasteryPanel.type === 'empty'}
-					<div class="flex flex-col items-center justify-center h-full text-center">
-						<div class="rounded-full bg-parchment p-8 mb-4"
-							style="box-shadow: 0 0 40px 20px var(--color-parchment);">
-							<img src="/img/many-roasteries.png" alt="" class="opacity-70" style="max-width: 220px;" />
-						</div>
-						<p class="text-stone-500 text-2xl" style="font-family: 'DM Serif Display', serif;">{$t('roastery.select')}</p>
-					</div>
+					<EmptyState img="many-roasteries.png" title={$t('roastery.select')} />
 				{:else if roasteryPanel.type === 'detail' && selectedRoastery}
 					<RoasteryDetail roastery={selectedRoastery} onUpdated={onRoasteryUpdated} onDeleted={onRoasteryDeleted} onBack={() => roasteryPanel = { type: 'empty' }} />
 				{:else if roasteryPanel.type === 'new'}
