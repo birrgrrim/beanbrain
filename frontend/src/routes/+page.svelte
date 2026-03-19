@@ -48,7 +48,7 @@
 		{ id: 'coffee', key: 'tab.coffee', img: '/img/tab-coffee.png' },
 		{ id: 'grinding', key: 'tab.grinding', img: '/img/tab-grinder.png' },
 		{ id: 'brewing', key: 'tab.brewing', img: '/img/tab-machine.png' },
-		{ id: 'roasteries', key: 'tab.roasteries', img: '/img/roastery.png' },
+		{ id: 'roasteries', key: 'tab.roasteries', img: '/img/tab-roastery.png' },
 	];
 
 	async function loadCoffees() {
