@@ -45,6 +45,7 @@ deploy.sh
 deploy/
 Caddyfile
 *.plist
+DEPLOY.md
 
 # Release artifacts
 release/
