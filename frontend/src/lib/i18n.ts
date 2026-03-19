@@ -12,6 +12,18 @@ const translations: Record<string, Record<string, string>> = {
 	'sidebar.search': { en: 'Search coffees...', uk: 'Пошук кави...' },
 	'sidebar.empty': { en: 'No coffees yet', uk: 'Кави ще немає' },
 	'sidebar.no_matches': { en: 'No matches', uk: 'Нічого не знайдено' },
+	'sidebar.filters': { en: 'Filters', uk: 'Фільтри' },
+	'sidebar.clear_filters': { en: 'Clear', uk: 'Скинути' },
+	'sidebar.hide_unavailable': { en: 'Hide unavailable', uk: 'Сховати недоступні' },
+	'sidebar.origin': { en: 'Origin', uk: 'Країна' },
+	'sidebar.roastery': { en: 'Roastery', uk: 'Обсмажувач' },
+	'sidebar.roast': { en: 'Roast', uk: 'Обсмаження' },
+	'sidebar.rating_min': { en: 'Rating', uk: 'Оцінка' },
+	'sidebar.descriptors': { en: 'Flavors', uk: 'Смаки' },
+	'sidebar.sort_date': { en: 'Date', uk: 'Дата' },
+	'sidebar.sort_rating': { en: 'Rating', uk: 'Оцінка' },
+	'sidebar.sort_price': { en: 'Price', uk: 'Ціна' },
+	'sidebar.sort_name': { en: 'Name', uk: 'Назва' },
 
 	// Empty state
 	'empty.title': { en: 'Select a coffee', uk: 'Оберіть каву' },
