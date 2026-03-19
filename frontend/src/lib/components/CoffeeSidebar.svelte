@@ -34,13 +34,16 @@
 	// --- Persisted state ---
 	type SortKey = 'date' | 'rating' | 'price' | 'name';
 
+	const isBrowser = typeof window !== 'undefined';
 	function loadState<T>(key: string, fallback: T): T {
+		if (!isBrowser) return fallback;
 		try {
 			const v = localStorage.getItem(`bb_sidebar_${key}`);
 			return v != null ? JSON.parse(v) : fallback;
 		} catch { return fallback; }
 	}
 	function saveState(key: string, value: unknown) {
+		if (!isBrowser) return;
 		localStorage.setItem(`bb_sidebar_${key}`, JSON.stringify(value));
 	}
 

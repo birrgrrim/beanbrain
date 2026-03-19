@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="BeanBrain", version="0.1.0", lifespan=lifespan)
 
-cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
