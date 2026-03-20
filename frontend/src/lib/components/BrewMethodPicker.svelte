@@ -29,7 +29,7 @@
 			<button
 				onclick={() => onPicked(mt.key, mt.has_basket)}
 				class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col items-center gap-3
-					hover:border-amber-300 hover:shadow-md transition-all cursor-pointer"
+					hover:border-amber-300 hover:shadow-md transition-[color,background-color,border-color,box-shadow] duration-150 cursor-pointer"
 			>
 				<img src="/img/{mt.icon}" alt="" class="w-16 h-16 opacity-70" />
 				<span class="font-semibold text-stone-700">{$t(`method.${mt.key}`)}</span>
