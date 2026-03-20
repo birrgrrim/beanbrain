@@ -64,6 +64,7 @@ prod-stop:
 
 prod-backup:
 	@mkdir -p backups
-	@cp backend/beanbrain.db backups/beanbrain-$$(date +%F-%H%M%S).db
-	@echo "Backup: backups/beanbrain-$$(date +%F-%H%M%S).db"
+	$(eval VERSION := $(shell cd backend && uv run python -c "from app import __version__; print(__version__)"))
+	@cp backend/beanbrain.db backups/beanbrain-$(VERSION)-$$(date +%F-%H%M%S).db
+	@echo "Backup: backups/beanbrain-$(VERSION)-$$(date +%F-%H%M%S).db"
 	@find backups/ -name "*.db" -mtime +30 -delete 2>/dev/null; true

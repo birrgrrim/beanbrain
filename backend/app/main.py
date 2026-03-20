@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import __version__
 from .database import Base, SessionLocal, engine
+from .models import SchemaVersion
 from .routers import coffees, descriptors, reviews, grinder_settings, tasters, scrape, grinders, brew_setups, origins, roasteries
 from .seed import seed_database, seed_origins
 
@@ -16,12 +18,19 @@ async def lifespan(app: FastAPI):
     try:
         seed_database(db)
         seed_origins(db)
+        # Stamp current version
+        row = db.query(SchemaVersion).first()
+        if row:
+            row.version = __version__
+        else:
+            db.add(SchemaVersion(version=__version__))
+        db.commit()
     finally:
         db.close()
     yield
 
 
-app = FastAPI(title="BeanBrain", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="BeanBrain", version=__version__, lifespan=lifespan)
 
 cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
 app.add_middleware(
