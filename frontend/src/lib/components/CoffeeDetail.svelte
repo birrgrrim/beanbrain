@@ -46,6 +46,7 @@
 	let editDescriptorIds = $state<number[]>([]);
 	let saving = $state(false);
 	let refreshing = $state(false);
+	let refreshError = $state('');
 
 	// Review form
 	let editingReviewTasterId = $state<number | null>(null);
@@ -225,10 +226,13 @@
 	async function refreshCoffee() {
 		if (!coffee?.roastery_url) return;
 		refreshing = true;
+		refreshError = '';
 		try {
 			await api.coffees.refresh(coffeeId);
 			await loadData();
 			onUpdated();
+		} catch (e) {
+			refreshError = e instanceof Error ? e.message : 'Refresh failed';
 		} finally {
 			refreshing = false;
 		}
@@ -549,6 +553,9 @@
 									<span class="text-[10px] text-stone-300">{$t('detail.fetched_at')} {new Date(coffee.fetched_at).toLocaleDateString()}</span>
 								{/if}
 							</div>
+							{#if refreshError}
+								<p class="text-xs text-red-500 mt-1">{refreshError}</p>
+							{/if}
 						{/if}
 						{#if !coffee.roastery_url && coffee.updated_at}
 							<span class="text-[10px] text-stone-300">{$t('detail.updated_at')} {new Date(coffee.updated_at).toLocaleDateString()}</span>
