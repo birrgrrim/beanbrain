@@ -245,8 +245,45 @@
 </script>
 
 {#if loading}
-	<div class="flex items-center justify-center h-full">
-		<div class="text-stone-300">Loading...</div>
+	<div class="max-w-6xl mx-auto p-4 md:p-10 space-y-6 md:space-y-8">
+		<!-- Header skeleton -->
+		<div class="flex items-center gap-3">
+			<div class="skeleton w-8 h-8 rounded-full"></div>
+			<div class="skeleton h-7 w-48 md:w-64"></div>
+		</div>
+		<!-- Photo + Details skeleton -->
+		<div class="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-4 md:gap-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6 flex items-center justify-center">
+				<div class="skeleton w-full h-48 rounded-xl"></div>
+			</div>
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-4 md:p-6 space-y-4">
+				<div class="skeleton h-5 w-36"></div>
+				<div class="grid grid-cols-3 gap-3">
+					<div class="skeleton h-4 w-full"></div>
+					<div class="skeleton h-4 w-full"></div>
+					<div class="skeleton h-4 w-full"></div>
+				</div>
+				<div class="flex gap-4">
+					<div class="skeleton h-4 w-16"></div>
+					<div class="skeleton h-4 w-16"></div>
+					<div class="skeleton h-4 w-16"></div>
+				</div>
+				<div class="skeleton h-4 w-3/4"></div>
+			</div>
+		</div>
+		<!-- Grinder + Reviews skeleton -->
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-4 md:p-6 space-y-3">
+				<div class="skeleton h-5 w-32"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-2/3"></div>
+			</div>
+			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-4 md:p-6 space-y-3">
+				<div class="skeleton h-5 w-28"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-1/2"></div>
+			</div>
+		</div>
 	</div>
 {:else if coffee}
 	<div class="max-w-6xl mx-auto p-4 md:p-10 space-y-6 md:space-y-8">

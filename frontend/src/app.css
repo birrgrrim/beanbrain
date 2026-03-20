@@ -33,3 +33,16 @@ button, a, input, select, textarea {
 .animate-card {
 	animation: fadeSlideUp 0.25s ease-out;
 }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+	0% { background-position: -400px 0; }
+	100% { background-position: 400px 0; }
+}
+
+.skeleton {
+	background: linear-gradient(90deg, var(--color-card-inset) 25%, #ede5d3 37%, var(--color-card-inset) 63%);
+	background-size: 800px 100%;
+	animation: shimmer 1.5s infinite ease-in-out;
+	border-radius: 0.5rem;
+}
