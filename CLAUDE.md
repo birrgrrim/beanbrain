@@ -91,6 +91,11 @@ frontend/
 - **Milestones**: group related issues into milestones for releases
 - **Releases**: semantic versioning, CHANGELOG.md updated with each release
 - **Version**: update `frontend/package.json` and `backend/pyproject.toml` version on release
+- **PR merge**: user hand-tests the deployed result before merging — never auto-merge
+
+### Milestone strategies
+- **Independent fixes** (e.g. v0.2.0 — polish/bugs): each issue gets its own branch → PR to `main`
+- **Coupled changes** (e.g. v0.3.0 — migrations + schema): create a `milestone/vX.Y.Z` branch, feature branches PR into it, final PR to `main` after integration testing
 
 ## Conventions
 - Commits co-authored with Claude
