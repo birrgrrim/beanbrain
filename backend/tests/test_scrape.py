@@ -54,7 +54,7 @@ def test_scrape_network_failure(client):
     ):
         resp = client.get("/scrape/", params={"url": "https://madheadscoffee.com/p/test"})
     assert resp.status_code == 502
-    assert "Failed to scrape" in resp.json()["detail"]
+    assert resp.json()["detail"] == "Connection refused"
 
 
 def test_scrape_missing_url_param(client):

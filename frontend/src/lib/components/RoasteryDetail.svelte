@@ -11,15 +11,19 @@
 	} = $props();
 
 	let refreshing = $state(false);
-	let refreshResult = $state<{ refreshed: number; failed: number } | null>(null);
+	let refreshResult = $state<{ refreshed: number; failed: number; errors: string[] } | null>(null);
+	let refreshError = $state('');
 
 	async function refreshAllCoffees() {
 		refreshing = true;
 		refreshResult = null;
+		refreshError = '';
 		try {
 			const result = await api.roasteries.refresh(roastery.id);
 			refreshResult = result;
 			onUpdated();
+		} catch (e) {
+			refreshError = e instanceof Error ? e.message : 'Refresh failed';
 		} finally {
 			refreshing = false;
 		}
@@ -78,5 +82,15 @@
 				</span>
 			{/if}
 		</div>
+		{#if refreshError}
+			<p class="text-xs text-red-500 mt-2">{refreshError}</p>
+		{/if}
+		{#if refreshResult?.errors?.length}
+			<div class="mt-2 space-y-1">
+				{#each refreshResult.errors as err}
+					<p class="text-xs text-red-400">{err}</p>
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>

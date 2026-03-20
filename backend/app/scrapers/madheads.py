@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 import httpx
@@ -123,12 +124,35 @@ class MadHeadsScraper(BaseScraper):
 
         return product
 
+    @staticmethod
+    async def _fetch_with_retry(url: str, retries: int = 3) -> httpx.Response:
+        """Fetch URL with exponential backoff on transient errors."""
+        delays = [1, 3, 9]
+        for attempt in range(retries):
+            try:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
+                    resp = await client.get(url)
+                if resp.status_code == 404:
+                    raise ValueError("Product page not found")
+                resp.raise_for_status()
+                return resp
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError) as e:
+                if attempt == retries - 1:
+                    if isinstance(e, httpx.TimeoutException):
+                        raise ConnectionError("Roastery site timed out") from e
+                    raise ConnectionError("Could not connect to roastery site") from e
+                await asyncio.sleep(delays[attempt])
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code >= 500 and attempt < retries - 1:
+                    await asyncio.sleep(delays[attempt])
+                    continue
+                raise ValueError(f"Roastery returned error {e.response.status_code}") from e
+        raise ConnectionError("Could not connect to roastery site")
+
     async def scrape(self, url: str) -> ScrapeResult:
         uk_url, en_url = self._normalize_url(url)
 
-        async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
-            resp = await client.get(en_url)
-            resp.raise_for_status()
+        resp = await self._fetch_with_retry(en_url)
 
         data = self._extract_data(resp.text)
         chars = data.get("characteristics", {})

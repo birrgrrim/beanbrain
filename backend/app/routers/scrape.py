@@ -12,5 +12,7 @@ async def scrape(url: str = Query(..., description="Product URL to scrape")):
         return await scrape_url(url)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to scrape: {e}")
+    except ConnectionError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=502, detail="Unexpected error while scraping")
