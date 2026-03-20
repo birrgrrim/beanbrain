@@ -112,15 +112,15 @@ def test_coffee_stock_and_store(client):
     rid = client.post("/roasteries/", json={"name": "R"}).json()["id"]
     resp = client.post("/coffees/", json={"name": "Coffee", "roastery_id": rid})
     data = resp.json()
-    assert data["in_stock"] == False
-    assert data["in_store"] == True
+    assert data["in_stock"] is False
+    assert data["in_store"] is True
 
     coffee_id = data["id"]
     resp = client.put(f"/coffees/{coffee_id}", json={"in_stock": True})
-    assert resp.json()["in_stock"] == True
+    assert resp.json()["in_stock"] is True
 
     resp = client.put(f"/coffees/{coffee_id}", json={"in_store": False})
-    assert resp.json()["in_store"] == False
+    assert resp.json()["in_store"] is False
 
 
 def test_coffees_sorted_by_stock(client):
