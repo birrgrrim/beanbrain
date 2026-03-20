@@ -1,5 +1,8 @@
 # BeanBrain
 
+[![CI](https://github.com/birrgrrim/beanbrain/actions/workflows/ci.yml/badge.svg)](https://github.com/birrgrrim/beanbrain/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/birrgrrim/beanbrain)](https://github.com/birrgrrim/beanbrain/releases)
+
 A personal coffee tracking tool for coffee enthusiasts. Track your beans, grinder settings, and reviews — never forget what worked.
 
 ## Features
@@ -31,7 +34,7 @@ A personal coffee tracking tool for coffee enthusiasts. Track your beans, grinde
 
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) (Python package manager)
-- Node.js 18+
+- Node.js 22+
 
 ### Setup
 
@@ -56,7 +59,7 @@ make dev-frontend     # UI at http://localhost:5173
 ### Testing
 
 ```bash
-make test             # 32 backend tests (in-memory SQLite)
+make test             # 70 backend tests (in-memory SQLite)
 ```
 
 ### Production Deploy
