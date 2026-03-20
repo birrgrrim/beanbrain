@@ -53,7 +53,7 @@ frontend/
 - **One review per person per coffee** — upsert via PUT, not multiple tastings
 - **Coffee stock tracking** — `in_stock` (at home) + `in_store` (at roastery), independent booleans
 - **Equipment defaults** — `is_default` on grinder/method, used for sidebar display
-- **MadHeads scraper** — parses SvelteKit embedded data from HTML, supports EN/UK, all 18 products validated
+- **MadHeads scraper** — parses SvelteKit embedded data from HTML, supports EN/UK, all 18 products validated, retry with exponential backoff on transient errors
 - **Bean rating** — hand-drawn coffee bean images (full/half/empty) replace star SVGs
 - **Responsive font** — 16px mobile, 18px desktop
 - **SSR-safe localStorage** — guarded with `typeof window !== 'undefined'` (Node 22+ has broken localStorage global)
@@ -78,7 +78,7 @@ frontend/
 - Coffee list returns `avg_rating`, `person_rating`, `default_grind` computed fields
 
 ## Testing
-- Backend: pytest with in-memory SQLite (70 tests), ruff linting
+- Backend: pytest with in-memory SQLite (92 tests), ruff linting
 - Frontend: svelte-check type validation + production build verification
 - Run: `cd backend && uv run pytest tests/ -v`
 - Lint: `cd backend && uv run ruff check .`
@@ -90,7 +90,7 @@ frontend/
 - **Branches**: use descriptive prefixes (`ci/`, `feat/`, `fix/`, `design/`, etc.)
 - **Milestones**: group related issues into milestones for releases
 - **Releases**: semantic versioning, CHANGELOG.md updated with each release
-- **Version**: update `frontend/package.json` and `backend/pyproject.toml` version on release
+- **Version**: update `frontend/package.json`, `backend/pyproject.toml`, and `backend/app/__init__.py` on release
 - **PR merge**: user hand-tests the deployed result before merging — never auto-merge
 
 ### Milestone strategies
@@ -101,5 +101,5 @@ frontend/
 - Commits co-authored with Claude
 - Ukrainian translations maintained alongside English
 - Hand-drawn art generated externally, processed with Pillow (transparent bg removal)
-- Images stored at 2x resolution for Retina, displayed via fixed pixel sizes
+- Images resized to 2x max display size and compressed with pngquant (~1.2MB total)
 - `uv.lock` committed for reproducible deploys
