@@ -16,7 +16,7 @@ router = APIRouter(prefix="/roasteries", tags=["roasteries"])
 
 @router.get("/", response_model=list[RoasteryOut])
 def list_roasteries(db: Session = Depends(get_db)):
-    return db.query(Roastery).filter(Roastery.is_active == True).order_by(Roastery.name).all()
+    return db.query(Roastery).filter(Roastery.is_active.is_(True)).order_by(Roastery.name).all()
 
 
 @router.post("/", response_model=RoasteryOut, status_code=201)

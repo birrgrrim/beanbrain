@@ -10,4 +10,4 @@ def get_or_404(db: Session, model, id: int, detail: str = "Not found"):
 
 
 def clear_default(db: Session, model) -> None:
-    db.query(model).filter(model.is_default == True).update({"is_default": False})
+    db.query(model).filter(model.is_default.is_(True)).update({"is_default": False})

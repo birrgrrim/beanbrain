@@ -14,8 +14,8 @@ router = APIRouter(prefix="/coffees", tags=["coffees"])
 
 def _get_default_grind(db: Session, coffee_id: int) -> float | None:
     """Get grind setting for default grinder + default brew setup."""
-    default_grinder = db.query(Grinder).filter(Grinder.is_default == True).first()
-    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default == True).first()
+    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
+    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
     if not default_grinder or not default_setup:
         return None
     setting = db.query(GrinderSetting).filter(
@@ -90,8 +90,8 @@ def list_coffees(
 
     # Bulk: default grind settings (1+2 queries instead of 3N)
     default_grinds: dict[int, float] = {}
-    default_grinder = db.query(Grinder).filter(Grinder.is_default == True).first()
-    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default == True).first()
+    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
+    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
     if default_grinder and default_setup:
         for row in db.query(GrinderSetting.coffee_id, GrinderSetting.setting).filter(
             GrinderSetting.coffee_id.in_(coffee_ids),

@@ -78,9 +78,19 @@ frontend/
 - Coffee list returns `avg_rating`, `person_rating`, `default_grind` computed fields
 
 ## Testing
-- Backend: pytest with in-memory SQLite (32 tests)
-- Frontend: no tests yet
+- Backend: pytest with in-memory SQLite (70 tests), ruff linting
+- Frontend: svelte-check type validation + production build verification
 - Run: `cd backend && uv run pytest tests/ -v`
+- Lint: `cd backend && uv run ruff check .`
+- CI: GitHub Actions runs on every push to `main` and on PRs
+
+## Git Workflow
+- **`main` branch**: direct pushes only for critical/short fixes (typos, broken prod, etc.)
+- **All other work**: create an issue → branch → PR → merge after CI passes
+- **Branches**: use descriptive prefixes (`ci/`, `feat/`, `fix/`, `design/`, etc.)
+- **Milestones**: group related issues into milestones for releases
+- **Releases**: semantic versioning, CHANGELOG.md updated with each release
+- **Version**: update `frontend/package.json` and `backend/pyproject.toml` version on release
 
 ## Conventions
 - Commits co-authored with Claude

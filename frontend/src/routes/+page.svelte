@@ -161,6 +161,8 @@
 		lang.set(currentLang === 'en' ? 'uk' : 'en');
 	}
 
+	const appVersion = __APP_VERSION__;
+
 	const selectedCoffeeId = $derived(coffeePanel.type === 'detail' ? coffeePanel.id : null);
 	const selectedGrinderId = $derived(grinderPanel.type === 'detail' ? grinderPanel.id : null);
 	const selectedBrewSetupId = $derived(brewPanel.type === 'detail' ? brewPanel.id : null);
@@ -225,6 +227,7 @@
 			</div>
 
 			<div class="flex items-center gap-2 xl:gap-3">
+				<span class="hidden md:inline text-xs text-stone-300 font-mono">v{appVersion}</span>
 				<PersonSwitcher onChange={loadCoffees} />
 				<button
 					onclick={toggleLang}
