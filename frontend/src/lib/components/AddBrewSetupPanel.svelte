@@ -10,16 +10,18 @@
 		onCancel: () => void;
 	} = $props();
 
-	let name = $state('');
+	let manufacturer = $state('');
+	let model = $state('');
 	let basketGrams = $state('');
 	let saving = $state(false);
 
 	async function save() {
-		if (!name.trim()) return;
+		if (!manufacturer.trim()) return;
 		saving = true;
 		const setup = await api.brewSetups.create({
 			method_type: methodType,
-			name: name.trim(),
+			manufacturer: manufacturer.trim(),
+			model: model.trim() || undefined,
 			basket_grams: hasBasket && basketGrams ? parseInt(basketGrams) : undefined,
 		});
 		saving = false;
@@ -42,8 +44,14 @@
 
 	<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-6 space-y-4">
 		<div>
-			<label for="brew-setup-name" class="text-xs text-stone-400 uppercase tracking-wide">{$t('brewing.name')}</label>
-			<input id="brew-setup-name" type="text" bind:value={name} placeholder={$t('brewing.name_placeholder')}
+			<label for="brew-setup-manufacturer" class="text-xs text-stone-400 uppercase tracking-wide">{$t('brewing.manufacturer')}</label>
+			<input id="brew-setup-manufacturer" type="text" bind:value={manufacturer} placeholder={$t('brewing.manufacturer_placeholder')}
+				class="w-full mt-1 px-4 py-2.5 rounded-lg border border-stone-200 text-base bg-card-inset
+					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300" />
+		</div>
+		<div>
+			<label for="brew-setup-model" class="text-xs text-stone-400 uppercase tracking-wide">{$t('brewing.model')}</label>
+			<input id="brew-setup-model" type="text" bind:value={model} placeholder={$t('brewing.model_placeholder')}
 				class="w-full mt-1 px-4 py-2.5 rounded-lg border border-stone-200 text-base bg-card-inset
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300" />
 		</div>
@@ -56,7 +64,7 @@
 			</div>
 		{/if}
 		<div class="flex gap-2 pt-2">
-			<button onclick={save} disabled={!name.trim() || saving}
+			<button onclick={save} disabled={!manufacturer.trim() || saving}
 				class="px-6 py-2.5 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">
 				{$t('common.save')}
 			</button>

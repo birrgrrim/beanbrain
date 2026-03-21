@@ -122,7 +122,7 @@ class Grinder(Base):
     __tablename__ = "grinders"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    manufacturer = Column(String, nullable=False)
     model = Column(String, nullable=True)
     kind = Column(String, default="auto")  # "auto" or "manual"
     is_default = Column(Boolean, default=False)
@@ -138,7 +138,8 @@ class BrewSetup(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     method_type = Column(String, nullable=False)  # key from BREW_METHOD_TYPES
-    name = Column(String, nullable=False)  # user label, e.g. "Gaggia Classic 18g"
+    manufacturer = Column(String, nullable=False)
+    model = Column(String, nullable=True)
     basket_grams = Column(Integer, nullable=True)  # espresso only
     is_default = Column(Boolean, default=False)
 

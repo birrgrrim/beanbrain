@@ -33,7 +33,7 @@ def test_list_grinders(client):
     assert resp.status_code == 200
     grinders = resp.json()
     assert len(grinders) == 1
-    assert grinders[0]["name"] == "Default Grinder"
+    assert grinders[0]["manufacturer"] == "Default Grinder"
     assert grinders[0]["is_default"] is True
 
 

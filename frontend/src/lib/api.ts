@@ -30,7 +30,7 @@ export interface Taster {
 
 export interface Grinder {
 	id: number;
-	name: string;
+	manufacturer: string;
 	model: string | null;
 	kind: string;
 	is_default: boolean;
@@ -42,7 +42,8 @@ export interface Grinder {
 export interface BrewSetup {
 	id: number;
 	method_type: string;
-	name: string;
+	manufacturer: string;
+	model: string | null;
 	basket_grams: number | null;
 	is_default: boolean;
 }
@@ -239,7 +240,7 @@ export const api = {
 	},
 	grinders: {
 		list: () => request<Grinder[]>('/grinders/'),
-		create: (data: { name: string; model?: string; kind?: string; is_default?: boolean; range_min?: number; range_max?: number | null; step?: number }) =>
+		create: (data: { manufacturer: string; model?: string; kind?: string; is_default?: boolean; range_min?: number; range_max?: number | null; step?: number }) =>
 			request<Grinder>('/grinders/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Grinder>(`/grinders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -247,7 +248,7 @@ export const api = {
 	},
 	brewSetups: {
 		list: () => request<BrewSetup[]>('/brew-setups/'),
-		create: (data: { method_type: string; name: string; basket_grams?: number; is_default?: boolean }) =>
+		create: (data: { method_type: string; manufacturer: string; model?: string; basket_grams?: number; is_default?: boolean }) =>
 			request<BrewSetup>('/brew-setups/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
 			request<BrewSetup>(`/brew-setups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

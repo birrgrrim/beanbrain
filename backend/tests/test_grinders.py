@@ -1,19 +1,19 @@
 def test_create_grinder(client):
     resp = client.post("/grinders/", json={
-        "name": "Niche Zero",
+        "manufacturer": "Niche Zero",
         "model": "NZ",
         "kind": "auto",
     })
     assert resp.status_code == 201
     data = resp.json()
-    assert data["name"] == "Niche Zero"
+    assert data["manufacturer"] == "Niche Zero"
     assert data["kind"] == "auto"
     assert data["is_default"] is False
 
 
 def test_create_manual_grinder(client):
     resp = client.post("/grinders/", json={
-        "name": "1Zpresso K-Max",
+        "manufacturer": "1Zpresso K-Max",
         "kind": "manual",
     })
     assert resp.status_code == 201
@@ -27,7 +27,7 @@ def test_create_default_grinder_clears_previous(client):
     assert any(g["is_default"] for g in grinders)
 
     resp = client.post("/grinders/", json={
-        "name": "New Default",
+        "manufacturer": "New Default",
         "is_default": True,
     })
     assert resp.status_code == 201
@@ -37,20 +37,20 @@ def test_create_default_grinder_clears_previous(client):
     grinders = client.get("/grinders/").json()
     defaults = [g for g in grinders if g["is_default"]]
     assert len(defaults) == 1
-    assert defaults[0]["name"] == "New Default"
+    assert defaults[0]["manufacturer"] == "New Default"
 
 
 def test_update_grinder(client):
     grinders = client.get("/grinders/").json()
     gid = grinders[0]["id"]
 
-    resp = client.put(f"/grinders/{gid}", json={"name": "Renamed"})
+    resp = client.put(f"/grinders/{gid}", json={"manufacturer": "Renamed"})
     assert resp.status_code == 200
-    assert resp.json()["name"] == "Renamed"
+    assert resp.json()["manufacturer"] == "Renamed"
 
 
 def test_update_grinder_set_default(client):
-    create = client.post("/grinders/", json={"name": "Second"})
+    create = client.post("/grinders/", json={"manufacturer": "Second"})
     gid = create.json()["id"]
 
     resp = client.put(f"/grinders/{gid}", json={"is_default": True})
@@ -64,12 +64,12 @@ def test_update_grinder_set_default(client):
 
 
 def test_update_grinder_not_found(client):
-    resp = client.put("/grinders/999", json={"name": "Ghost"})
+    resp = client.put("/grinders/999", json={"manufacturer": "Ghost"})
     assert resp.status_code == 404
 
 
 def test_delete_grinder(client):
-    create = client.post("/grinders/", json={"name": "Temporary"})
+    create = client.post("/grinders/", json={"manufacturer": "Temporary"})
     gid = create.json()["id"]
 
     resp = client.delete(f"/grinders/{gid}")

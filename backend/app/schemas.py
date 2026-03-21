@@ -67,7 +67,7 @@ class RoasteryOut(BaseModel):
 # --- Grinder ---
 
 class GrinderCreate(BaseModel):
-    name: str
+    manufacturer: str
     model: str | None = None
     kind: Literal["auto", "manual"] = "auto"
     is_default: bool = False
@@ -77,7 +77,7 @@ class GrinderCreate(BaseModel):
 
 
 class GrinderUpdate(BaseModel):
-    name: str | None = None
+    manufacturer: str | None = None
     model: str | None = None
     kind: Literal["auto", "manual"] | None = None
     is_default: bool | None = None
@@ -88,7 +88,7 @@ class GrinderUpdate(BaseModel):
 
 class GrinderOut(BaseModel):
     id: int
-    name: str
+    manufacturer: str
     model: str | None = None
     kind: str
     is_default: bool
@@ -103,13 +103,15 @@ class GrinderOut(BaseModel):
 
 class BrewSetupCreate(BaseModel):
     method_type: Literal["espresso", "pourover", "aeropress", "frenchpress", "moka", "cezve"]
-    name: str
+    manufacturer: str
+    model: str | None = None
     basket_grams: int | None = None
     is_default: bool = False
 
 
 class BrewSetupUpdate(BaseModel):
-    name: str | None = None
+    manufacturer: str | None = None
+    model: str | None = None
     basket_grams: int | None = None
     is_default: bool | None = None
 
@@ -117,7 +119,8 @@ class BrewSetupUpdate(BaseModel):
 class BrewSetupOut(BaseModel):
     id: int
     method_type: str
-    name: str
+    manufacturer: str
+    model: str | None = None
     basket_grams: int | None = None
     is_default: bool
 

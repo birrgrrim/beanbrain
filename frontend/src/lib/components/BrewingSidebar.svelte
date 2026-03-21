@@ -14,7 +14,7 @@
 	let filtered = $derived(
 		search.trim()
 			? brewSetups.filter(s =>
-				s.name.toLowerCase().includes(search.toLowerCase()) ||
+				s.manufacturer.toLowerCase().includes(search.toLowerCase()) ||
 				s.method_type.toLowerCase().includes(search.toLowerCase())
 			)
 			: brewSetups
@@ -49,7 +49,7 @@
 				<div class="flex items-center gap-3">
 					<img src="/img/method-{setup.method_type}.png" alt="" class="w-20 h-20 opacity-60" />
 					<div class="min-w-0 flex-1">
-						<p class="font-semibold text-lg text-stone-800 truncate">{setup.name}</p>
+						<p class="font-semibold text-lg text-stone-800 truncate">{setup.manufacturer}{setup.model ? ` ${setup.model}` : ""}</p>
 						<div class="flex items-center gap-2 mt-0.5">
 							<span class="text-sm text-stone-400">{$t(`method.${setup.method_type}`)}</span>
 							{#if setup.basket_grams}

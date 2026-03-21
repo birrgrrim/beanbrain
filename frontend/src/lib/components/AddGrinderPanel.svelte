@@ -8,7 +8,7 @@
 		onCancel: () => void;
 	} = $props();
 
-	let name = $state('');
+	let manufacturer = $state('');
 	let model = $state('');
 	let kind = $state<'auto' | 'manual'>('auto');
 	let rangeMin = $state<number | string>(0);
@@ -17,10 +17,10 @@
 	let saving = $state(false);
 
 	async function save() {
-		if (!name.trim()) return;
+		if (!manufacturer.trim()) return;
 		saving = true;
 		const grinder = await api.grinders.create({
-			name: name.trim(),
+			manufacturer: manufacturer.trim(),
 			model: model.trim() || undefined,
 			kind,
 			range_min: Number(rangeMin) || 0,
@@ -61,8 +61,8 @@
 			</button>
 		</div>
 		<div>
-			<label for="grinder-name" class="text-xs text-stone-400 uppercase tracking-wide">{$t('grinding.name')}</label>
-			<input id="grinder-name" type="text" bind:value={name} placeholder={$t('grinding.name_placeholder')}
+			<label for="grinder-manufacturer" class="text-xs text-stone-400 uppercase tracking-wide">{$t('grinding.manufacturer')}</label>
+			<input id="grinder-manufacturer" type="text" bind:value={manufacturer} placeholder={$t('grinding.manufacturer_placeholder')}
 				class="w-full mt-1 px-4 py-2.5 rounded-lg border border-stone-200 text-base bg-card-inset
 					focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-300" />
 		</div>
@@ -89,7 +89,7 @@
 			</div>
 		</div>
 		<div class="flex gap-2 pt-2">
-			<button onclick={save} disabled={!name.trim() || saving}
+			<button onclick={save} disabled={!manufacturer.trim() || saving}
 				class="px-6 py-2.5 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">
 				{$t('common.save')}
 			</button>
