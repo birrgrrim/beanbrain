@@ -102,12 +102,13 @@ class Taster(Base):
 class Review(Base):
     __tablename__ = "reviews"
     __table_args__ = (
-        UniqueConstraint("coffee_id", "taster_id", name="uq_review_coffee_taster"),
+        UniqueConstraint("coffee_id", "taster_id", "brew_setup_id", name="uq_review_coffee_taster_setup"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
     coffee_id = Column(Integer, ForeignKey("coffees.id", ondelete="CASCADE"), nullable=False)
     taster_id = Column(Integer, ForeignKey("tasters.id"), nullable=False)
+    brew_setup_id = Column(Integer, ForeignKey("brew_setups.id"), nullable=False)
     rating = Column(Integer, nullable=False)  # 1-10 (displayed as 5 stars with halves)
     comment = Column(String, nullable=True)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
@@ -115,6 +116,7 @@ class Review(Base):
 
     coffee = relationship("Coffee", back_populates="reviews")
     taster = relationship("Taster")
+    brew_setup = relationship("BrewSetup")
     descriptors = relationship("Descriptor", secondary=review_descriptor)
 
 

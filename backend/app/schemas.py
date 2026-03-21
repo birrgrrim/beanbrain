@@ -161,6 +161,7 @@ class GrinderSettingOut(BaseModel):
 
 class ReviewUpsert(BaseModel):
     taster_id: int
+    brew_setup_id: int
     rating: int = Field(ge=1, le=10)
     comment: str | None = None
     descriptor_ids: list[int] = []
@@ -170,7 +171,9 @@ class ReviewOut(BaseModel):
     id: int
     coffee_id: int
     taster_id: int
+    brew_setup_id: int
     taster: TasterOut
+    brew_setup: BrewSetupOut
     rating: int
     comment: str | None = None
     updated_at: datetime

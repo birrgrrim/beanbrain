@@ -51,6 +51,7 @@
 
 	// Review form
 	let editingReviewTasterId = $state<number | null>(null);
+	let reviewBrewSetupId = $state<number | null>(null);
 	let reviewRating = $state(0);
 	let reviewComment = $state('');
 	let reviewDescriptors = $state<number[]>([]);
@@ -98,7 +99,7 @@
 	);
 
 	const unreviewedTasters = $derived(
-		tasters.filter(ta => !coffee?.reviews.some(r => r.taster_id === ta.id))
+		tasters
 	);
 
 	// Edit mode helpers
@@ -156,8 +157,9 @@
 	}
 
 	// Review helpers
-	function startReview(tasterId: number, existing?: { rating: number; comment: string | null; descriptors: { id: number }[] }) {
+	function startReview(tasterId: number, brewSetupId?: number, existing?: { rating: number; comment: string | null; descriptors: { id: number }[] }) {
 		editingReviewTasterId = tasterId;
+		reviewBrewSetupId = brewSetupId ?? brewSetupsList.find(s => s.is_default)?.id ?? brewSetupsList[0]?.id ?? null;
 		reviewRating = existing?.rating ?? 0;
 		reviewComment = existing?.comment ?? '';
 		reviewDescriptors = existing?.descriptors.map(d => d.id) ?? [];
@@ -165,15 +167,17 @@
 
 	function cancelReview() {
 		editingReviewTasterId = null;
+		reviewBrewSetupId = null;
 		reviewRating = 0;
 		reviewComment = '';
 		reviewDescriptors = [];
 	}
 
 	async function saveReview() {
-		if (!editingReviewTasterId || reviewRating === 0) return;
+		if (!editingReviewTasterId || !reviewBrewSetupId || reviewRating === 0) return;
 		await api.reviews.upsert(coffeeId, {
 			taster_id: editingReviewTasterId,
+			brew_setup_id: reviewBrewSetupId,
 			rating: reviewRating,
 			comment: reviewComment.trim() || undefined,
 			descriptor_ids: reviewDescriptors.length > 0 ? reviewDescriptors : undefined,
@@ -688,6 +692,8 @@
 					{#if editingReviewTasterId === review.taster_id}
 						<ReviewForm
 							tasterName={review.taster.name}
+							brewSetups={brewSetupsList}
+							bind:brewSetupId={reviewBrewSetupId}
 							bind:rating={reviewRating}
 							bind:comment={reviewComment}
 							bind:descriptorIds={reviewDescriptors}
@@ -701,11 +707,12 @@
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
 									<span class="text-base font-semibold text-stone-700">{review.taster.name}</span>
+									<span class="text-xs bg-stone-100 text-stone-500 rounded-md px-2 py-0.5">{review.brew_setup.manufacturer}{review.brew_setup.model ? ` ${review.brew_setup.model}` : ''}</span>
 									<StarRating rating={review.rating} />
 									<span class="text-sm text-stone-400 tabular-nums">{review.rating}/10</span>
 								</div>
 								<div class="flex gap-2 items-center">
-									<button onclick={() => startReview(review.taster_id, review)} class="px-3 py-1 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded hover:bg-card-inset">edit</button>
+									<button onclick={() => startReview(review.taster_id, review.brew_setup_id, review)} class="px-3 py-1 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded hover:bg-card-inset">edit</button>
 									<button onclick={() => deleteReview(review.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
 										<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
 									</button>
@@ -723,9 +730,11 @@
 					{/if}
 				{/each}
 
-				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId)}
+				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId && r.brew_setup_id === reviewBrewSetupId)}
 					<ReviewForm
 						tasterName={tasters.find(ta => ta.id === editingReviewTasterId)?.name ?? ''}
+						brewSetups={brewSetupsList}
+						bind:brewSetupId={reviewBrewSetupId}
 						bind:rating={reviewRating}
 						bind:comment={reviewComment}
 						bind:descriptorIds={reviewDescriptors}
