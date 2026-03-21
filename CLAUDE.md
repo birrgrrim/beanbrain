@@ -91,7 +91,7 @@ frontend/
   # Check current state:
   uv run alembic current
   ```
-- **Tests**: use `SKIP_MIGRATIONS=1` env var, create tables via `Base.metadata.create_all` directly
+- **Tests**: use `TESTING=1` env var (skips migrations + seed in lifespan), create tables via `Base.metadata.create_all` directly
 - **Baseline**: first migration (`3817fe24fdf7`) is a no-op — existing DBs stamped with `alembic stamp head`
 
 ## Testing

@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-os.environ["SKIP_MIGRATIONS"] = "1"
+os.environ["TESTING"] = "1"
 
 from app.database import Base, get_db
 from app.main import app

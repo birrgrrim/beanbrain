@@ -19,14 +19,14 @@ def _run_migrations() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not os.environ.get("SKIP_MIGRATIONS"):
+    if not os.environ.get("TESTING"):
         _run_migrations()
-    db = SessionLocal()
-    try:
-        seed_database(db)
-        seed_origins(db)
-    finally:
-        db.close()
+        db = SessionLocal()
+        try:
+            seed_database(db)
+            seed_origins(db)
+        finally:
+            db.close()
     yield
 
 
