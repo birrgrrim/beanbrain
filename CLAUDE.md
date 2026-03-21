@@ -95,7 +95,7 @@ frontend/
 - **Baseline**: first migration (`3817fe24fdf7`) is a no-op — existing DBs stamped with `alembic stamp head`
 
 ## Testing
-- Backend: pytest with in-memory SQLite (91 tests), ruff linting
+- Backend: pytest with in-memory SQLite (92 tests), ruff linting
 - Frontend: svelte-check type validation + production build verification
 - Run: `cd backend && uv run pytest tests/ -v`
 - Lint: `cd backend && uv run ruff check .`
@@ -111,9 +111,16 @@ frontend/
 - **PR merge**: user hand-tests the deployed result before merging — never auto-merge
 
 ### Versioning strategy
-- **Schema-changing issues** (new/altered DB columns, migrations): each gets its own minor version bump (0.3.0 → 0.3.1 → 0.3.2), own milestone, own branch → PR to `main`
-- **Non-schema issues** (design, bug fixes, infra): group many into one milestone with a minor bump, each issue gets its own branch → PR to `main`
+- **Schema-changing issues** (new/altered DB columns, migrations): each gets its own minor version bump (0.3.0 → 0.3.1 → 0.3.2)
+- **Non-schema issues** (design, bug fixes, infra): group many into one milestone with a minor bump
 - **Backup filenames**: include both release version and migration number (`beanbrain-0.3.1-m003-2026-03-21.db`) so schema state is always visible
+- **Version bump** happens once per milestone — after the last schema-changing issue merges
+
+### Branching strategy
+- **Single-issue milestone**: feature branch → PR to `main`
+- **Multi-issue milestone**: create `milestone/vX.Y.Z` branch from `main`, each issue gets a feature branch → PR to milestone branch, final PR from milestone branch → `main`
+- Version bump, changelog, and release happen on the milestone branch (or `main` for single-issue) after all issues land
+- Cleanup: delete feature branches and milestone branch after release
 
 ## Conventions
 - Commits co-authored with Claude
