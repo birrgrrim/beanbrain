@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.3] - 2026-03-21
+
+### Added
+- Per-brew-method reviews — same person can rate same coffee differently per brew method
+- Brew method selector in review form
+- Brew method badge on each review display
+- New test: `test_per_method_reviews` (92 tests total)
+
+### Changed
+- Review unique constraint: `(coffee_id, taster_id)` → `(coffee_id, taster_id, brew_setup_id)`
+- Sidebar person rating filters by default brew setup
+- Migration backfills existing reviews with default brew setup
+
 ## [0.3.2] - 2026-03-21
 
 ### Changed
@@ -80,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruff linter for backend code
 - Version label in header bar
 
+[0.3.3]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.3
 [0.3.2]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.2
 [0.3.1]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.1
 [0.3.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.0
