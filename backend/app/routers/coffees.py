@@ -79,19 +79,25 @@ def list_coffees(
         .all()
     )
 
-    # Bulk: person ratings (1 query)
+    # Shared: default equipment (used for person_rating + default_grind)
+    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
+    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
+
+    # Bulk: person ratings for default brew setup (1 query)
     person_ratings = {}
-    if taster_id:
+    if taster_id and default_setup:
         person_ratings = dict(
             db.query(Review.coffee_id, Review.rating)
-            .filter(Review.coffee_id.in_(coffee_ids), Review.taster_id == taster_id)
+            .filter(
+                Review.coffee_id.in_(coffee_ids),
+                Review.taster_id == taster_id,
+                Review.brew_setup_id == default_setup.id,
+            )
             .all()
         )
 
     # Bulk: default grind settings (1+2 queries instead of 3N)
     default_grinds: dict[int, float] = {}
-    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
-    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
     if default_grinder and default_setup:
         for row in db.query(GrinderSetting.coffee_id, GrinderSetting.setting).filter(
             GrinderSetting.coffee_id.in_(coffee_ids),
@@ -123,6 +129,7 @@ def get_coffee(coffee_id: int, db: Session = Depends(get_db)):
             joinedload(Coffee.roastery_descriptors),
             joinedload(Coffee.reviews).joinedload(Review.descriptors),
             joinedload(Coffee.reviews).joinedload(Review.taster),
+            joinedload(Coffee.reviews).joinedload(Review.brew_setup),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.grinder),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_setup),
         )
@@ -204,6 +211,7 @@ async def refresh_coffee(coffee_id: int, db: Session = Depends(get_db)):
             joinedload(Coffee.roastery_descriptors),
             joinedload(Coffee.reviews).joinedload(Review.descriptors),
             joinedload(Coffee.reviews).joinedload(Review.taster),
+            joinedload(Coffee.reviews).joinedload(Review.brew_setup),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.grinder),
             joinedload(Coffee.grinder_settings).joinedload(GrinderSetting.brew_setup),
         )

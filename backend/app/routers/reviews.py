@@ -16,7 +16,7 @@ def list_reviews(coffee_id: int, db: Session = Depends(get_db)):
 
     return (
         db.query(Review)
-        .options(joinedload(Review.descriptors), joinedload(Review.taster))
+        .options(joinedload(Review.descriptors), joinedload(Review.taster), joinedload(Review.brew_setup))
         .filter(Review.coffee_id == coffee_id)
         .all()
     )
@@ -24,14 +24,18 @@ def list_reviews(coffee_id: int, db: Session = Depends(get_db)):
 
 @router.put("/", response_model=ReviewOut)
 def upsert_review(coffee_id: int, data: ReviewUpsert, db: Session = Depends(get_db)):
-    """Create or update a review. One review per person per coffee."""
+    """Create or update a review. One review per person per coffee per brew setup."""
     coffee = db.query(Coffee).filter(Coffee.id == coffee_id).first()
     if not coffee:
         raise HTTPException(status_code=404, detail="Coffee not found")
 
     review = (
         db.query(Review)
-        .filter(Review.coffee_id == coffee_id, Review.taster_id == data.taster_id)
+        .filter(
+            Review.coffee_id == coffee_id,
+            Review.taster_id == data.taster_id,
+            Review.brew_setup_id == data.brew_setup_id,
+        )
         .first()
     )
 
@@ -42,6 +46,7 @@ def upsert_review(coffee_id: int, data: ReviewUpsert, db: Session = Depends(get_
         review = Review(
             coffee_id=coffee_id,
             taster_id=data.taster_id,
+            brew_setup_id=data.brew_setup_id,
             rating=data.rating,
             comment=data.comment,
         )
@@ -60,7 +65,7 @@ def upsert_review(coffee_id: int, data: ReviewUpsert, db: Session = Depends(get_
 
     return (
         db.query(Review)
-        .options(joinedload(Review.descriptors), joinedload(Review.taster))
+        .options(joinedload(Review.descriptors), joinedload(Review.taster), joinedload(Review.brew_setup))
         .filter(Review.id == review.id)
         .first()
     )

@@ -69,7 +69,9 @@ export interface Review {
 	id: number;
 	coffee_id: number;
 	taster_id: number;
+	brew_setup_id: number;
 	taster: Taster;
+	brew_setup: BrewSetup;
 	rating: number;
 	comment: string | null;
 	updated_at: string;
@@ -207,6 +209,7 @@ export const api = {
 	reviews: {
 		upsert: (coffeeId: number, data: {
 			taster_id: number;
+			brew_setup_id: number;
 			rating: number;
 			comment?: string;
 			descriptor_ids?: number[];

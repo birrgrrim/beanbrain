@@ -2,16 +2,17 @@
 
 
 def _setup(client):
-    """Create a roastery + coffee, return (roastery_id, coffee_id)."""
+    """Create a roastery + coffee, return (roastery_id, coffee_id, default_setup_id)."""
     rid = client.post("/roasteries/", json={"name": "Test Roastery"}).json()["id"]
     cid = client.post("/coffees/", json={"name": "Test Coffee", "roastery_id": rid}).json()["id"]
-    return rid, cid
+    sid = next(s["id"] for s in client.get("/brew-setups/").json() if s["is_default"])
+    return rid, cid, sid
 
 
 def test_avg_rating_single_review(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     tid = client.post("/tasters/", json={"name": "Alex"}).json()["id"]
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": tid, "rating": 8})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": tid, "brew_setup_id": sid, "rating": 8})
 
     coffees = client.get("/coffees/").json()
     coffee = next(c for c in coffees if c["id"] == cid)
@@ -19,11 +20,11 @@ def test_avg_rating_single_review(client):
 
 
 def test_avg_rating_multiple_reviews(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     t1 = client.post("/tasters/", json={"name": "Alex"}).json()["id"]
     t2 = client.post("/tasters/", json={"name": "Kate"}).json()["id"]
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "rating": 7})
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "rating": 9})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "brew_setup_id": sid, "rating": 7})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "brew_setup_id": sid, "rating": 9})
 
     coffees = client.get("/coffees/").json()
     coffee = next(c for c in coffees if c["id"] == cid)
@@ -31,13 +32,13 @@ def test_avg_rating_multiple_reviews(client):
 
 
 def test_avg_rating_rounds_to_one_decimal(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     t1 = client.post("/tasters/", json={"name": "Alex"}).json()["id"]
     t2 = client.post("/tasters/", json={"name": "Kate"}).json()["id"]
     t3 = client.post("/tasters/", json={"name": "Sam"}).json()["id"]
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "rating": 7})
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "rating": 8})
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t3, "rating": 9})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "brew_setup_id": sid, "rating": 7})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "brew_setup_id": sid, "rating": 8})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t3, "brew_setup_id": sid, "rating": 9})
 
     coffees = client.get("/coffees/").json()
     coffee = next(c for c in coffees if c["id"] == cid)
@@ -45,18 +46,18 @@ def test_avg_rating_rounds_to_one_decimal(client):
 
 
 def test_avg_rating_none_without_reviews(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     coffees = client.get("/coffees/").json()
     coffee = next(c for c in coffees if c["id"] == cid)
     assert coffee["avg_rating"] is None
 
 
 def test_person_rating(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     t1 = client.post("/tasters/", json={"name": "Alex"}).json()["id"]
     t2 = client.post("/tasters/", json={"name": "Kate"}).json()["id"]
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "rating": 7})
-    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "rating": 9})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t1, "brew_setup_id": sid, "rating": 7})
+    client.put(f"/coffees/{cid}/reviews/", json={"taster_id": t2, "brew_setup_id": sid, "rating": 9})
 
     coffees = client.get("/coffees/", params={"taster_id": t1}).json()
     coffee = next(c for c in coffees if c["id"] == cid)
@@ -64,7 +65,7 @@ def test_person_rating(client):
 
 
 def test_person_rating_none_without_review(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     t1 = client.post("/tasters/", json={"name": "Alex"}).json()["id"]
 
     coffees = client.get("/coffees/", params={"taster_id": t1}).json()
@@ -73,7 +74,7 @@ def test_person_rating_none_without_review(client):
 
 
 def test_default_grind(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     grinder_id = next(g["id"] for g in client.get("/grinders/").json() if g["is_default"])
     setup_id = next(s["id"] for s in client.get("/brew-setups/").json() if s["is_default"])
 
@@ -89,7 +90,7 @@ def test_default_grind(client):
 
 
 def test_default_grind_none_without_setting(client):
-    _, cid = _setup(client)
+    _, cid, sid = _setup(client)
     coffees = client.get("/coffees/").json()
     coffee = next(c for c in coffees if c["id"] == cid)
     assert coffee["default_grind"] is None
