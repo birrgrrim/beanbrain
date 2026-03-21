@@ -5,7 +5,7 @@
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
 	import { activePerson } from '$lib/personStore';
-	import { activeBrewSetup } from '$lib/contextStore';
+	import { activeGrinder, activeBrewSetup } from '$lib/contextStore';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import ReviewForm from './ReviewForm.svelte';
@@ -30,8 +30,10 @@
 	let loading = $state(true);
 
 	let currentPersonId = $state<number | null>(null);
+	let currentGrinderId = $state<number | null>(null);
 	let currentBrewSetupId = $state<number | null>(null);
 	activePerson.subscribe(v => currentPersonId = v);
+	activeGrinder.subscribe(v => currentGrinderId = v);
 	activeBrewSetup.subscribe(v => currentBrewSetupId = v);
 
 	let originsList = $state<Origin[]>([]);
@@ -98,6 +100,22 @@
 	const suggestedDescriptorIds = $derived(
 		coffee?.roastery_descriptors.map(d => d.id) ?? []
 	);
+
+	// Active context: find existing grind setting and review for current combo
+	const activeGrindSetting = $derived(
+		coffee?.grinder_settings.find(s =>
+			s.grinder_id === Number(currentGrinderId) && s.brew_setup_id === Number(currentBrewSetupId)
+		) ?? null
+	);
+
+	const activeReview = $derived(
+		coffee?.reviews.find(r =>
+			r.taster_id === Number(currentPersonId) && r.brew_setup_id === Number(currentBrewSetupId)
+		) ?? null
+	);
+
+	const currentGrinderObj = $derived(grindersList.find(g => g.id === Number(currentGrinderId)));
+	const currentSetupObj = $derived(brewSetupsList.find(s => s.id === Number(currentBrewSetupId)));
 
 	const roasterCommentText = $derived(
 		coffee?.roaster_comment?.[currentLang] || coffee?.roaster_comment?.['uk'] || coffee?.roaster_comment?.['en'] || null
@@ -210,10 +228,14 @@
 	}
 
 	async function addGrinderSetting() {
-		if (!settingGrinderId || !settingBrewSetupId || !settingValue) return;
+		if (!currentGrinderId || !currentBrewSetupId || !settingValue) return;
+		// Delete existing setting for this combo first (upsert)
+		if (activeGrindSetting) {
+			await api.grinderSettings.delete(coffeeId, activeGrindSetting.id);
+		}
 		await api.grinderSettings.create(coffeeId, {
-			grinder_id: Number(settingGrinderId),
-			brew_setup_id: Number(settingBrewSetupId),
+			grinder_id: Number(currentGrinderId),
+			brew_setup_id: Number(currentBrewSetupId),
 			setting: parseFloat(settingValue),
 			notes: settingNotes.trim() || undefined,
 		});
@@ -581,8 +603,14 @@
 						<img src="/img/burr-icon.png" alt="" class="w-12 h-12 opacity-60" />
 						<h3 class="font-semibold text-base text-stone-700">{$t('grinder.title')}</h3>
 					</div>
-					{#if !showSettingForm}
-						<button onclick={() => showSettingForm = true} class="text-xs text-amber-600 hover:text-amber-800 font-medium">{$t('grinder.add')}</button>
+					{#if currentGrinderId && currentBrewSetupId && !showSettingForm}
+						{#if activeGrindSetting}
+							<button onclick={() => { settingValue = String(activeGrindSetting.setting); settingNotes = activeGrindSetting.notes ?? ''; showSettingForm = true; }}
+								class="text-sm text-amber-600 hover:text-amber-700 transition-colors">{$t('common.edit')}</button>
+						{:else}
+							<button onclick={() => { settingValue = ''; settingNotes = ''; showSettingForm = true; }}
+								class="text-sm text-amber-600 hover:text-amber-700 transition-colors">+ {$t('tasting.add_short')}</button>
+						{/if}
 					{/if}
 				</div>
 				{#if coffee.grinder_settings.length === 0 && !showSettingForm}
@@ -592,74 +620,42 @@
 					</div>
 				{/if}
 				{#each coffee.grinder_settings as setting}
-					<div class="flex flex-wrap items-center gap-2 md:gap-3 py-2 border-b border-stone-50 last:border-0">
-						<GrindValue value={setting.setting} step={setting.grinder.step} class="text-2xl md:text-3xl text-amber-700 flex-shrink-0" />
-						<div class="flex flex-wrap gap-2 flex-1 min-w-0">
-							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
-								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-								<span class="text-xs md:text-sm text-stone-600">{setting.grinder.manufacturer}</span>
-								{#if setting.grinder.model}<span class="text-xs md:text-sm text-stone-400">{setting.grinder.model}</span>{/if}
-							</div>
-							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
-								<img src="/img/method-{setting.brew_setup.method_type}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-								<span class="text-xs md:text-sm text-stone-600">{setting.brew_setup.manufacturer}{setting.brew_setup.model ? ` ${setting.brew_setup.model}` : ''}</span>
-								{#if setting.brew_setup.basket_grams}<span class="text-xs md:text-sm text-stone-400">{setting.brew_setup.basket_grams}g</span>{/if}
-							</div>
+					<div class="flex items-center gap-2 py-2 border-b border-stone-50 last:border-0">
+						<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+							<span class="text-xs text-stone-500 truncate">{setting.grinder.manufacturer}{setting.grinder.model ? ` ${setting.grinder.model}` : ''}</span>
+							<span class="text-xs text-stone-400 truncate">{setting.brew_setup.manufacturer}{setting.brew_setup.model ? ` ${setting.brew_setup.model}` : ''}</span>
 						</div>
-						<button onclick={() => deleteGrinderSetting(setting.id)} class="p-1 md:p-1.5 flex-shrink-0 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-							<img src="/img/knockbox.png" alt="delete" class="w-5 h-5 md:w-7 md:h-7 opacity-50" />
-						</button>
+						<GrindValue value={setting.setting} step={setting.grinder.step} class="text-2xl text-amber-700 flex-shrink-0" />
 					</div>
 				{/each}
 				{#if showSettingForm}
-					{@const selectedGrinder = grindersList.find(g => String(g.id) === String(settingGrinderId))}
-					{@const selectedSetup = brewSetupsList.find(s => String(s.id) === String(settingBrewSetupId))}
-					<div class="mt-3 bg-card-inset rounded-xl p-4 space-y-4">
-						<!-- Grind value — big centered input -->
+					<div class="mt-3 bg-card-inset rounded-xl p-4 space-y-3">
 						<div class="flex items-center justify-center gap-3">
 							<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-40" />
 							<input type="number"
-								step={selectedGrinder?.step ?? 1}
-								min={selectedGrinder?.range_min ?? 0}
-								max={selectedGrinder?.range_max ?? undefined}
+								step={currentGrinderObj?.step ?? 1}
+								min={currentGrinderObj?.range_min ?? 0}
+								max={currentGrinderObj?.range_max ?? undefined}
 								bind:value={settingValue}
-								placeholder={selectedGrinder && selectedGrinder.step % 1 !== 0 ? '12.5' : '12'}
+								placeholder={currentGrinderObj && currentGrinderObj.step % 1 !== 0 ? '12.5' : '12'}
 								class="w-24 px-3 py-2 rounded-xl border border-stone-200 text-2xl font-bold text-amber-700 text-center bg-card
 									focus:outline-none focus:ring-2 focus:ring-amber-400/50 tabular-nums" />
 						</div>
-
-						<!-- Grinder selector -->
-						<div class="flex items-center gap-3 bg-card rounded-xl px-4 py-3 border border-stone-100">
-							{#if selectedGrinder}
-								<img src="/img/grinder-{selectedGrinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-8 h-8 opacity-50 flex-shrink-0" />
-							{/if}
-							<select bind:value={settingGrinderId}
-								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
-								{#each grindersList as g}<option value={g.id}>{g.manufacturer}{g.model ? ` ${g.model}` : ''}</option>{/each}
-							</select>
-						</div>
-
-						<!-- Brew setup selector -->
-						<div class="flex items-center gap-3 bg-card rounded-xl px-4 py-3 border border-stone-100">
-							{#if selectedSetup}
-								<img src="/img/method-{selectedSetup.method_type}.png" alt="" class="w-8 h-8 opacity-50 flex-shrink-0" />
-							{/if}
-							<select bind:value={settingBrewSetupId}
-								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
-								{#each brewSetupsList as s}<option value={s.id}>{s.manufacturer}{s.model ? ` ${s.model}` : ''}{s.basket_grams ? ` ${s.basket_grams}g` : ''}</option>{/each}
-							</select>
-						</div>
-
-						<!-- Notes -->
 						<input type="text" bind:value={settingNotes} placeholder={$t('grinder.notes')}
 							class="w-full px-4 py-2.5 rounded-xl border border-stone-100 text-sm bg-card
 								focus:outline-none focus:ring-2 focus:ring-amber-400/50 placeholder:text-stone-300" />
-
-						<!-- Actions -->
-						<div class="flex gap-2 justify-end">
-							<button onclick={() => showSettingForm = false} class="px-4 py-2 text-stone-400 text-sm">{$t('grinder.cancel')}</button>
-							<button onclick={addGrinderSetting}
-								class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{$t('grinder.save')}</button>
+						<div class="flex items-center justify-between">
+							{#if activeGrindSetting}
+								<button onclick={() => { deleteGrinderSetting(activeGrindSetting.id); showSettingForm = false; }}
+									class="text-sm text-red-400 hover:text-red-600 transition-colors">{$t('detail.delete')}</button>
+							{:else}
+								<div></div>
+							{/if}
+							<div class="flex gap-2">
+								<button onclick={() => showSettingForm = false} class="px-4 py-2 text-stone-400 text-sm">{$t('grinder.cancel')}</button>
+								<button onclick={addGrinderSetting}
+									class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{$t('grinder.save')}</button>
+							</div>
 						</div>
 					</div>
 				{/if}
@@ -672,11 +668,14 @@
 						<img src="/img/coffee-cup.png" alt="" class="w-12 h-12 opacity-60" />
 						<h3 class="font-semibold text-base text-stone-700">{$t('tasting.title')}</h3>
 					</div>
-					{#if currentPersonId && editingReviewTasterId === null}
-						<button onclick={() => startReview(currentPersonId!)}
-							class="text-sm text-amber-600 hover:text-amber-700 transition-colors">
-							+ {$t('tasting.add_short')}
-						</button>
+					{#if currentPersonId && currentBrewSetupId && editingReviewTasterId === null}
+						{#if activeReview}
+							<button onclick={() => startReview(currentPersonId!, currentBrewSetupId!, activeReview)}
+								class="text-sm text-amber-600 hover:text-amber-700 transition-colors">{$t('common.edit')}</button>
+						{:else}
+							<button onclick={() => startReview(currentPersonId!)}
+								class="text-sm text-amber-600 hover:text-amber-700 transition-colors">+ {$t('tasting.add_short')}</button>
+						{/if}
 					{/if}
 				</div>
 
@@ -687,49 +686,7 @@
 					</div>
 				{/if}
 
-				{#each coffee.reviews as review}
-					{#if editingReviewTasterId === review.taster_id}
-						<ReviewForm
-							tasterName={review.taster.name}
-							brewSetups={brewSetupsList}
-							bind:brewSetupId={reviewBrewSetupId}
-							bind:rating={reviewRating}
-							bind:comment={reviewComment}
-							bind:descriptorIds={reviewDescriptors}
-							{descriptors}
-							{suggestedDescriptorIds}
-							onSave={saveReview}
-							onCancel={cancelReview}
-						/>
-					{:else}
-						<div class="py-2 border-b border-stone-50 last:border-0">
-							<div class="flex items-center justify-between">
-								<div class="flex items-center gap-2">
-									<span class="text-base font-semibold text-stone-700">{review.taster.name}</span>
-									<span class="text-xs bg-stone-100 text-stone-500 rounded-md px-2 py-0.5">{review.brew_setup.manufacturer}{review.brew_setup.model ? ` ${review.brew_setup.model}` : ''}</span>
-									<StarRating rating={review.rating} />
-									<span class="text-sm text-stone-400 tabular-nums">{review.rating}/10</span>
-								</div>
-								<div class="flex gap-2 items-center">
-									<button onclick={() => startReview(review.taster_id, review.brew_setup_id, review)} class="px-3 py-1 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded hover:bg-card-inset">edit</button>
-									<button onclick={() => deleteReview(review.id)} class="p-1.5 text-stone-300 hover:text-red-400 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-										<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
-									</button>
-								</div>
-							</div>
-							{#if review.comment}<p class="text-base text-stone-500 mt-1.5">{review.comment}</p>{/if}
-							{#if review.descriptors.length > 0}
-								<div class="flex flex-wrap gap-1.5 mt-2">
-									{#each review.descriptors as desc}
-										<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
-									{/each}
-								</div>
-							{/if}
-						</div>
-					{/if}
-				{/each}
-
-				{#if editingReviewTasterId && !coffee.reviews.some(r => r.taster_id === editingReviewTasterId && r.brew_setup_id === reviewBrewSetupId)}
+				{#if editingReviewTasterId}
 					<ReviewForm
 						tasterName={tasters.find(ta => ta.id === editingReviewTasterId)?.name ?? ''}
 						brewSetups={brewSetupsList}
@@ -741,7 +698,18 @@
 						{suggestedDescriptorIds}
 						onSave={saveReview}
 						onCancel={cancelReview}
+						onDelete={activeReview ? () => { deleteReview(activeReview.id); cancelReview(); } : undefined}
 					/>
+				{:else}
+					{#each coffee.reviews as review}
+						<div class="flex items-center gap-2 py-2 border-b border-stone-50 last:border-0">
+							<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+								<span class="text-sm text-stone-600 truncate">{review.taster.name}</span>
+								<span class="text-xs text-stone-400 truncate">{review.brew_setup.manufacturer}{review.brew_setup.model ? ` ${review.brew_setup.model}` : ''}</span>
+							</div>
+							<span class="text-2xl font-bold text-amber-700 tabular-nums flex-shrink-0">{review.rating}</span>
+						</div>
+					{/each}
 				{/if}
 			</div>
 
