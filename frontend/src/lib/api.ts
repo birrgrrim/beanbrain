@@ -173,10 +173,12 @@ export const BREW_METHOD_TYPES: BrewMethodType[] = [
 
 export const api = {
 	coffees: {
-		list: (search?: string, tasterId?: number | null) => {
+		list: (opts?: { search?: string; tasterId?: number | null; grinderId?: number | null; brewSetupId?: number | null }) => {
 			const params = new URLSearchParams();
-			if (search) params.set('search', search);
-			if (tasterId) params.set('taster_id', String(tasterId));
+			if (opts?.search) params.set('search', opts.search);
+			if (opts?.tasterId) params.set('taster_id', String(opts.tasterId));
+			if (opts?.grinderId) params.set('grinder_id', String(opts.grinderId));
+			if (opts?.brewSetupId) params.set('brew_setup_id', String(opts.brewSetupId));
 			const qs = params.toString();
 			return request<CoffeeListItem[]>(`/coffees/${qs ? `?${qs}` : ''}`);
 		},
