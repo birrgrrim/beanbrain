@@ -43,22 +43,23 @@
 		]);
 
 		if (currentGrinderId === null || !grinders.some(g => g.id === currentGrinderId)) {
-			const def = grinders.find(g => g.is_default) ?? grinders[0];
+			const def = grinders[0];
 			if (def) activeGrinder.set(def.id);
 		}
 		if (currentBrewSetupId === null || !brewSetups.some(s => s.id === currentBrewSetupId)) {
-			const def = brewSetups.find(s => s.is_default) ?? brewSetups[0];
+			const def = brewSetups[0];
 			if (def) activeBrewSetup.set(def.id);
 		}
-		if (currentPersonId !== null && !tasters.some(t => t.id === currentPersonId)) {
-			activePerson.set(null);
+		if (currentPersonId === null || !tasters.some(t => t.id === currentPersonId)) {
+			const def = tasters[0];
+			if (def) activePerson.set(def.id);
 		}
 	}
 
 	$effect(() => { loadAll(); });
 
 	function selectPerson(id: number | null) {
-		activePerson.set(id);
+		if (id !== null) activePerson.set(id);
 		openPanel = null;
 		onChange();
 	}
@@ -125,21 +126,24 @@
 	const personItems = $derived(tasters.map(t => ({
 		id: t.id,
 		label: t.name,
-		icon: '/img/tab-person.png',
+		icon: t.avatar ?? '/img/avatar-person-1.png',
+		isCustomAvatar: !!t.avatar,
 	})));
 
 	const grinderItems = $derived(grinders.map(g => ({
 		id: g.id,
 		label: `${g.manufacturer}${g.model ? ` ${g.model}` : ''}`,
 		sublabel: g.range_max ? `${g.range_min}–${g.range_max} step ${g.step}` : `step ${g.step}`,
-		icon: `/img/grinder-${g.kind === 'manual' ? 'manual' : 'auto'}.png`,
+		icon: g.avatar ?? `/img/grinder-${g.kind === 'manual' ? 'manual' : 'auto'}.png`,
+		isCustomAvatar: !!g.avatar,
 	})));
 
 	const brewItems = $derived(brewSetups.map(s => ({
 		id: s.id,
 		label: `${s.manufacturer}${s.model ? ` ${s.model}` : ''}`,
 		sublabel: s.basket_grams ? `${s.basket_grams}g` : undefined,
-		icon: `/img/method-${s.method_type}.png`,
+		icon: s.avatar ?? `/img/method-${s.method_type}.png`,
+		isCustomAvatar: !!s.avatar,
 	})));
 
 	function toggle(panel: 'person' | 'grinder' | 'brew') {
@@ -156,25 +160,22 @@
 
 <svelte:window onclick={handleClickOutside} />
 
-<div class="context-switcher flex items-center gap-1.5">
+<div class="context-switcher flex items-center gap-2">
 	<!-- Person -->
 	<div class="relative">
 		<button
 			onclick={() => toggle('person')}
-			class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium
-				hover:bg-parchment transition-colors
-				{openPanel === 'person' ? 'bg-parchment' : 'bg-card-inset'} text-stone-500"
+			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+				{openPanel === 'person' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentPerson?.name ?? $t('person.everyone')}
 		>
-			<img src="/img/tab-person.png" alt="" class="w-6 h-6 opacity-60" />
-			<span class="max-w-[80px] truncate hidden md:inline">{currentPerson?.name ?? $t('person.everyone')}</span>
+			<img src={currentPerson?.avatar ?? '/img/avatar-person-1.png'} alt="" class="w-full h-full object-cover" />
 		</button>
 		{#if openPanel === 'person'}
 			<div class="absolute right-0 top-full mt-1">
 				<SwitcherPopover
 					items={personItems}
 					activeId={currentPersonId}
-					everyoneLabel={$t('person.everyone')}
 					addLabel={$t('persons.add')}
 					onSelect={selectPerson}
 					onAdd={() => openAdd('person')}
@@ -188,13 +189,11 @@
 	<div class="relative">
 		<button
 			onclick={() => toggle('grinder')}
-			class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium
-				hover:bg-parchment transition-colors
-				{openPanel === 'grinder' ? 'bg-parchment' : 'bg-card-inset'} text-stone-500"
+			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+				{openPanel === 'grinder' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentGrinder ? `${currentGrinder.manufacturer}${currentGrinder.model ? ` ${currentGrinder.model}` : ''}` : 'Grinder'}
 		>
-			<img src="/img/grinder-{currentGrinder?.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-6 h-6 opacity-60" />
-			<span class="max-w-[80px] truncate hidden lg:inline">{currentGrinder?.manufacturer ?? '—'}</span>
+			<img src={currentGrinder?.avatar ?? `/img/grinder-${currentGrinder?.kind === 'manual' ? 'manual' : 'auto'}.png`} alt="" class="w-full h-full object-cover" />
 		</button>
 		{#if openPanel === 'grinder'}
 			<div class="absolute right-0 top-full mt-1">
@@ -214,13 +213,11 @@
 	<div class="relative">
 		<button
 			onclick={() => toggle('brew')}
-			class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium
-				hover:bg-parchment transition-colors
-				{openPanel === 'brew' ? 'bg-parchment' : 'bg-card-inset'} text-stone-500"
+			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+				{openPanel === 'brew' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentBrewSetup ? `${currentBrewSetup.manufacturer}${currentBrewSetup.model ? ` ${currentBrewSetup.model}` : ''}` : 'Brew'}
 		>
-			<img src="/img/method-{currentBrewSetup?.method_type ?? 'espresso'}.png" alt="" class="w-6 h-6 opacity-60" />
-			<span class="max-w-[80px] truncate hidden lg:inline">{currentBrewSetup?.manufacturer ?? '—'}</span>
+			<img src={currentBrewSetup?.avatar ?? `/img/method-${currentBrewSetup?.method_type ?? 'espresso'}.png`} alt="" class="w-full h-full object-cover" />
 		</button>
 		{#if openPanel === 'brew'}
 			<div class="absolute right-0 top-full mt-1">

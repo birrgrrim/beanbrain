@@ -56,9 +56,6 @@
 								<span class="text-stone-200">|</span>
 							{/if}
 							<span class="text-sm text-stone-400">step {grinder.step}</span>
-							{#if grinder.is_default}
-								<span class="text-xs bg-amber-100 text-amber-700 rounded-md px-2 py-0.5">{$t('common.default')}</span>
-							{/if}
 						</div>
 					</div>
 				</div>

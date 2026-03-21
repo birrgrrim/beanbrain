@@ -2,6 +2,12 @@
 	import { api, type Grinder, type BrewSetup, type Taster, type BrewMethodType } from '$lib/api';
 	import { t } from '$lib/i18n';
 
+	const BASE_URL = import.meta.env.DEV ? 'http://localhost:8001' : '/api';
+
+	const PERSON_PRESETS = ['/img/avatar-person-1.png', '/img/avatar-person-2.png', '/img/avatar-person-3.png', '/img/avatar-person-4.png'];
+	const GRINDER_PRESETS = ['/img/grinder-auto.png', '/img/grinder-manual.png'];
+	const BREW_PRESETS = ['/img/method-espresso.png', '/img/method-pourover.png', '/img/method-aeropress.png', '/img/method-frenchpress.png', '/img/method-moka.png', '/img/method-cezve.png'];
+
 	type DialogType =
 		| { type: 'person'; mode: 'add' }
 		| { type: 'person'; mode: 'edit'; item: Taster }
@@ -41,6 +47,11 @@
 	let bMethodType = $state('espresso');
 	let bBasketGrams = $state<number | string>('');
 
+	// Shared
+	let avatarUrl = $state<string | null>(null);
+	let uploading = $state(false);
+	let showAvatarPicker = $state(false);
+
 	let saving = $state(false);
 	let confirmDelete = $state(false);
 	let deleteInfo = $state('');
@@ -49,8 +60,11 @@
 	$effect(() => {
 		confirmDelete = false;
 		deleteInfo = '';
+		avatarUrl = null;
+		showAvatarPicker = false;
 		if (dialog.type === 'person') {
 			personName = dialog.mode === 'edit' ? dialog.item.name : '';
+			avatarUrl = dialog.mode === 'edit' ? dialog.item.avatar : null;
 		} else if (dialog.type === 'grinder') {
 			if (dialog.mode === 'edit') {
 				gManufacturer = dialog.item.manufacturer;
@@ -59,6 +73,7 @@
 				gRangeMin = dialog.item.range_min;
 				gRangeMax = dialog.item.range_max ?? '';
 				gStep = dialog.item.step;
+				avatarUrl = dialog.item.avatar;
 			} else {
 				gManufacturer = ''; gModel = ''; gKind = 'auto';
 				gRangeMin = 0; gRangeMax = ''; gStep = 1;
@@ -69,11 +84,48 @@
 				bModel = dialog.item.model ?? '';
 				bMethodType = dialog.item.method_type;
 				bBasketGrams = dialog.item.basket_grams ?? '';
+				avatarUrl = dialog.item.avatar;
 			} else {
 				bManufacturer = ''; bModel = ''; bMethodType = 'espresso'; bBasketGrams = '';
 			}
 		}
 	});
+
+	const defaultAvatar = $derived(
+		dialog.type === 'person' ? '/img/avatar-person-1.png' :
+		dialog.type === 'grinder' ? `/img/grinder-${gKind}.png` :
+		`/img/method-${bMethodType}.png`
+	);
+
+	const displayAvatar = $derived(avatarUrl ?? defaultAvatar);
+
+	const presets = $derived(
+		dialog.type === 'person' ? PERSON_PRESETS :
+		dialog.type === 'grinder' ? GRINDER_PRESETS :
+		BREW_PRESETS
+	);
+
+	async function uploadAvatar() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/jpeg,image/png,image/webp';
+		input.onchange = async () => {
+			const file = input.files?.[0];
+			if (!file) return;
+			uploading = true;
+			try {
+				const form = new FormData();
+				form.append('file', file);
+				const res = await fetch(`${BASE_URL}/avatars/upload`, { method: 'POST', body: form });
+				if (!res.ok) throw new Error('Upload failed');
+				const data = await res.json();
+				avatarUrl = `${BASE_URL}${data.path}`;
+			} finally {
+				uploading = false;
+			}
+		};
+		input.click();
+	}
 
 	const hasBasket = $derived(
 		brewMethodTypes.find(m => m.key === bMethodType)?.has_basket ?? false
@@ -91,7 +143,7 @@
 		try {
 			if (dialog.type === 'person') {
 				if (dialog.mode === 'edit') {
-					await api.tasters.update(dialog.item.id, { name: personName.trim() });
+					await api.tasters.update(dialog.item.id, { name: personName.trim(), avatar: avatarUrl });
 				} else {
 					await api.tasters.create(personName.trim());
 				}
@@ -100,6 +152,7 @@
 					manufacturer: gManufacturer.trim(),
 					model: gModel.trim() || undefined,
 					kind: gKind,
+					avatar: avatarUrl,
 					range_min: Number(gRangeMin) || 0,
 					range_max: gRangeMax !== '' ? Number(gRangeMax) : null,
 					step: Number(gStep) || 1,
@@ -115,6 +168,7 @@
 					model: bModel.trim() || undefined,
 					method_type: bMethodType,
 					basket_grams: hasBasket && bBasketGrams ? Number(bBasketGrams) : null,
+					avatar: avatarUrl,
 				};
 				if (dialog.mode === 'edit') {
 					await api.brewSetups.update(dialog.item.id, data);
@@ -173,6 +227,42 @@
 				{dialog.mode === 'edit' ? $t('brewing.edit') : $t('brewing.add')}
 			{/if}
 		</h3>
+
+		<!-- Avatar -->
+		<div class="flex items-center gap-3">
+			<button onclick={() => showAvatarPicker = !showAvatarPicker}
+				class="w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors flex-shrink-0
+					{showAvatarPicker ? 'border-amber-400' : 'border-stone-200 hover:border-amber-300'}">
+				<img src={displayAvatar} alt="" class="w-full h-full object-cover" />
+			</button>
+			<span class="text-xs text-stone-400">{$t('common.change_avatar')}</span>
+		</div>
+		{#if showAvatarPicker}
+			<div class="bg-card-inset rounded-xl p-3 space-y-2">
+				<div class="grid grid-cols-6 gap-2">
+					{#each presets as preset}
+						<button onclick={() => { avatarUrl = preset; showAvatarPicker = false; }}
+							class="w-full aspect-square rounded-lg overflow-hidden border-2 transition-colors
+								{avatarUrl === preset ? 'border-amber-400' : 'border-stone-200 hover:border-stone-300'}">
+							<img src={preset} alt="" class="w-full h-full object-cover" />
+						</button>
+					{/each}
+				</div>
+				<div class="flex gap-2">
+					<button onclick={uploadAvatar} disabled={uploading}
+						class="flex-1 px-3 py-2 text-sm text-amber-600 border border-dashed border-amber-300 rounded-lg
+							hover:bg-amber-50 transition-colors">
+						{uploading ? '...' : $t('common.upload_photo')}
+					</button>
+					{#if avatarUrl}
+						<button onclick={() => { avatarUrl = null; showAvatarPicker = false; }}
+							class="px-3 py-2 text-sm text-stone-400 hover:text-red-400 transition-colors">
+							{$t('common.reset')}
+						</button>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		{#if confirmDelete}
 			<div class="space-y-3">

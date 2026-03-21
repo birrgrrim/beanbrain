@@ -10,10 +10,6 @@
 		onBack: () => void;
 	} = $props();
 
-	async function toggleDefault() {
-		await api.brewSetups.update(brewSetup.id, { is_default: !brewSetup.is_default });
-		onUpdated();
-	}
 
 	async function deleteSetup() {
 		if (!confirm(`Delete "${brewSetup.manufacturer}"?`)) return;
@@ -58,16 +54,5 @@
 			</div>
 		</div>
 
-		<div class="flex items-center gap-4 pt-2">
-			<button onclick={toggleDefault}
-				class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
-					{brewSetup.is_default ? 'bg-amber-600' : 'bg-stone-300'}"
-				title={$t('common.set_default')}
-			>
-				<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
-					{brewSetup.is_default ? 'translate-x-7' : 'translate-x-1'}"></span>
-			</button>
-			<span class="text-sm text-stone-500">{$t('common.default')}</span>
-		</div>
 	</div>
 </div>

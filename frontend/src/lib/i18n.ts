@@ -66,6 +66,7 @@ const translations: Record<string, Record<string, string>> = {
 	// Reviews
 	'tasting.title': { en: 'Reviews', uk: 'Відгуки' },
 	'tasting.add': { en: '+ Add Review', uk: '+ Додати відгук' },
+	'tasting.add_short': { en: 'Add', uk: 'Додати' },
 	'tasting.empty': { en: 'No reviews yet', uk: 'Ще немає відгуків' },
 	'tasting.who': { en: "Who's reviewing?", uk: 'Хто оцінює?' },
 	'tasting.select': { en: 'Select person...', uk: 'Оберіть персону...' },
@@ -161,6 +162,9 @@ const translations: Record<string, Record<string, string>> = {
 	'common.set_default': { en: 'set default', uk: 'за замовч.' },
 	'common.save': { en: 'Save', uk: 'Зберегти' },
 	'common.delete_confirm': { en: 'Are you sure you want to delete this?', uk: 'Ви впевнені, що хочете видалити?' },
+	'common.change_avatar': { en: 'Tap to change avatar', uk: 'Натисніть щоб змінити аватар' },
+	'common.upload_photo': { en: 'Upload photo', uk: 'Завантажити фото' },
+	'common.reset': { en: 'Reset', uk: 'Скинути' },
 	'common.cancel': { en: 'Cancel', uk: 'Скасувати' },
 };
 

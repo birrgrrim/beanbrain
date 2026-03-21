@@ -7,6 +7,7 @@
 		label: string;
 		sublabel?: string;
 		icon?: string;
+		isCustomAvatar?: boolean;
 	}
 
 	let {
@@ -53,7 +54,7 @@
 							{activeId === item.id ? 'text-amber-700 font-medium' : 'text-stone-600'}"
 					>
 						{#if item.icon}
-							<img src={item.icon} alt="" class="w-6 h-6 opacity-60 flex-shrink-0" />
+							<img src={item.icon} alt="" class="w-6 h-6 flex-shrink-0 {item.isCustomAvatar ? 'rounded-full object-cover' : 'opacity-60'}" />
 						{/if}
 						<div class="min-w-0 flex-1">
 							<span class="truncate block">{item.label}</span>

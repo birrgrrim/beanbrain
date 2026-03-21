@@ -8,6 +8,3 @@ def get_or_404(db: Session, model, id: int, detail: str = "Not found"):
         raise HTTPException(status_code=404, detail=detail)
     return obj
 
-
-def clear_default(db: Session, model) -> None:
-    db.query(model).filter(model.is_default.is_(True)).update({"is_default": False})

@@ -31,6 +31,7 @@ def update_taster(taster_id: int, data: TasterCreate, db: Session = Depends(get_
     if not taster:
         raise HTTPException(status_code=404, detail="Taster not found")
     taster.name = data.name
+    taster.avatar = data.avatar
     db.commit()
     db.refresh(taster)
     return taster

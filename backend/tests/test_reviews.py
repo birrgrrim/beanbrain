@@ -9,15 +9,17 @@ def _create_taster(client, name="Alex"):
     return resp.json()["id"]
 
 
-def _default_brew_setup_id(client):
+def _ensure_brew_setup(client):
     setups = client.get("/brew-setups/").json()
-    return next(s["id"] for s in setups if s["is_default"])
+    if setups:
+        return setups[0]["id"]
+    return client.post("/brew-setups/", json={"method_type": "espresso", "manufacturer": "Test"}).json()["id"]
 
 
 def test_create_review(client):
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client)
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
 
     resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
         "taster_id": taster_id,
@@ -36,7 +38,7 @@ def test_upsert_review(client):
     """Same person + brew setup updating their review should overwrite, not create new."""
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client)
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
 
     client.put(f"/coffees/{coffee_id}/reviews/", json={
         "taster_id": taster_id, "brew_setup_id": setup_id, "rating": 6, "comment": "Ok",
@@ -55,7 +57,7 @@ def test_upsert_review(client):
 def test_review_with_descriptors(client):
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client, "Kate")
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
     descriptors = client.get("/descriptors").json()
     chocolate_id = next(d["id"] for d in descriptors if d["name"] == "Chocolate")
 
@@ -72,7 +74,7 @@ def test_review_with_descriptors(client):
 def test_review_rating_validation(client):
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client)
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
 
     resp = client.put(f"/coffees/{coffee_id}/reviews/", json={
         "taster_id": taster_id, "brew_setup_id": setup_id, "rating": 0,
@@ -90,13 +92,12 @@ def test_per_method_reviews(client):
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client)
 
-    # Create a second brew setup
-    s2 = client.post("/brew-setups/", json={
-        "method_type": "pourover", "manufacturer": "Hario", "model": "V60",
-    }).json()
+    setup1 = _ensure_brew_setup(client)
 
-    setup1 = _default_brew_setup_id(client)
-    setup2 = s2["id"]
+    # Create a second brew setup
+    setup2 = client.post("/brew-setups/", json={
+        "method_type": "pourover", "manufacturer": "Hario", "model": "V60",
+    }).json()["id"]
 
     client.put(f"/coffees/{coffee_id}/reviews/", json={
         "taster_id": taster_id, "brew_setup_id": setup1, "rating": 9,
@@ -116,7 +117,7 @@ def test_list_reviews(client):
     coffee_id = _create_coffee(client)
     t1 = _create_taster(client, "Alex")
     t2 = _create_taster(client, "Kate")
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
     client.put(f"/coffees/{coffee_id}/reviews/", json={"taster_id": t1, "brew_setup_id": setup_id, "rating": 8})
     client.put(f"/coffees/{coffee_id}/reviews/", json={"taster_id": t2, "brew_setup_id": setup_id, "rating": 6})
 
@@ -128,7 +129,7 @@ def test_list_reviews(client):
 def test_delete_review(client):
     coffee_id = _create_coffee(client)
     taster_id = _create_taster(client)
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
     create = client.put(f"/coffees/{coffee_id}/reviews/", json={
         "taster_id": taster_id, "brew_setup_id": setup_id, "rating": 5,
     })
@@ -143,7 +144,7 @@ def test_delete_review(client):
 
 def test_review_for_nonexistent_coffee(client):
     taster_id = _create_taster(client)
-    setup_id = _default_brew_setup_id(client)
+    setup_id = _ensure_brew_setup(client)
     resp = client.put("/coffees/999/reviews/", json={
         "taster_id": taster_id, "brew_setup_id": setup_id, "rating": 5,
     })
