@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] - 2026-03-21
+
+### Changed
+- Grinder: `name` field renamed to `manufacturer`
+- Brew setup: `name` field replaced with `manufacturer` + `model` (consistent with grinders)
+- Unified equipment display: one-line name in sidebars, full name at back button, separate lines in detail cards
+- Grinder sidebar shows range and step info on second line
+- Updated form placeholders (e.g. "Eureka" + "Mignon Specialita")
+
 ## [0.3.1] - 2026-03-21
 
 ### Added
@@ -71,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruff linter for backend code
 - Version label in header bar
 
+[0.3.2]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.2
 [0.3.1]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.1
 [0.3.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.0
 [0.2.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.2.0
