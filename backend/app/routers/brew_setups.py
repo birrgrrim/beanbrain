@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import BREW_METHOD_TYPES, BrewSetup, GrinderSetting, Review
 from ..schemas import BrewMethodTypeOut, BrewSetupCreate, BrewSetupOut, BrewSetupUpdate
-from ._helpers import clear_default, get_or_404
+from ._helpers import get_or_404
 
 router = APIRouter(tags=["brew setups"])
 
@@ -26,8 +26,6 @@ def list_brew_setups(db: Session = Depends(get_db)):
 def create_brew_setup(data: BrewSetupCreate, db: Session = Depends(get_db)):
     if data.method_type not in BREW_METHOD_TYPES:
         raise HTTPException(status_code=400, detail=f"Invalid method_type: {data.method_type}")
-    if data.is_default:
-        clear_default(db, BrewSetup)
     setup = BrewSetup(**data.model_dump())
     db.add(setup)
     db.commit()
@@ -39,8 +37,6 @@ def create_brew_setup(data: BrewSetupCreate, db: Session = Depends(get_db)):
 def update_brew_setup(setup_id: int, data: BrewSetupUpdate, db: Session = Depends(get_db)):
     setup = get_or_404(db, BrewSetup, setup_id, "Brew setup not found")
     update = data.model_dump(exclude_unset=True)
-    if update.get("is_default"):
-        clear_default(db, BrewSetup)
     for k, v in update.items():
         setattr(setup, k, v)
     db.commit()

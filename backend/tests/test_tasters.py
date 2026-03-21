@@ -29,20 +29,17 @@ def test_delete_taster(client):
 
 
 def test_list_grinders(client):
+    client.post("/grinders/", json={"manufacturer": "Test Grinder"})
     resp = client.get("/grinders/")
     assert resp.status_code == 200
-    grinders = resp.json()
-    assert len(grinders) == 1
-    assert grinders[0]["manufacturer"] == "Default Grinder"
-    assert grinders[0]["is_default"] is True
+    assert len(resp.json()) == 1
 
 
 def test_list_brew_setups(client):
+    client.post("/brew-setups/", json={"method_type": "espresso", "manufacturer": "Test"})
     resp = client.get("/brew-setups/")
     assert resp.status_code == 200
-    setups = resp.json()
-    assert len(setups) == 1
-    assert setups[0]["method_type"] == "espresso"
+    assert len(resp.json()) == 1
 
 
 def test_list_brew_method_types(client):

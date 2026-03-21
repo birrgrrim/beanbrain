@@ -7,8 +7,8 @@ def _create_coffee(client):
 def _get_defaults(client):
     grinders = client.get("/grinders/").json()
     setups = client.get("/brew-setups/").json()
-    grinder_id = next(g["id"] for g in grinders if g["is_default"])
-    setup_id = next(s["id"] for s in setups if s["is_default"])
+    grinder_id = grinders[0]["id"] if grinders else client.post("/grinders/", json={"manufacturer": "Test"}).json()["id"]
+    setup_id = setups[0]["id"] if setups else client.post("/brew-setups/", json={"method_type": "espresso", "manufacturer": "Test"}).json()["id"]
     return grinder_id, setup_id
 
 
@@ -25,7 +25,7 @@ def test_create_grinder_setting(client):
     assert resp.status_code == 201
     data = resp.json()
     assert data["setting"] == 12.5
-    assert data["grinder"]["manufacturer"] == "Default Grinder"
+    assert data["grinder"]["manufacturer"] == "Test"
     assert data["brew_setup"]["method_type"] == "espresso"
 
 

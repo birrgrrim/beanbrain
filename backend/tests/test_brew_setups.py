@@ -7,7 +7,6 @@ def test_create_brew_setup(client):
     data = resp.json()
     assert data["method_type"] == "pourover"
     assert data["manufacturer"] == "V60"
-    assert data["is_default"] is False
     assert data["basket_grams"] is None
 
 
@@ -29,25 +28,9 @@ def test_create_brew_setup_invalid_method_type(client):
     assert resp.status_code == 422  # Pydantic Literal validation
 
 
-def test_create_default_brew_setup_clears_previous(client):
-    # Seed has a default espresso setup
-    setups = client.get("/brew-setups/").json()
-    assert any(s["is_default"] for s in setups)
-
-    resp = client.post("/brew-setups/", json={
-        "method_type": "pourover",
-        "manufacturer": "New Default",
-        "is_default": True,
-    })
-    assert resp.status_code == 201
-
-    setups = client.get("/brew-setups/").json()
-    defaults = [s for s in setups if s["is_default"]]
-    assert len(defaults) == 1
-    assert defaults[0]["manufacturer"] == "New Default"
-
 
 def test_update_brew_setup(client):
+    client.post("/brew-setups/", json={"method_type": "espresso", "manufacturer": "Original"})
     setups = client.get("/brew-setups/").json()
     sid = setups[0]["id"]
 
@@ -55,21 +38,6 @@ def test_update_brew_setup(client):
     assert resp.status_code == 200
     assert resp.json()["manufacturer"] == "Renamed Setup"
 
-
-def test_update_brew_setup_set_default(client):
-    create = client.post("/brew-setups/", json={
-        "method_type": "aeropress",
-        "manufacturer": "AeroPress",
-    })
-    sid = create.json()["id"]
-
-    resp = client.put(f"/brew-setups/{sid}", json={"is_default": True})
-    assert resp.status_code == 200
-
-    setups = client.get("/brew-setups/").json()
-    defaults = [s for s in setups if s["is_default"]]
-    assert len(defaults) == 1
-    assert defaults[0]["id"] == sid
 
 
 def test_update_brew_setup_not_found(client):

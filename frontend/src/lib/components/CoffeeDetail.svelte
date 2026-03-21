@@ -4,6 +4,8 @@
 	import { toggleId } from '$lib/utils';
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
+	import { activePerson } from '$lib/personStore';
+	import { activeBrewSetup } from '$lib/contextStore';
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import ReviewForm from './ReviewForm.svelte';
@@ -26,6 +28,11 @@
 	let brewSetupsList = $state<BrewSetup[]>([]);
 	let tasters = $state<Taster[]>([]);
 	let loading = $state(true);
+
+	let currentPersonId = $state<number | null>(null);
+	let currentBrewSetupId = $state<number | null>(null);
+	activePerson.subscribe(v => currentPersonId = v);
+	activeBrewSetup.subscribe(v => currentBrewSetupId = v);
 
 	let originsList = $state<Origin[]>([]);
 	let roasteriesList = $state<Roastery[]>([]);
@@ -82,8 +89,6 @@
 		originsList = ori;
 		roasteriesList = roast;
 
-		settingGrinderId = gr.find(g => g.is_default)?.id ?? gr[0]?.id ?? null;
-		settingBrewSetupId = bs.find(s => s.is_default)?.id ?? bs[0]?.id ?? null;
 
 		loading = false;
 	}
@@ -98,9 +103,6 @@
 		coffee?.roaster_comment?.[currentLang] || coffee?.roaster_comment?.['uk'] || coffee?.roaster_comment?.['en'] || null
 	);
 
-	const unreviewedTasters = $derived(
-		tasters
-	);
 
 	// Edit mode helpers
 	function startEditing() {
@@ -159,7 +161,7 @@
 	// Review helpers
 	function startReview(tasterId: number, brewSetupId?: number, existing?: { rating: number; comment: string | null; descriptors: { id: number }[] }) {
 		editingReviewTasterId = tasterId;
-		reviewBrewSetupId = brewSetupId ?? brewSetupsList.find(s => s.is_default)?.id ?? brewSetupsList[0]?.id ?? null;
+		reviewBrewSetupId = brewSetupId ?? currentBrewSetupId ?? brewSetupsList[0]?.id ?? null;
 		reviewRating = existing?.rating ?? 0;
 		reviewComment = existing?.comment ?? '';
 		reviewDescriptors = existing?.descriptors.map(d => d.id) ?? [];
@@ -670,14 +672,11 @@
 						<img src="/img/coffee-cup.png" alt="" class="w-12 h-12 opacity-60" />
 						<h3 class="font-semibold text-base text-stone-700">{$t('tasting.title')}</h3>
 					</div>
-					{#if unreviewedTasters.length > 0 && editingReviewTasterId === null}
-						<select
-							onchange={(e) => { const v = parseInt((e.target as HTMLSelectElement).value); if (v) startReview(v); }}
-							class="text-xs text-amber-600 bg-transparent border-none cursor-pointer focus:outline-none"
-						>
-							<option value="">{$t('tasting.add')}</option>
-							{#each unreviewedTasters as ta}<option value={ta.id}>{ta.name}</option>{/each}
-						</select>
+					{#if currentPersonId && editingReviewTasterId === null}
+						<button onclick={() => startReview(currentPersonId!)}
+							class="text-sm text-amber-600 hover:text-amber-700 transition-colors">
+							+ {$t('tasting.add_short')}
+						</button>
 					{/if}
 				</div>
 

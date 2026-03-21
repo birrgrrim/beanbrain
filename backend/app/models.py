@@ -97,6 +97,7 @@ class Taster(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, unique=True)
+    avatar = Column(String, nullable=True)  # preset name or uploaded file path
 
 
 class Review(Base):
@@ -127,7 +128,7 @@ class Grinder(Base):
     manufacturer = Column(String, nullable=False)
     model = Column(String, nullable=True)
     kind = Column(String, default="auto")  # "auto" or "manual"
-    is_default = Column(Boolean, default=False)
+    avatar = Column(String, nullable=True)  # preset name or uploaded file path
     range_min = Column(Float, default=0)
     range_max = Column(Float, nullable=True)  # null = no upper bound
     step = Column(Float, default=1)
@@ -143,7 +144,7 @@ class BrewSetup(Base):
     manufacturer = Column(String, nullable=False)
     model = Column(String, nullable=True)
     basket_grams = Column(Integer, nullable=True)  # espresso only
-    is_default = Column(Boolean, default=False)
+    avatar = Column(String, nullable=True)  # preset name or uploaded file path
 
     grinder_settings = relationship("GrinderSetting", back_populates="brew_setup")
 

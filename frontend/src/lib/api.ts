@@ -26,6 +26,7 @@ export interface Descriptor {
 export interface Taster {
 	id: number;
 	name: string;
+	avatar: string | null;
 }
 
 export interface Grinder {
@@ -33,7 +34,7 @@ export interface Grinder {
 	manufacturer: string;
 	model: string | null;
 	kind: string;
-	is_default: boolean;
+	avatar: string | null;
 	range_min: number;
 	range_max: number | null;
 	step: number;
@@ -45,7 +46,7 @@ export interface BrewSetup {
 	manufacturer: string;
 	model: string | null;
 	basket_grams: number | null;
-	is_default: boolean;
+	avatar: string | null;
 }
 
 export interface BrewMethodType {
@@ -238,7 +239,7 @@ export const api = {
 		create: (name: string) => request<Taster>('/tasters/', {
 			method: 'POST', body: JSON.stringify({ name }),
 		}),
-		update: (id: number, data: { name: string }) =>
+		update: (id: number, data: { name: string; avatar?: string | null }) =>
 			request<Taster>(`/tasters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/tasters/${id}`, { method: 'DELETE' }),
 		dependents: (id: number) => request<{ reviews: number }>(`/tasters/${id}/dependents`),

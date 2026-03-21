@@ -56,9 +56,6 @@
 								<span class="text-stone-200">|</span>
 								<span class="text-sm text-stone-400">{setup.basket_grams}g</span>
 							{/if}
-							{#if setup.is_default}
-								<span class="text-xs bg-amber-100 text-amber-700 rounded-md px-2 py-0.5">{$t('common.default')}</span>
-							{/if}
 						</div>
 					</div>
 				</div>

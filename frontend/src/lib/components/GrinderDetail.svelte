@@ -10,10 +10,6 @@
 		onBack: () => void;
 	} = $props();
 
-	async function toggleDefault() {
-		await api.grinders.update(grinder.id, { is_default: !grinder.is_default });
-		onUpdated();
-	}
 
 	async function toggleKind() {
 		await api.grinders.update(grinder.id, { kind: grinder.kind === 'manual' ? 'auto' : 'manual' });
@@ -77,18 +73,6 @@
 		</div>
 
 		<div class="flex items-center gap-6 pt-2">
-			<div class="flex items-center gap-3">
-				<button onclick={toggleDefault}
-					class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
-						{grinder.is_default ? 'bg-amber-600' : 'bg-stone-300'}"
-					title={$t('common.set_default')}
-				>
-					<span class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
-						{grinder.is_default ? 'translate-x-7' : 'translate-x-1'}"></span>
-				</button>
-				<span class="text-sm text-stone-500">{$t('common.default')}</span>
-			</div>
-
 			<div class="flex items-center gap-3">
 				<button onclick={toggleKind}
 					class="relative inline-flex h-6 w-12 items-center rounded-full transition-colors
