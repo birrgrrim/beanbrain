@@ -113,6 +113,8 @@ const translations: Record<string, Record<string, string>> = {
 	'grinding.name_placeholder': { en: 'e.g. Eureka Mignon', uk: 'напр. Eureka Mignon' },
 	'grinding.model': { en: 'Model', uk: 'Модель' },
 	'grinding.model_placeholder': { en: 'Model (optional)', uk: 'Модель (необов.)' },
+	'grinding.range': { en: 'Range', uk: 'Діапазон' },
+	'grinding.step': { en: 'Step', uk: 'Крок' },
 	'grinding.select': { en: 'Select a grinder', uk: 'Оберіть кавомолку' },
 
 	// Brewing tab (sidebar + detail)

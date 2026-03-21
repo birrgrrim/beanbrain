@@ -126,6 +126,9 @@ class Grinder(Base):
     model = Column(String, nullable=True)
     kind = Column(String, default="auto")  # "auto" or "manual"
     is_default = Column(Boolean, default=False)
+    range_min = Column(Float, default=0)
+    range_max = Column(Float, nullable=True)  # null = no upper bound
+    step = Column(Float, default=1)
 
     grinder_settings = relationship("GrinderSetting", back_populates="grinder")
 

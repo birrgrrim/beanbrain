@@ -98,6 +98,7 @@
 
 	async function onGrinderUpdated() {
 		await loadGrinders();
+		await loadCoffees();
 		// Re-select to refresh detail
 		if (grinderPanel.type === 'detail') {
 			grinderPanel = { ...grinderPanel };
@@ -125,6 +126,7 @@
 
 	async function onBrewSetupUpdated() {
 		await loadBrewSetups();
+		await loadCoffees();
 		if (brewPanel.type === 'detail') {
 			brewPanel = { ...brewPanel };
 		}

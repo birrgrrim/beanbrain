@@ -7,6 +7,7 @@
 	import StarRating from './StarRating.svelte';
 	import DescriptorAutocomplete from './DescriptorAutocomplete.svelte';
 	import ReviewForm from './ReviewForm.svelte';
+	import GrindValue from './GrindValue.svelte';
 	import Icons from './Icons.svelte';
 
 	let currentLang = $state('en');
@@ -586,7 +587,7 @@
 				{/if}
 				{#each coffee.grinder_settings as setting}
 					<div class="flex flex-wrap items-center gap-2 md:gap-3 py-2 border-b border-stone-50 last:border-0">
-						<span class="text-2xl md:text-3xl font-bold text-amber-700 tabular-nums flex-shrink-0">{setting.setting}</span>
+						<GrindValue value={setting.setting} step={setting.grinder.step} class="text-2xl md:text-3xl text-amber-700 flex-shrink-0" />
 						<div class="flex flex-wrap gap-2 flex-1 min-w-0">
 							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
 								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
@@ -611,7 +612,12 @@
 						<!-- Grind value — big centered input -->
 						<div class="flex items-center justify-center gap-3">
 							<img src="/img/burr-icon.png" alt="" class="w-8 h-8 opacity-40" />
-							<input type="number" step="0.5" bind:value={settingValue} placeholder="12.5"
+							<input type="number"
+								step={selectedGrinder?.step ?? 1}
+								min={selectedGrinder?.range_min ?? 0}
+								max={selectedGrinder?.range_max ?? undefined}
+								bind:value={settingValue}
+								placeholder={selectedGrinder && selectedGrinder.step % 1 !== 0 ? '12.5' : '12'}
 								class="w-24 px-3 py-2 rounded-xl border border-stone-200 text-2xl font-bold text-amber-700 text-center bg-card
 									focus:outline-none focus:ring-2 focus:ring-amber-400/50 tabular-nums" />
 						</div>

@@ -71,6 +71,9 @@ class GrinderCreate(BaseModel):
     model: str | None = None
     kind: Literal["auto", "manual"] = "auto"
     is_default: bool = False
+    range_min: float = 0
+    range_max: float | None = None
+    step: float = 1
 
 
 class GrinderUpdate(BaseModel):
@@ -78,6 +81,9 @@ class GrinderUpdate(BaseModel):
     model: str | None = None
     kind: Literal["auto", "manual"] | None = None
     is_default: bool | None = None
+    range_min: float | None = None
+    range_max: float | None = None
+    step: float | None = None
 
 
 class GrinderOut(BaseModel):
@@ -86,6 +92,9 @@ class GrinderOut(BaseModel):
     model: str | None = None
     kind: str
     is_default: bool
+    range_min: float
+    range_max: float | None = None
+    step: float
 
     model_config = {"from_attributes": True}
 
@@ -259,6 +268,7 @@ class CoffeeListOut(BaseModel):
     avg_rating: float | None = None
     person_rating: int | None = None
     default_grind: float | None = None
+    default_grind_step: float = 1
     roastery_descriptors: list[DescriptorOut] = []
 
     model_config = {"from_attributes": True}
