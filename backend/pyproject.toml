@@ -1,6 +1,6 @@
 [project]
 name = "beanbrain"
-version = "0.3.0"
+version = "0.3.1"
 description = "Coffee tracking tool"
 requires-python = ">=3.12"
 dependencies = [

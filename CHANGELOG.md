@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-03-21
+
+### Added
+- Grinder config: `range_min`, `range_max`, `step` fields with Alembic migration
+- GrindValue component: integer part normal size, decimal part (`.5`) in smaller font
+- Range and step fields in grinder create/edit forms
+- Grinder setting input respects grinder's min/max/step constraints
+- Coffee list refreshes when default grinder or brew setup changes
+
+### Fixed
+- Sidebar spacing: wider number area and gap between icons and values
+- Orphaned grinder setting crash (brew setup FK without cascade)
+
 ## [0.3.0] - 2026-03-21
 
 ### Added
@@ -58,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruff linter for backend code
 - Version label in header bar
 
+[0.3.1]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.1
 [0.3.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.0
 [0.2.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.2.0
 [0.1.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.1.0
