@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.4] - 2026-03-22
+
+### Added
+- Context switcher — person, grinder, brew method as compact header selectors with popovers
+- EditDialog modal for adding/editing all equipment types with full fields
+- Delete with cascade confirmation showing dependent record counts
+- Avatar system — preset icons + custom image upload for persons, grinders, brew setups
+- 4 hand-drawn person avatar presets (transparent backgrounds)
+- Avatar upload endpoint with Pillow resize to 128x128
+- `PUT /tasters/{id}` endpoint for rename
+- Dependents count endpoints for cascade confirmation
+
+### Changed
+- Removed Grind and Brew sidebar tabs (replaced by header context switcher)
+- Removed `is_default` from grinders and brew setups — all context selection is frontend-only (localStorage)
+- Removed "Everyone" mode — person must always be selected
+- Removed seed equipment (no more "Default Grinder")
+- Grind settings and reviews use active context (person/grinder/brew) instead of inline selectors
+- Shows "Edit" when entry exists for current context, "+ Add" when not
+- Delete inside edit form only — removed per-item buttons from lists
+- Right-aligned grind values and review ratings
+- Review rating as number only in list (no stars, no /10)
+- Consistent vertical layout for equipment info in grind/review lists
+- Backend test count: 92 → 88 (removed is_default toggle tests)
+
+### Removed
+- GrindingSidebar and BrewingSidebar tabs
+- `is_default` column from grinders and brew_setups tables
+- PersonSwitcher component (replaced by ContextSwitcher)
+
 ## [0.3.3] - 2026-03-21
 
 ### Added
@@ -93,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruff linter for backend code
 - Version label in header bar
 
+[0.3.4]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.4
 [0.3.3]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.3
 [0.3.2]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.2
 [0.3.1]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.1
