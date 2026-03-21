@@ -32,13 +32,16 @@ release: test
 	@echo "Building release..."
 	rm -rf release/
 	mkdir -p $(RELEASE_DIR)/backend $(RELEASE_DIR)/frontend
-	# Backend: source + deps spec
+	# Backend: source + deps spec + migrations
 	cp -r backend/app $(RELEASE_DIR)/backend/
-	cp backend/pyproject.toml backend/uv.lock $(RELEASE_DIR)/backend/
+	cp -r backend/migrations $(RELEASE_DIR)/backend/
+	cp backend/alembic.ini backend/pyproject.toml backend/uv.lock $(RELEASE_DIR)/backend/
 	# Frontend: build
 	cd frontend && npm run build
 	cp -r frontend/build $(RELEASE_DIR)/frontend/
 	cp frontend/package.json frontend/package-lock.json $(RELEASE_DIR)/frontend/
+	# Deploy scripts
+	cp -r deploy $(RELEASE_DIR)/
 	# Top-level files
 	cp Makefile $(RELEASE_DIR)/
 	# Package
@@ -63,8 +66,4 @@ prod-stop:
 	@echo "Stopped."
 
 prod-backup:
-	@mkdir -p backups
-	$(eval VERSION := $(shell cd backend && uv run python -c "from app import __version__; print(__version__)"))
-	@cp backend/beanbrain.db backups/beanbrain-$(VERSION)-$$(date +%F-%H%M%S).db
-	@echo "Backup: backups/beanbrain-$(VERSION)-$$(date +%F-%H%M%S).db"
-	@find backups/ -name "*.db" -mtime +30 -delete 2>/dev/null; true
+	@deploy/backup-db.sh .
