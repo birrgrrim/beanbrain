@@ -20,6 +20,24 @@
 		onUpdated();
 	}
 
+	let editRangeMin = $state(0);
+	let editRangeMax = $state<number | string>('');
+	let editStep = $state(1);
+	$effect(() => {
+		editRangeMin = grinder.range_min;
+		editRangeMax = grinder.range_max ?? '';
+		editStep = grinder.step;
+	});
+
+	async function saveRange() {
+		await api.grinders.update(grinder.id, {
+			range_min: Number(editRangeMin) || 0,
+			range_max: editRangeMax !== '' ? Number(editRangeMax) : null,
+			step: Number(editStep) || 1,
+		});
+		onUpdated();
+	}
+
 	async function deleteGrinder() {
 		if (!confirm(`Delete "${grinder.name}"?`)) return;
 		await api.grinders.delete(grinder.id);
@@ -81,6 +99,27 @@
 						{grinder.kind === 'manual' ? 'translate-x-7' : 'translate-x-1'}"></span>
 				</button>
 				<span class="text-sm text-stone-500">{grinder.kind === 'manual' ? 'Manual' : 'Auto'}</span>
+			</div>
+		</div>
+
+		<div class="border-t border-stone-100 pt-4">
+			<label class="text-xs text-stone-400 uppercase tracking-wide">{$t('grinding.range')}</label>
+			<div class="flex items-center gap-2 mt-2">
+				<input type="number" bind:value={editRangeMin} placeholder="0"
+					class="w-24 px-3 py-2 rounded-lg border border-stone-200 text-base bg-card-inset text-center
+						focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+				<span class="text-stone-400">—</span>
+				<input type="number" bind:value={editRangeMax} placeholder="∞"
+					class="w-24 px-3 py-2 rounded-lg border border-stone-200 text-base bg-card-inset text-center
+						focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+				<span class="text-xs text-stone-400 mx-1">{$t('grinding.step')}</span>
+				<input type="number" bind:value={editStep} placeholder="1" min="0.1" step="0.1"
+					class="w-20 px-3 py-2 rounded-lg border border-stone-200 text-base bg-card-inset text-center
+						focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+				<button onclick={saveRange}
+					class="ml-2 px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">
+					{$t('common.save')}
+				</button>
 			</div>
 		</div>
 	</div>

@@ -107,6 +107,8 @@ def list_coffees(
         data.avg_rating = round(avg, 1) if avg else None
         data.person_rating = person_ratings.get(c.id)
         data.default_grind = default_grinds.get(c.id)
+        if default_grinder:
+            data.default_grind_step = default_grinder.step or 1
         result.append(data)
     return result
 

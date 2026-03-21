@@ -34,6 +34,9 @@ export interface Grinder {
 	model: string | null;
 	kind: string;
 	is_default: boolean;
+	range_min: number;
+	range_max: number | null;
+	step: number;
 }
 
 export interface BrewSetup {
@@ -132,6 +135,7 @@ export interface CoffeeListItem {
 	avg_rating: number | null;
 	person_rating: number | null;
 	default_grind: number | null;
+	default_grind_step: number;
 	created_at: string;
 	roastery_descriptors: Descriptor[];
 }
@@ -235,7 +239,7 @@ export const api = {
 	},
 	grinders: {
 		list: () => request<Grinder[]>('/grinders/'),
-		create: (data: { name: string; model?: string; kind?: string; is_default?: boolean }) =>
+		create: (data: { name: string; model?: string; kind?: string; is_default?: boolean; range_min?: number; range_max?: number | null; step?: number }) =>
 			request<Grinder>('/grinders/', { method: 'POST', body: JSON.stringify(data) }),
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Grinder>(`/grinders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

@@ -5,6 +5,7 @@
 	import { t } from '$lib/i18n';
 	import { lang } from '$lib/lang';
 	import SidebarShell from './SidebarShell.svelte';
+	import GrindValue from './GrindValue.svelte';
 	import Icons from './Icons.svelte';
 
 	let currentLang = $state('en');
@@ -384,15 +385,15 @@
 							{@const rating = coffee.person_rating ?? coffee.avg_rating}
 							<div class="flex-shrink-0 ml-3 space-y-1">
 								{#if rating != null}
-									<div class="flex items-center justify-end" title="Rating">
+									<div class="flex items-center justify-end gap-1" title="Rating">
 										<img src="/img/icon-rating.png" alt="" class="w-8 h-8 {coffee.person_rating != null ? 'opacity-70' : 'opacity-30'}" />
-										<span class="w-10 text-right text-2xl tabular-nums font-bold {coffee.person_rating != null ? 'text-amber-700' : 'text-stone-400'}">{Math.round(rating * 10) / 10}</span>
+										<span class="w-12 text-right text-2xl tabular-nums font-bold {coffee.person_rating != null ? 'text-amber-700' : 'text-stone-400'}">{Math.round(rating * 10) / 10}</span>
 									</div>
 								{/if}
 								{#if coffee.default_grind != null}
-									<div class="flex items-center justify-end" title="Grind setting">
+									<div class="flex items-center justify-end gap-1" title="Grind setting">
 										<img src="/img/icon-grind.png" alt="" class="w-8 h-8 opacity-50" />
-										<span class="w-10 text-right text-2xl text-amber-700 tabular-nums font-bold">{coffee.default_grind}</span>
+										<span class="w-12 text-right"><GrindValue value={coffee.default_grind} step={coffee.default_grind_step} class="text-2xl text-amber-700" /></span>
 									</div>
 								{/if}
 							</div>
