@@ -1,6 +1,6 @@
 [project]
 name = "beanbrain"
-version = "0.2.0"
+version = "0.3.0"
 description = "Coffee tracking tool"
 requires-python = ">=3.12"
 dependencies = [
@@ -9,6 +9,7 @@ dependencies = [
     "sqlalchemy>=2.0.36",
     "pydantic>=2.10.4",
     "httpx>=0.28.1",
+    "alembic>=1.18.4",
 ]
 
 [dependency-groups]

@@ -33,14 +33,6 @@ BREW_METHOD_TYPES = {
 }
 
 
-class SchemaVersion(Base):
-    __tablename__ = "schema_version"
-
-    id = Column(Integer, primary_key=True)
-    version = Column(String, nullable=False)
-    applied_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-
 class Origin(Base):
     __tablename__ = "origins"
 
