@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-03-21
+
+### Added
+- Alembic database migration mechanism with autogenerate and SQLite batch mode
+- Migrations auto-applied on backend startup
+- Baseline migration stamping existing databases
+- Centralized backup script with version + migration number in filenames (`beanbrain-0.3.0-m001-2026-03-21.db`)
+
+### Changed
+- Replaced hand-rolled `schema_version` table with Alembic's `alembic_version`
+- Release tarball now includes `migrations/` and `deploy/` directories
+- Versioning strategy: schema-changing issues get individual minor version bumps
+- Backend test count: 92 → 91 (removed SchemaVersion test, replaced by Alembic)
+
 ## [0.2.0] - 2026-03-21
 
 ### Fixed
@@ -44,5 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruff linter for backend code
 - Version label in header bar
 
+[0.3.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.3.0
 [0.2.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.2.0
 [0.1.0]: https://github.com/birrgrrim/beanbrain/releases/tag/v0.1.0
