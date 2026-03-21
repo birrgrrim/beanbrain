@@ -40,6 +40,9 @@ Thumbs.db
 # Planning (local only)
 PLAN.md
 
+# Uploaded avatars (user content)
+backend/avatars/
+
 # Deploy (local only)
 deploy.sh
 deploy/

@@ -160,6 +160,7 @@ const translations: Record<string, Record<string, string>> = {
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },
 	'common.default': { en: 'default', uk: 'за замовч.' },
 	'common.set_default': { en: 'set default', uk: 'за замовч.' },
+	'common.edit': { en: 'Edit', uk: 'Редагувати' },
 	'common.save': { en: 'Save', uk: 'Зберегти' },
 	'common.delete_confirm': { en: 'Are you sure you want to delete this?', uk: 'Ви впевнені, що хочете видалити?' },
 	'common.change_avatar': { en: 'Tap to change avatar', uk: 'Натисніть щоб змінити аватар' },
