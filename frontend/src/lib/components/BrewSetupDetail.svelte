@@ -16,7 +16,7 @@
 	}
 
 	async function deleteSetup() {
-		if (!confirm(`Delete "${brewSetup.name}"?`)) return;
+		if (!confirm(`Delete "${brewSetup.manufacturer}"?`)) return;
 		await api.brewSetups.delete(brewSetup.id);
 		onDeleted();
 	}
@@ -32,7 +32,7 @@
 			</button>
 			<img src="/img/method-{brewSetup.method_type}.png" alt="" class="w-8 h-8 opacity-70" />
 			<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-				{brewSetup.name}
+				{brewSetup.manufacturer}
 			</h2>
 		</div>
 		<button onclick={deleteSetup}
@@ -46,7 +46,8 @@
 		<div class="flex items-center gap-4">
 			<img src="/img/method-{brewSetup.method_type}.png" alt="" class="w-16 h-16 opacity-60" />
 			<div class="space-y-1">
-				<p class="text-stone-700 font-medium text-lg">{brewSetup.name}</p>
+				<p class="text-stone-700 font-medium text-lg">{brewSetup.manufacturer}</p>
+				{#if brewSetup.model}<p class="text-sm text-stone-400">{brewSetup.model}</p>{/if}
 				<p class="text-sm text-stone-400">{$t(`method.${brewSetup.method_type}`)}</p>
 				{#if brewSetup.basket_grams}
 					<div class="flex items-center gap-2">

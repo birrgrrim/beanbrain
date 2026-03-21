@@ -591,12 +591,12 @@
 						<div class="flex flex-wrap gap-2 flex-1 min-w-0">
 							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
 								<img src="/img/grinder-{setting.grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-								<span class="text-xs md:text-sm text-stone-600">{setting.grinder.name}</span>
+								<span class="text-xs md:text-sm text-stone-600">{setting.grinder.manufacturer}</span>
 								{#if setting.grinder.model}<span class="text-xs md:text-sm text-stone-400">{setting.grinder.model}</span>{/if}
 							</div>
 							<div class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 bg-card-inset rounded-lg">
 								<img src="/img/method-{setting.brew_setup.method_type}.png" alt="" class="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-								<span class="text-xs md:text-sm text-stone-600">{setting.brew_setup.name}</span>
+								<span class="text-xs md:text-sm text-stone-600">{setting.brew_setup.manufacturer}{setting.brew_setup.model ? ` ${setting.brew_setup.model}` : ''}</span>
 								{#if setting.brew_setup.basket_grams}<span class="text-xs md:text-sm text-stone-400">{setting.brew_setup.basket_grams}g</span>{/if}
 							</div>
 						</div>
@@ -629,7 +629,7 @@
 							{/if}
 							<select bind:value={settingGrinderId}
 								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
-								{#each grindersList as g}<option value={g.id}>{g.name}{g.model ? ` ${g.model}` : ''}</option>{/each}
+								{#each grindersList as g}<option value={g.id}>{g.manufacturer}{g.model ? ` ${g.model}` : ''}</option>{/each}
 							</select>
 						</div>
 
@@ -640,7 +640,7 @@
 							{/if}
 							<select bind:value={settingBrewSetupId}
 								class="flex-1 bg-transparent text-sm text-stone-700 font-medium focus:outline-none cursor-pointer">
-								{#each brewSetupsList as s}<option value={s.id}>{s.name}{s.basket_grams ? ` ${s.basket_grams}g` : ''}</option>{/each}
+								{#each brewSetupsList as s}<option value={s.id}>{s.manufacturer}{s.model ? ` ${s.model}` : ''}{s.basket_grams ? ` ${s.basket_grams}g` : ''}</option>{/each}
 							</select>
 						</div>
 

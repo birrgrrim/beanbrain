@@ -25,7 +25,7 @@ def test_create_grinder_setting(client):
     assert resp.status_code == 201
     data = resp.json()
     assert data["setting"] == 12.5
-    assert data["grinder"]["name"] == "Default Grinder"
+    assert data["grinder"]["manufacturer"] == "Default Grinder"
     assert data["brew_setup"]["method_type"] == "espresso"
 
 

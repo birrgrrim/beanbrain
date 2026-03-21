@@ -14,7 +14,7 @@
 	let filtered = $derived(
 		search.trim()
 			? grinders.filter(g =>
-				g.name.toLowerCase().includes(search.toLowerCase()) ||
+				g.manufacturer.toLowerCase().includes(search.toLowerCase()) ||
 				(g.model?.toLowerCase().includes(search.toLowerCase()) ?? false)
 			)
 			: grinders
@@ -49,11 +49,13 @@
 				<div class="flex items-center gap-3">
 					<img src="/img/grinder-{grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-20 h-20 opacity-60" />
 					<div class="min-w-0 flex-1">
-						<p class="font-semibold text-lg text-stone-800 truncate">{grinder.name}</p>
+						<p class="font-semibold text-lg text-stone-800 truncate">{grinder.manufacturer}{grinder.model ? ` ${grinder.model}` : ''}</p>
 						<div class="flex items-center gap-2 mt-0.5">
-							{#if grinder.model}
-								<span class="text-sm text-stone-400 truncate">{grinder.model}</span>
+							{#if grinder.range_max}
+								<span class="text-sm text-stone-400">{grinder.range_min}–{grinder.range_max}</span>
+								<span class="text-stone-200">|</span>
 							{/if}
+							<span class="text-sm text-stone-400">step {grinder.step}</span>
 							{#if grinder.is_default}
 								<span class="text-xs bg-amber-100 text-amber-700 rounded-md px-2 py-0.5">{$t('common.default')}</span>
 							{/if}

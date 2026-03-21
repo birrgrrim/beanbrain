@@ -39,7 +39,7 @@
 	}
 
 	async function deleteGrinder() {
-		if (!confirm(`Delete "${grinder.name}"?`)) return;
+		if (!confirm(`Delete "${grinder.manufacturer}"?`)) return;
 		await api.grinders.delete(grinder.id);
 		onDeleted();
 	}
@@ -55,7 +55,7 @@
 			</button>
 			<img src="/img/grinder-{grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-8 h-8 opacity-70" />
 			<h2 class="text-3xl font-bold text-stone-800" style="font-family: 'DM Serif Display', serif;">
-				{grinder.name}
+				{grinder.manufacturer}
 			</h2>
 		</div>
 		<button onclick={deleteGrinder}
@@ -69,7 +69,7 @@
 		<div class="flex items-center gap-4">
 			<img src="/img/grinder-{grinder.kind === 'manual' ? 'manual' : 'auto'}.png" alt="" class="w-16 h-16 opacity-60" />
 			<div class="space-y-1">
-				<p class="text-stone-700 font-medium text-lg">{grinder.name}</p>
+				<p class="text-stone-700 font-medium text-lg">{grinder.manufacturer}</p>
 				{#if grinder.model}
 					<p class="text-sm text-stone-400">{grinder.model}</p>
 				{/if}
