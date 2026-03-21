@@ -19,11 +19,13 @@ class DescriptorOut(BaseModel):
 
 class TasterCreate(BaseModel):
     name: str
+    avatar: str | None = None
 
 
 class TasterOut(BaseModel):
     id: int
     name: str
+    avatar: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -70,7 +72,7 @@ class GrinderCreate(BaseModel):
     manufacturer: str
     model: str | None = None
     kind: Literal["auto", "manual"] = "auto"
-    is_default: bool = False
+    avatar: str | None = None
     range_min: float = 0
     range_max: float | None = None
     step: float = 1
@@ -80,7 +82,7 @@ class GrinderUpdate(BaseModel):
     manufacturer: str | None = None
     model: str | None = None
     kind: Literal["auto", "manual"] | None = None
-    is_default: bool | None = None
+    avatar: str | None = None
     range_min: float | None = None
     range_max: float | None = None
     step: float | None = None
@@ -91,7 +93,7 @@ class GrinderOut(BaseModel):
     manufacturer: str
     model: str | None = None
     kind: str
-    is_default: bool
+    avatar: str | None = None
     range_min: float
     range_max: float | None = None
     step: float
@@ -106,14 +108,14 @@ class BrewSetupCreate(BaseModel):
     manufacturer: str
     model: str | None = None
     basket_grams: int | None = None
-    is_default: bool = False
+    avatar: str | None = None
 
 
 class BrewSetupUpdate(BaseModel):
     manufacturer: str | None = None
     model: str | None = None
     basket_grams: int | None = None
-    is_default: bool | None = None
+    avatar: str | None = None
 
 
 class BrewSetupOut(BaseModel):
@@ -122,7 +124,7 @@ class BrewSetupOut(BaseModel):
     manufacturer: str
     model: str | None = None
     basket_grams: int | None = None
-    is_default: bool
+    avatar: str | None = None
 
     model_config = {"from_attributes": True}
 

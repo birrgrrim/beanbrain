@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from .models import BrewSetup, Descriptor, Grinder, Origin
+from .models import Descriptor, Origin
 
 DESCRIPTORS = {
     "Fruity": [
@@ -97,8 +97,6 @@ def seed_database(db: Session) -> None:
         for name in names:
             db.add(Descriptor(name=name, category=category))
 
-    db.add(Grinder(manufacturer="Default Grinder", is_default=True))
-    db.add(BrewSetup(method_type="espresso", manufacturer="Default", is_default=True))
 
     for name_en, name_uk, flag in ORIGINS:
         db.add(Origin(name_en=name_en, name_uk=name_uk, flag=flag))

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Grinder
+from ..models import Grinder, GrinderSetting
 from ..schemas import GrinderCreate, GrinderOut, GrinderUpdate
-from ._helpers import clear_default, get_or_404
+from ._helpers import get_or_404
 
 router = APIRouter(prefix="/grinders", tags=["grinders"])
 
@@ -16,8 +16,6 @@ def list_grinders(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=GrinderOut, status_code=201)
 def create_grinder(data: GrinderCreate, db: Session = Depends(get_db)):
-    if data.is_default:
-        clear_default(db, Grinder)
     grinder = Grinder(**data.model_dump())
     db.add(grinder)
     db.commit()
@@ -29,13 +27,18 @@ def create_grinder(data: GrinderCreate, db: Session = Depends(get_db)):
 def update_grinder(grinder_id: int, data: GrinderUpdate, db: Session = Depends(get_db)):
     grinder = get_or_404(db, Grinder, grinder_id, "Grinder not found")
     update = data.model_dump(exclude_unset=True)
-    if update.get("is_default"):
-        clear_default(db, Grinder)
     for k, v in update.items():
         setattr(grinder, k, v)
     db.commit()
     db.refresh(grinder)
     return grinder
+
+
+@router.get("/{grinder_id}/dependents")
+def grinder_dependents(grinder_id: int, db: Session = Depends(get_db)):
+    get_or_404(db, Grinder, grinder_id, "Grinder not found")
+    settings = db.query(GrinderSetting).filter(GrinderSetting.grinder_id == grinder_id).count()
+    return {"grinder_settings": settings}
 
 
 @router.delete("/{grinder_id}", status_code=204)

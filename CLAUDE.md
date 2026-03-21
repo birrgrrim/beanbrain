@@ -95,7 +95,7 @@ frontend/
 - **Baseline**: first migration (`3817fe24fdf7`) is a no-op — existing DBs stamped with `alembic stamp head`
 
 ## Testing
-- Backend: pytest with in-memory SQLite (92 tests), ruff linting
+- Backend: pytest with in-memory SQLite (88 tests), ruff linting
 - Frontend: svelte-check type validation + production build verification
 - Run: `cd backend && uv run pytest tests/ -v`
 - Lint: `cd backend && uv run ruff check .`

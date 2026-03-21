@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
 from .database import SessionLocal
-from .routers import coffees, descriptors, reviews, grinder_settings, tasters, scrape, grinders, brew_setups, origins, roasteries
+from fastapi.staticfiles import StaticFiles
+
+from .routers import coffees, descriptors, reviews, grinder_settings, tasters, scrape, grinders, brew_setups, origins, roasteries, avatars
 from .seed import seed_database, seed_origins
 
 
@@ -51,6 +53,12 @@ app.include_router(origins.router)
 app.include_router(roasteries.router)
 app.include_router(tasters.router)
 app.include_router(scrape.router)
+app.include_router(avatars.router)
+
+# Serve uploaded avatars
+_avatar_dir = os.path.join(os.path.dirname(__file__), "..", "avatars")
+os.makedirs(_avatar_dir, exist_ok=True)
+app.mount("/avatars", StaticFiles(directory=_avatar_dir), name="avatars")
 
 
 @app.get("/health")

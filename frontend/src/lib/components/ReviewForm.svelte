@@ -16,6 +16,7 @@
 		suggestedDescriptorIds = [],
 		onSave,
 		onCancel,
+		onDelete,
 	}: {
 		tasterName: string;
 		brewSetups: BrewSetup[];
@@ -27,6 +28,7 @@
 		suggestedDescriptorIds?: number[];
 		onSave: () => void;
 		onCancel: () => void;
+		onDelete?: () => void;
 	} = $props();
 
 	function toggleDescriptor(id: number) {
@@ -40,22 +42,19 @@
 		<StarRating {rating} interactive onRate={(v) => rating = v} />
 		{#if rating > 0}<span class="text-xs text-stone-400 tabular-nums">{rating}/10</span>{/if}
 	</div>
-	<div class="flex items-center gap-2">
-		<select bind:value={brewSetupId}
-			class="text-sm text-stone-600 bg-card-inset rounded-lg px-3 py-1.5 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-400/50 cursor-pointer">
-			{#each brewSetups as s}
-				<option value={s.id}>
-					{s.manufacturer}{s.model ? ` ${s.model}` : ''}{s.basket_grams ? ` ${s.basket_grams}g` : ''}
-				</option>
-			{/each}
-		</select>
-	</div>
 	<textarea bind:value={comment} rows={2} placeholder={$t('tasting.comment_placeholder')}
 		class="w-full px-2 py-1.5 rounded border border-stone-200 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"></textarea>
 	<DescriptorAutocomplete {descriptors} selected={descriptorIds} suggested={suggestedDescriptorIds} onToggle={toggleDescriptor} />
-	<div class="flex gap-2">
-		<button onclick={onSave} disabled={rating === 0 || !brewSetupId}
-			class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
-		<button onclick={onCancel} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
+	<div class="flex items-center justify-between">
+		{#if onDelete}
+			<button onclick={onDelete} class="text-sm text-red-400 hover:text-red-600 transition-colors">{$t('detail.delete')}</button>
+		{:else}
+			<div></div>
+		{/if}
+		<div class="flex gap-2">
+			<button onclick={onCancel} class="px-4 py-2 text-stone-400 text-sm">{$t('tasting.cancel')}</button>
+			<button onclick={onSave} disabled={rating === 0}
+				class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{$t('tasting.save')}</button>
+		</div>
 	</div>
 </div>

@@ -12,40 +12,13 @@ from ..scrapers.registry import scrape_url
 router = APIRouter(prefix="/coffees", tags=["coffees"])
 
 
-def _get_default_grind(db: Session, coffee_id: int) -> float | None:
-    """Get grind setting for default grinder + default brew setup."""
-    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
-    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
-    if not default_grinder or not default_setup:
-        return None
-    setting = db.query(GrinderSetting).filter(
-        GrinderSetting.coffee_id == coffee_id,
-        GrinderSetting.grinder_id == default_grinder.id,
-        GrinderSetting.brew_setup_id == default_setup.id,
-    ).first()
-    return setting.setting if setting else None
-
-
-def _get_avg_rating(db: Session, coffee_id: int) -> float | None:
-    result = db.query(func.avg(Review.rating)).filter(
-        Review.coffee_id == coffee_id
-    ).scalar()
-    return round(result, 1) if result else None
-
-
-def _get_person_rating(db: Session, coffee_id: int, taster_id: int) -> int | None:
-    review = db.query(Review).filter(
-        Review.coffee_id == coffee_id,
-        Review.taster_id == taster_id,
-    ).first()
-    return review.rating if review else None
-
-
 @router.get("/", response_model=list[CoffeeListOut])
 def list_coffees(
     search: str | None = Query(None, description="Search by name or roastery"),
     descriptor_id: int | None = Query(None, description="Filter by roastery descriptor"),
     taster_id: int | None = Query(None, description="Active person — returns their rating"),
+    grinder_id: int | None = Query(None, description="Active grinder — returns grind setting"),
+    brew_setup_id: int | None = Query(None, description="Active brew setup — filters ratings and grind"),
     db: Session = Depends(get_db),
 ):
     query = db.query(Coffee).options(
@@ -71,38 +44,42 @@ def list_coffees(
 
     coffee_ids = [c.id for c in coffees]
 
-    # Bulk: avg ratings (1 query)
-    avg_ratings = dict(
-        db.query(Review.coffee_id, func.avg(Review.rating))
-        .filter(Review.coffee_id.in_(coffee_ids))
-        .group_by(Review.coffee_id)
-        .all()
-    )
+    # Bulk: avg ratings — only for "Everyone" mode, filtered by active brew setup
+    avg_ratings: dict[int, float] = {}
 
-    # Shared: default equipment (used for person_rating + default_grind)
-    default_grinder = db.query(Grinder).filter(Grinder.is_default.is_(True)).first()
-    default_setup = db.query(BrewSetup).filter(BrewSetup.is_default.is_(True)).first()
+    # Resolve active equipment from explicit IDs
+    active_grinder = db.query(Grinder).filter(Grinder.id == grinder_id).first() if grinder_id else None
+    active_setup = db.query(BrewSetup).filter(BrewSetup.id == brew_setup_id).first() if brew_setup_id else None
 
-    # Bulk: person ratings for default brew setup (1 query)
+    # Bulk: avg ratings for "Everyone" mode, filtered by active brew setup
+    if not taster_id and active_setup:
+        avg_ratings = dict(
+            db.query(Review.coffee_id, func.avg(Review.rating))
+            .filter(Review.coffee_id.in_(coffee_ids), Review.brew_setup_id == active_setup.id)
+            .group_by(Review.coffee_id)
+            .all()
+        )
+
+    # Bulk: person ratings for active brew setup (1 query)
     person_ratings = {}
-    if taster_id and default_setup:
+    if taster_id and active_setup:
         person_ratings = dict(
             db.query(Review.coffee_id, Review.rating)
             .filter(
                 Review.coffee_id.in_(coffee_ids),
                 Review.taster_id == taster_id,
-                Review.brew_setup_id == default_setup.id,
+                Review.brew_setup_id == active_setup.id,
             )
             .all()
         )
 
-    # Bulk: default grind settings (1+2 queries instead of 3N)
+    # Bulk: grind settings for active grinder + brew setup
     default_grinds: dict[int, float] = {}
-    if default_grinder and default_setup:
+    if active_grinder and active_setup:
         for row in db.query(GrinderSetting.coffee_id, GrinderSetting.setting).filter(
             GrinderSetting.coffee_id.in_(coffee_ids),
-            GrinderSetting.grinder_id == default_grinder.id,
-            GrinderSetting.brew_setup_id == default_setup.id,
+            GrinderSetting.grinder_id == active_grinder.id,
+            GrinderSetting.brew_setup_id == active_setup.id,
         ).all():
             default_grinds[row.coffee_id] = row.setting
 
@@ -113,8 +90,8 @@ def list_coffees(
         data.avg_rating = round(avg, 1) if avg else None
         data.person_rating = person_ratings.get(c.id)
         data.default_grind = default_grinds.get(c.id)
-        if default_grinder:
-            data.default_grind_step = default_grinder.step or 1
+        if active_grinder:
+            data.default_grind_step = active_grinder.step or 1
         result.append(data)
     return result
 

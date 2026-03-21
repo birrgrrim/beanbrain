@@ -26,6 +26,7 @@ export interface Descriptor {
 export interface Taster {
 	id: number;
 	name: string;
+	avatar: string | null;
 }
 
 export interface Grinder {
@@ -33,7 +34,7 @@ export interface Grinder {
 	manufacturer: string;
 	model: string | null;
 	kind: string;
-	is_default: boolean;
+	avatar: string | null;
 	range_min: number;
 	range_max: number | null;
 	step: number;
@@ -45,7 +46,7 @@ export interface BrewSetup {
 	manufacturer: string;
 	model: string | null;
 	basket_grams: number | null;
-	is_default: boolean;
+	avatar: string | null;
 }
 
 export interface BrewMethodType {
@@ -173,10 +174,12 @@ export const BREW_METHOD_TYPES: BrewMethodType[] = [
 
 export const api = {
 	coffees: {
-		list: (search?: string, tasterId?: number | null) => {
+		list: (opts?: { search?: string; tasterId?: number | null; grinderId?: number | null; brewSetupId?: number | null }) => {
 			const params = new URLSearchParams();
-			if (search) params.set('search', search);
-			if (tasterId) params.set('taster_id', String(tasterId));
+			if (opts?.search) params.set('search', opts.search);
+			if (opts?.tasterId) params.set('taster_id', String(opts.tasterId));
+			if (opts?.grinderId) params.set('grinder_id', String(opts.grinderId));
+			if (opts?.brewSetupId) params.set('brew_setup_id', String(opts.brewSetupId));
 			const qs = params.toString();
 			return request<CoffeeListItem[]>(`/coffees/${qs ? `?${qs}` : ''}`);
 		},
@@ -236,7 +239,10 @@ export const api = {
 		create: (name: string) => request<Taster>('/tasters/', {
 			method: 'POST', body: JSON.stringify({ name }),
 		}),
+		update: (id: number, data: { name: string; avatar?: string | null }) =>
+			request<Taster>(`/tasters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/tasters/${id}`, { method: 'DELETE' }),
+		dependents: (id: number) => request<{ reviews: number }>(`/tasters/${id}/dependents`),
 	},
 	descriptors: {
 		list: () => request<Descriptor[]>('/descriptors/'),
@@ -248,6 +254,7 @@ export const api = {
 		update: (id: number, data: Record<string, unknown>) =>
 			request<Grinder>(`/grinders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/grinders/${id}`, { method: 'DELETE' }),
+		dependents: (id: number) => request<{ grinder_settings: number }>(`/grinders/${id}/dependents`),
 	},
 	brewSetups: {
 		list: () => request<BrewSetup[]>('/brew-setups/'),
@@ -256,6 +263,7 @@ export const api = {
 		update: (id: number, data: Record<string, unknown>) =>
 			request<BrewSetup>(`/brew-setups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 		delete: (id: number) => request<void>(`/brew-setups/${id}`, { method: 'DELETE' }),
+		dependents: (id: number) => request<{ grinder_settings: number; reviews: number }>(`/brew-setups/${id}/dependents`),
 	},
 	brewMethodTypes: {
 		list: () => request<BrewMethodType[]>('/brew-method-types'),
