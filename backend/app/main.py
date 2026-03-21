@@ -1,30 +1,30 @@
 import os
 from contextlib import asynccontextmanager
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
-from .database import Base, SessionLocal, engine
-from .models import SchemaVersion
+from .database import SessionLocal
 from .routers import coffees, descriptors, reviews, grinder_settings, tasters, scrape, grinders, brew_setups, origins, roasteries
 from .seed import seed_database, seed_origins
 
 
+def _run_migrations() -> None:
+    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
+    command.upgrade(alembic_cfg, "head")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    if not os.environ.get("SKIP_MIGRATIONS"):
+        _run_migrations()
     db = SessionLocal()
     try:
         seed_database(db)
         seed_origins(db)
-        # Stamp current version
-        row = db.query(SchemaVersion).first()
-        if row:
-            row.version = __version__
-        else:
-            db.add(SchemaVersion(version=__version__))
-        db.commit()
     finally:
         db.close()
     yield

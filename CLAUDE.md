@@ -77,8 +77,25 @@ frontend/
 - Scrape: `GET /scrape/?url=...`
 - Coffee list returns `avg_rating`, `person_rating`, `default_grind` computed fields
 
+## Database Migrations
+- **Tool**: Alembic with `render_as_batch=True` (required for SQLite)
+- **Auto-upgrade**: migrations run automatically on backend startup (lifespan)
+- **Config**: `backend/alembic.ini` + `backend/migrations/env.py`, uses `DATABASE_URL` env var
+- **Workflow**:
+  ```bash
+  cd backend
+  # After changing models.py:
+  uv run alembic revision --autogenerate -m "description of change"
+  # Review generated migration in migrations/versions/, then:
+  uv run alembic upgrade head
+  # Check current state:
+  uv run alembic current
+  ```
+- **Tests**: use `SKIP_MIGRATIONS=1` env var, create tables via `Base.metadata.create_all` directly
+- **Baseline**: first migration (`3817fe24fdf7`) is a no-op — existing DBs stamped with `alembic stamp head`
+
 ## Testing
-- Backend: pytest with in-memory SQLite (92 tests), ruff linting
+- Backend: pytest with in-memory SQLite (91 tests), ruff linting
 - Frontend: svelte-check type validation + production build verification
 - Run: `cd backend && uv run pytest tests/ -v`
 - Lint: `cd backend && uv run ruff check .`
@@ -93,9 +110,10 @@ frontend/
 - **Version**: update `frontend/package.json`, `backend/pyproject.toml`, and `backend/app/__init__.py` on release
 - **PR merge**: user hand-tests the deployed result before merging — never auto-merge
 
-### Milestone strategies
-- **Independent fixes** (e.g. v0.2.0 — polish/bugs): each issue gets its own branch → PR to `main`
-- **Coupled changes** (e.g. v0.3.0 — migrations + schema): create a `milestone/vX.Y.Z` branch, feature branches PR into it, final PR to `main` after integration testing
+### Versioning strategy
+- **Schema-changing issues** (new/altered DB columns, migrations): each gets its own minor version bump (0.3.0 → 0.3.1 → 0.3.2), own milestone, own branch → PR to `main`
+- **Non-schema issues** (design, bug fixes, infra): group many into one milestone with a minor bump, each issue gets its own branch → PR to `main`
+- **Backup filenames**: include both release version and migration number (`beanbrain-0.3.1-m003-2026-03-21.db`) so schema state is always visible
 
 ## Conventions
 - Commits co-authored with Claude
