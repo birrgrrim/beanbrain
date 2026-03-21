@@ -50,12 +50,14 @@ frontend/
 ```
 
 ## Key Design Decisions
-- **One review per person per coffee** — upsert via PUT, not multiple tastings
+- **Per-brew-method reviews** — one review per person per coffee per brew setup, upsert via PUT
 - **Coffee stock tracking** — `in_stock` (at home) + `in_store` (at roastery), independent booleans
-- **Equipment defaults** — `is_default` on grinder/method, used for sidebar display
+- **Context switcher** — person, grinder, brew method selected via header buttons (localStorage), no backend `is_default`
+- **Equipment naming** — `manufacturer` + `model` for both grinders and brew setups
+- **Avatars** — preset icons + custom upload (Pillow resize to 128x128), stored as path string
 - **MadHeads scraper** — parses SvelteKit embedded data from HTML, supports EN/UK, all 18 products validated, retry with exponential backoff on transient errors
 - **Bean rating** — hand-drawn coffee bean images (full/half/empty) replace star SVGs
-- **Responsive font** — 16px mobile, 18px desktop
+- **GrindValue display** — integer part normal size, decimal part smaller (`.5` in 60% size)
 - **SSR-safe localStorage** — guarded with `typeof window !== 'undefined'` (Node 22+ has broken localStorage global)
 
 ## Design Language
@@ -63,9 +65,9 @@ frontend/
 - **Typography**: DM Serif Display (headings) + DM Sans (body)
 - **Art**: Hand-drawn coffee illustrations, transparent PNGs, consistent sepia/brown style
 - **Logo**: Bean-brain icon (coffee bean + circuit board), with text variant
-- **Layout**: Responsive — sidebar (full/320/420px) + content panel, tab navigation (Coffee/Grind/Brew/Roast)
-  - xl (1280px+): 2-column with tab labels, logo with text
-  - md-xl: sidebar + detail, icon-only tabs
+- **Layout**: Responsive — sidebar + content panel, tab navigation (Coffee/Roast), context switcher in header
+  - xl (1280px+): 2-column with tab labels, logo with text, context switcher with names
+  - md-xl: sidebar + detail, icon-only tabs, context switcher avatar-only
   - mobile (<768px): single panel mode (sidebar OR detail)
 
 ## API Patterns
