@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import BREW_METHOD_TYPES, BrewSetup
+from ..models import BREW_METHOD_TYPES, BrewSetup, GrinderSetting, Review
 from ..schemas import BrewMethodTypeOut, BrewSetupCreate, BrewSetupOut, BrewSetupUpdate
 from ._helpers import clear_default, get_or_404
 
@@ -46,6 +46,14 @@ def update_brew_setup(setup_id: int, data: BrewSetupUpdate, db: Session = Depend
     db.commit()
     db.refresh(setup)
     return setup
+
+
+@router.get("/brew-setups/{setup_id}/dependents")
+def brew_setup_dependents(setup_id: int, db: Session = Depends(get_db)):
+    get_or_404(db, BrewSetup, setup_id, "Brew setup not found")
+    settings = db.query(GrinderSetting).filter(GrinderSetting.brew_setup_id == setup_id).count()
+    reviews = db.query(Review).filter(Review.brew_setup_id == setup_id).count()
+    return {"grinder_settings": settings, "reviews": reviews}
 
 
 @router.delete("/brew-setups/{setup_id}", status_code=204)
