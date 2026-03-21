@@ -1,17 +1,30 @@
 <script lang="ts">
-	import { api, type Taster, type Grinder, type BrewSetup } from '$lib/api';
+	import { api, type Taster, type Grinder, type BrewSetup, type BrewMethodType } from '$lib/api';
 	import { activePerson } from '$lib/personStore';
 	import { activeGrinder, activeBrewSetup } from '$lib/contextStore';
 	import { t } from '$lib/i18n';
 	import SwitcherPopover from './SwitcherPopover.svelte';
+	import EditDialog from './EditDialog.svelte';
 
 	let { onChange }: { onChange: () => void } = $props();
 
 	let tasters = $state<Taster[]>([]);
 	let grinders = $state<Grinder[]>([]);
 	let brewSetups = $state<BrewSetup[]>([]);
+	let brewMethodTypes = $state<BrewMethodType[]>([]);
 
 	let openPanel = $state<'person' | 'grinder' | 'brew' | null>(null);
+
+	type DialogState =
+		| null
+		| { type: 'person'; mode: 'add' }
+		| { type: 'person'; mode: 'edit'; item: Taster }
+		| { type: 'grinder'; mode: 'add' }
+		| { type: 'grinder'; mode: 'edit'; item: Grinder }
+		| { type: 'brew'; mode: 'add' }
+		| { type: 'brew'; mode: 'edit'; item: BrewSetup };
+
+	let dialogState = $state<DialogState>(null);
 
 	let currentPersonId = $state<number | null>(null);
 	let currentGrinderId = $state<number | null>(null);
@@ -22,13 +35,13 @@
 	activeBrewSetup.subscribe(v => currentBrewSetupId = v);
 
 	async function loadAll() {
-		[tasters, grinders, brewSetups] = await Promise.all([
+		[tasters, grinders, brewSetups, brewMethodTypes] = await Promise.all([
 			api.tasters.list(),
 			api.grinders.list(),
 			api.brewSetups.list(),
+			api.brewMethodTypes.list(),
 		]);
 
-		// Auto-select defaults if nothing stored
 		if (currentGrinderId === null || !grinders.some(g => g.id === currentGrinderId)) {
 			const def = grinders.find(g => g.is_default) ?? grinders[0];
 			if (def) activeGrinder.set(def.id);
@@ -62,46 +75,44 @@
 		onChange();
 	}
 
-	async function addPerson(name: string) {
-		const created = await api.tasters.create(name);
-		await loadAll();
-		selectPerson(created.id);
+	function openAdd(type: 'person' | 'grinder' | 'brew') {
+		openPanel = null;
+		dialogState = { type, mode: 'add' };
 	}
 
-	async function addGrinder(name: string) {
-		const created = await api.grinders.create({ manufacturer: name });
-		await loadAll();
-		selectGrinder(created.id);
+	function openEditPerson(id: number) {
+		openPanel = null;
+		const item = tasters.find(t => t.id === id);
+		if (item) dialogState = { type: 'person', mode: 'edit', item };
 	}
 
-	async function addBrewSetup(name: string) {
-		const created = await api.brewSetups.create({ method_type: 'espresso', manufacturer: name });
-		await loadAll();
-		selectBrewSetup(created.id);
+	function openEditGrinder(id: number) {
+		openPanel = null;
+		const item = grinders.find(g => g.id === id);
+		if (item) dialogState = { type: 'grinder', mode: 'edit', item };
 	}
 
-	async function removePerson(id: number) {
-		await api.tasters.delete(id);
-		if (currentPersonId === id) activePerson.set(null);
-		await loadAll();
-		onChange();
+	function openEditBrewSetup(id: number) {
+		openPanel = null;
+		const item = brewSetups.find(s => s.id === id);
+		if (item) dialogState = { type: 'brew', mode: 'edit', item };
 	}
 
-	async function removeGrinder(id: number) {
-		await api.grinders.delete(id);
-		if (currentGrinderId === id) {
-			const next = grinders.find(g => g.id !== id);
-			activeGrinder.set(next?.id ?? null);
-		}
+	async function onDialogSaved() {
+		dialogState = null;
 		await loadAll();
 		onChange();
 	}
 
-	async function removeBrewSetup(id: number) {
-		await api.brewSetups.delete(id);
-		if (currentBrewSetupId === id) {
-			const next = brewSetups.find(s => s.id !== id);
-			activeBrewSetup.set(next?.id ?? null);
+	async function onDialogDeleted() {
+		const ds = dialogState;
+		dialogState = null;
+		if (ds?.type === 'person' && ds.mode === 'edit' && currentPersonId === ds.item.id) {
+			activePerson.set(null);
+		} else if (ds?.type === 'grinder' && ds.mode === 'edit' && currentGrinderId === ds.item.id) {
+			activeGrinder.set(null);
+		} else if (ds?.type === 'brew' && ds.mode === 'edit' && currentBrewSetupId === ds.item.id) {
+			activeBrewSetup.set(null);
 		}
 		await loadAll();
 		onChange();
@@ -164,11 +175,10 @@
 					items={personItems}
 					activeId={currentPersonId}
 					everyoneLabel={$t('person.everyone')}
-					addPlaceholder={$t('persons.add_placeholder')}
 					addLabel={$t('persons.add')}
 					onSelect={selectPerson}
-					onAdd={addPerson}
-					onRemove={removePerson}
+					onAdd={() => openAdd('person')}
+					onEdit={openEditPerson}
 				/>
 			</div>
 		{/if}
@@ -191,11 +201,10 @@
 				<SwitcherPopover
 					items={grinderItems}
 					activeId={currentGrinderId}
-					addPlaceholder={$t('grinding.manufacturer_placeholder')}
 					addLabel={$t('grinding.add')}
 					onSelect={selectGrinder}
-					onAdd={addGrinder}
-					onRemove={removeGrinder}
+					onAdd={() => openAdd('grinder')}
+					onEdit={openEditGrinder}
 				/>
 			</div>
 		{/if}
@@ -218,13 +227,22 @@
 				<SwitcherPopover
 					items={brewItems}
 					activeId={currentBrewSetupId}
-					addPlaceholder={$t('brewing.manufacturer_placeholder')}
 					addLabel={$t('brewing.add')}
 					onSelect={selectBrewSetup}
-					onAdd={addBrewSetup}
-					onRemove={removeBrewSetup}
+					onAdd={() => openAdd('brew')}
+					onEdit={openEditBrewSetup}
 				/>
 			</div>
 		{/if}
 	</div>
 </div>
+
+{#if dialogState}
+	<EditDialog
+		dialog={dialogState}
+		{brewMethodTypes}
+		onSaved={onDialogSaved}
+		onDeleted={onDialogDeleted}
+		onClose={() => dialogState = null}
+	/>
+{/if}

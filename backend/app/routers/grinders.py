@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Grinder
+from ..models import Grinder, GrinderSetting
 from ..schemas import GrinderCreate, GrinderOut, GrinderUpdate
 from ._helpers import clear_default, get_or_404
 
@@ -36,6 +36,13 @@ def update_grinder(grinder_id: int, data: GrinderUpdate, db: Session = Depends(g
     db.commit()
     db.refresh(grinder)
     return grinder
+
+
+@router.get("/{grinder_id}/dependents")
+def grinder_dependents(grinder_id: int, db: Session = Depends(get_db)):
+    get_or_404(db, Grinder, grinder_id, "Grinder not found")
+    settings = db.query(GrinderSetting).filter(GrinderSetting.grinder_id == grinder_id).count()
+    return {"grinder_settings": settings}
 
 
 @router.delete("/{grinder_id}", status_code=204)

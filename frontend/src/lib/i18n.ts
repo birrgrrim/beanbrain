@@ -100,10 +100,13 @@ const translations: Record<string, Record<string, string>> = {
 	// Person switcher
 	'person.everyone': { en: 'Everyone', uk: 'Усі' },
 	'person.add_new': { en: 'Add person...', uk: 'Додати персону...' },
+	'persons.name': { en: 'Name', uk: "Ім'я" },
 	'persons.add_placeholder': { en: 'Name...', uk: "Ім'я..." },
 	'persons.add': { en: 'Add', uk: 'Додати' },
+	'person.edit': { en: 'Edit Person', uk: 'Редагувати персону' },
 
 	// Grinding tab (sidebar + detail)
+	'grinding.edit': { en: 'Edit Grinder', uk: 'Редагувати кавомолку' },
 	'grinding.title': { en: 'Grinders', uk: 'Кавомолки' },
 	'grinding.empty': { en: 'No grinders yet', uk: 'Кавомолок ще немає' },
 	'grinding.search': { en: 'Search grinders...', uk: 'Пошук кавомолок...' },
@@ -118,6 +121,8 @@ const translations: Record<string, Record<string, string>> = {
 	'grinding.select': { en: 'Select a grinder', uk: 'Оберіть кавомолку' },
 
 	// Brewing tab (sidebar + detail)
+	'brewing.edit': { en: 'Edit Brew Setup', uk: 'Редагувати налаштування' },
+	'brewing.method': { en: 'Brew method', uk: 'Метод заварювання' },
 	'brewing.title': { en: 'Brew Setups', uk: 'Налаштування заварювання' },
 	'brewing.empty': { en: 'No brew setups yet', uk: 'Налаштувань ще немає' },
 	'brewing.search': { en: 'Search setups...', uk: 'Пошук налаштувань...' },
@@ -155,6 +160,7 @@ const translations: Record<string, Record<string, string>> = {
 	'common.default': { en: 'default', uk: 'за замовч.' },
 	'common.set_default': { en: 'set default', uk: 'за замовч.' },
 	'common.save': { en: 'Save', uk: 'Зберегти' },
+	'common.delete_confirm': { en: 'Are you sure you want to delete this?', uk: 'Ви впевнені, що хочете видалити?' },
 	'common.cancel': { en: 'Cancel', uk: 'Скасувати' },
 };
 
