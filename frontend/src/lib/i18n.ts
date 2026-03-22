@@ -38,6 +38,9 @@ const translations: Record<string, Record<string, string>> = {
 	'detail.sweet': { en: 'Sweet', uk: 'Солодкість' },
 	'detail.acid': { en: 'Acid', uk: 'Кислотність' },
 	'detail.bitter': { en: 'Bitter', uk: 'Гіркота' },
+	'card.sweet': { en: 'SWT', uk: 'СОЛ' },
+	'card.acid': { en: 'ACD', uk: 'КСЛ' },
+	'card.bitter': { en: 'BTR', uk: 'ГРК' },
 	'detail.price': { en: 'Price', uk: 'Ціна' },
 	'detail.price_wholesale': { en: 'Bulk', uk: 'Опт' },
 	'detail.flavor_profile': { en: 'Flavor profile', uk: 'Профіль смаку' },
@@ -156,7 +159,26 @@ const translations: Record<string, Record<string, string>> = {
 	'roastery.refresh': { en: 'Refresh all coffees', uk: 'Оновити всю каву' },
 	'roastery.refreshing': { en: 'Refreshing...', uk: 'Оновлення...' },
 
+	// Mode toggle
+	'mode.my_coffee': { en: 'My Coffee', uk: 'Моя кава' },
+	'mode.discover': { en: 'Discover', uk: 'Каталог' },
+
+	// Cards
+	'card.open': { en: 'Open', uk: 'Відкрита' },
+	'card.inStore': { en: 'In Store', uk: 'В магазині' },
+	'card.score': { en: 'Score', uk: 'Оцінка' },
+
+	// Footer
+	'footer.about': { en: 'About', uk: 'Про додаток' },
+
+	// Empty states (new)
+	'empty.my_coffee': { en: 'No coffee at home', uk: 'Вдома немає кави' },
+	'empty.my_coffee_hint': { en: 'Mark some coffee as "at home" or add new', uk: 'Позначте каву як "вдома" або додайте нову' },
+	'empty.discover': { en: 'No coffee in catalog', uk: 'Каталог порожній' },
+	'empty.discover_hint': { en: 'Add your first coffee to get started', uk: 'Додайте першу каву' },
+
 	// Common
+	'common.back': { en: 'Back', uk: 'Назад' },
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },
 	'common.default': { en: 'default', uk: 'за замовч.' },
 	'common.set_default': { en: 'set default', uk: 'за замовч.' },

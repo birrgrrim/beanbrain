@@ -278,7 +278,7 @@
 </script>
 
 {#if loading}
-	<div class="max-w-6xl mx-auto p-4 md:p-10 space-y-6 md:space-y-8">
+	<div class="max-w-6xl mx-auto p-3 md:p-5 lg:p-10 space-y-3 md:space-y-4 lg:space-y-6">
 		<!-- Header skeleton -->
 		<div class="flex items-center gap-3">
 			<div class="skeleton w-8 h-8 rounded-full"></div>
@@ -305,7 +305,7 @@
 			</div>
 		</div>
 		<!-- Grinder + Reviews skeleton -->
-		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+		<div class="detail-bottom-grid">
 			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm p-4 md:p-6 space-y-3">
 				<div class="skeleton h-5 w-32"></div>
 				<div class="skeleton h-4 w-full"></div>
@@ -319,49 +319,42 @@
 		</div>
 	</div>
 {:else if coffee}
-	<div class="max-w-6xl mx-auto p-4 md:p-10 space-y-6 md:space-y-8">
-		<!-- Header -->
-		<div class="flex items-start justify-between">
-			<div class="flex items-center gap-3">
-				<button onclick={onBack}
-					class="p-1.5 text-stone-400 hover:text-stone-600 transition-colors rounded-lg hover:bg-card-inset"
-					title="Back">
-					<Icons icon="back" size={18} />
-				</button>
-				{#if editing}
-					<input type="text" bind:value={editName}
-						class="text-xl md:text-3xl font-bold text-stone-800 bg-transparent border-b-2 border-amber-300 focus:outline-none focus:border-amber-500 px-1 min-w-0"
-						style="font-family: 'DM Serif Display', serif;" />
-				{:else}
-					<h2 class="text-xl md:text-3xl font-bold text-stone-800 break-words" style="font-family: 'DM Serif Display', serif;">
-						{coffee.name}
-					</h2>
-				{/if}
-			</div>
-			<div class="flex items-center gap-2">
+	<div class="detail-page">
+		<!-- Header buttons -->
+		<div class="flex items-center justify-between">
+			<button onclick={onBack}
+				class="flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-sm font-semibold
+					bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200">
+				<Icons icon="back" size={14} />
+				<span class="hidden md:inline">{$t('common.back')}</span>
+			</button>
+			<div class="flex items-center gap-1.5">
 				{#if !editing && !coffee.roastery_url}
 					<button onclick={startEditing}
-						class="px-3 py-1.5 text-sm text-stone-400 hover:text-amber-600 transition-colors rounded-lg hover:bg-card-inset font-medium">
-						{$t('detail.edit')}
+						class="flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-sm font-semibold
+							bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200">
+						<Icons icon="edit" size={14} />
+						<span class="hidden md:inline">{$t('detail.edit')}</span>
 					</button>
 				{/if}
-				<button onclick={deleteCoffee} class="p-2 text-stone-400 hover:text-red-500 transition-colors rounded hover:bg-card-inset" title={$t('detail.delete')}>
-					<img src="/img/knockbox.png" alt="delete" class="w-7 h-7 opacity-50" />
+				<button onclick={deleteCoffee}
+					class="flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-sm font-semibold
+						bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+					title={$t('detail.delete')}>
+					<svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+					<span class="hidden md:inline">{$t('detail.delete')}</span>
 				</button>
 			</div>
 		</div>
 
-		<!-- Photo + Details row -->
-		<div class="grid grid-cols-1 {coffee.image_url ? 'xl:grid-cols-[1fr_2fr]' : ''} gap-4 md:gap-6">
-			{#if coffee.image_url}
-				<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-6 flex items-center justify-center">
-					<img src={coffee.image_url} alt={coffee.name} class="max-h-64 object-contain" />
-				</div>
-			{/if}
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card overflow-hidden">
-				<div class="p-4 md:p-6 space-y-3 md:space-y-4 min-w-0">
+		<!-- Coffee details card -->
+		<div class="bg-card rounded-xl border border-stone-100 shadow-sm animate-card overflow-hidden">
+			<div class="p-3 md:p-4 lg:p-6 space-y-2 md:space-y-3 lg:space-y-4 min-w-0">
 					{#if editing}
 						<!-- Edit mode -->
+						<input type="text" bind:value={editName}
+							class="text-xl md:text-2xl font-bold text-stone-800 bg-transparent border-b-2 border-amber-300 focus:outline-none focus:border-amber-500 px-1 min-w-0 w-full"
+							style="font-family: 'DM Serif Display', serif;" />
 						<div class="flex flex-wrap items-center justify-between gap-3">
 							<select bind:value={editRoasteryId}
 								class="{inputClass} max-w-[250px]">
@@ -456,148 +449,135 @@
 						</div>
 					{:else}
 						<!-- Display mode -->
-						<!-- Row 1: Roastery + toggles -->
-						<div class="flex flex-wrap items-center justify-between gap-2">
-							<div class="flex items-center gap-2">
-								<img src="/img/header-detail.png" alt="" class="w-12 h-12 opacity-60" />
-								<p class="text-base text-stone-400">{coffee.roastery_ref?.name}</p>
+						<!-- Row 1: Name+country | store+price / quantity -->
+						<div class="detail-header-grid">
+							<div>
+								<h2 class="text-lg md:text-xl lg:text-2xl font-bold text-stone-800 truncate" style="font-family: 'DM Serif Display', serif;">
+									{#if coffee.origin_ref?.flag}<span class="mr-1">{coffee.origin_ref.flag}</span>{/if}
+									{coffee.name}
+								</h2>
+								{#if coffee.origin_ref}
+									<p class="text-xs md:text-sm text-stone-400">{currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p>
+								{/if}
 							</div>
-							<div class="flex items-center gap-4 md:gap-6">
+							<div class="flex flex-col items-end gap-0.5">
 								<div class="flex items-center gap-2">
-									<button onclick={toggleInStock} aria-label="Toggle in stock"
-										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
-											{coffee.in_stock ? 'bg-amber-600' : 'bg-stone-300'}">
-										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
-											{coffee.in_stock ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
-									</button>
-									<span class="text-xs text-stone-500">{$t('detail.in_stock')}</span>
+									{#if coffee.in_store}
+										<span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+											{#if coffee.roastery_url}
+												<button onclick={refreshCoffee} disabled={refreshing} class="hover:text-blue-900 disabled:opacity-50" title={refreshing ? $t('detail.refreshing') : $t('detail.refresh')}>
+													<svg viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 {refreshing ? 'animate-spin' : ''}"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+												</button>
+											{/if}
+											{$t('detail.in_store')}
+										</span>
+									{:else}
+										<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-stone-100 text-stone-400 border border-stone-200">{$t('detail.sold_out')}</span>
+									{/if}
+									{#if coffee.price != null}
+										<span class="text-base font-bold text-stone-700">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴
+											{#if coffee.price_wholesale != null}<span class="text-[10px] text-stone-300 line-through font-normal ml-0.5">{coffee.price}₴</span>{/if}
+										</span>
+									{/if}
 								</div>
-								<div class="flex items-center gap-2">
-									<button onclick={coffee.roastery_url ? undefined : toggleInStore} aria-label="Toggle in store"
-										class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors
-											{coffee.in_store ? 'bg-amber-600' : 'bg-stone-300'}
-											{coffee.roastery_url ? 'opacity-50 cursor-not-allowed' : ''}">
-										<span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform
-											{coffee.in_store ? 'translate-x-5.5' : 'translate-x-0.5'}"></span>
-									</button>
-									<span class="text-xs text-stone-500">{$t('detail.in_store')}</span>
+								<div class="flex items-center gap-1">
+									<button onclick={async () => { if (coffee && coffee.in_stock) { await api.coffees.update(coffeeId, { in_stock: false }); await loadData(); onUpdated(); } }}
+										class="w-5 h-5 rounded flex items-center justify-center text-xs font-bold
+											{coffee.in_stock ? 'bg-stone-100 text-stone-500 hover:bg-stone-200' : 'bg-stone-50 text-stone-300 cursor-not-allowed'}"
+										disabled={!coffee.in_stock}>−</button>
+									<span class="text-base font-bold text-amber-700 w-4 text-center tabular-nums">{coffee.in_stock ? 1 : 0}</span>
+									<button onclick={async () => { if (coffee && !coffee.in_stock) { await api.coffees.update(coffeeId, { in_stock: true }); await loadData(); onUpdated(); } }}
+										class="w-5 h-5 rounded flex items-center justify-center text-xs font-bold
+											bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200">+</button>
+									<span class="text-[10px] text-stone-400 ml-0.5">{$t('detail.in_stock')}</span>
 								</div>
 							</div>
 						</div>
+						{#if refreshError}<p class="text-xs text-red-500">{refreshError}</p>{/if}
 
-						<!-- Row 2: Origin / Process / Roast — always together -->
-						<div class="flex flex-wrap gap-x-8 gap-y-2 text-base">
-							{#if coffee.origin_ref}
-								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.origin')}</span><p class="text-stone-700 font-medium">{coffee.origin_ref.flag ? coffee.origin_ref.flag + ' ' : ''}{currentLang === 'uk' ? coffee.origin_ref.name_uk : coffee.origin_ref.name_en}</p></div>
-							{/if}
-							{#if coffee.process}
-								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium">{coffee.process}</p></div>
-							{/if}
-							{#if coffee.roast_level}
-								<div><span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium">{coffee.roast_level}</p></div>
-							{/if}
-						</div>
-
-						<!-- Row 3: Score + Price -->
-						{#if coffee.score != null || coffee.price != null}
-							<div class="flex flex-wrap items-end gap-4 md:gap-6">
-								{#if coffee.score != null}
-									<div>
-										<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.score')}</span>
-										<p class="text-2xl font-bold text-amber-700">{coffee.score}</p>
-									</div>
-								{/if}
-								{#if coffee.price != null}
-									<div>
-										<span class="text-stone-400 text-xs uppercase tracking-wide">{$t('detail.price')}</span>
-										<p class="text-2xl font-bold text-stone-700">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}₴
-											{#if coffee.price_wholesale != null}<span class="text-sm text-stone-300 line-through font-normal ml-1">{coffee.price}₴</span>{/if}
-										</p>
-									</div>
-								{/if}
-							</div>
-						{/if}
-
-						<!-- Row 4: Taste profile — boxed grid -->
-						{#if coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
-							<div class="bg-card-inset rounded-xl px-4 py-3">
-								<div class="grid grid-cols-3 gap-3 text-center">
-									{#if coffee.sweetness != null}
-										<div>
-											<p class="text-lg font-bold text-stone-700">{coffee.sweetness}<span class="text-xs text-stone-400 font-normal">/10</span></p>
-											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.sweet')}</p>
-										</div>
-									{/if}
-									{#if coffee.acidity != null}
-										<div>
-											<p class="text-lg font-bold text-stone-700">{coffee.acidity}<span class="text-xs text-stone-400 font-normal">/10</span></p>
-											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.acid')}</p>
-										</div>
-									{/if}
-									{#if coffee.bitterness != null}
-										<div>
-											<p class="text-lg font-bold text-stone-700">{coffee.bitterness}<span class="text-xs text-stone-400 font-normal">/10</span></p>
-											<p class="text-[10px] text-stone-400 uppercase tracking-wide">{$t('detail.bitter')}</p>
-										</div>
-									{/if}
+						<!-- Row 2: [image] | [details+bars] | [stats+comment] -->
+						<div class="detail-3col">
+							<!-- Col 1: Image -->
+							{#if coffee.image_url}
+								<div class="detail-inline-image">
+									<img src={coffee.image_url} alt={coffee.name} class="w-full h-full object-contain" />
 								</div>
-							</div>
-						{/if}
+							{/if}
 
-						<!-- Row 4: Descriptors -->
-						{#if coffee.roastery_descriptors.length > 0}
-							<div class="flex flex-wrap gap-1.5">
-								{#each coffee.roastery_descriptors as desc}
-									<span class="px-2.5 py-1 rounded-full text-sm bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
-								{/each}
-							</div>
-						{/if}
-
-						<!-- Row 5: Roaster comment + notes (full width, below everything) -->
-						{#if roasterCommentText || coffee.notes}
-							<div class="space-y-2">
-								{#if roasterCommentText}
-									<div class="bg-card-inset rounded-xl px-4 py-3">
-										<p class="text-xs text-stone-400 uppercase tracking-wide mb-1">{$t('detail.notes')}</p>
-										<p class="text-sm text-stone-600 italic leading-relaxed">{roasterCommentText}</p>
-									</div>
-								{/if}
-								{#if coffee.notes}
-									<p class="text-sm text-stone-400 italic px-1">{coffee.notes}</p>
-								{/if}
-							</div>
-						{/if}
-
-						<!-- Row 6: Link + refresh + timestamp -->
-						{#if coffee.roastery_url}
-							<div class="flex flex-wrap items-center gap-2 md:gap-3">
-								<a href={coffee.roastery_url} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-800">
-									<Icons icon="link" size={12} /> {$t('detail.roastery_link')}
+							<!-- Col 2: Roastery, score, process, roast, taste bars, descriptors -->
+							<div class="space-y-1.5 min-w-0">
+								<a href={coffee.roastery_url ?? '#'} target={coffee.roastery_url ? '_blank' : undefined} rel="noopener"
+									class="text-sm block {coffee.roastery_url ? 'text-amber-600 hover:text-amber-800' : 'text-stone-400 cursor-default'}">
+									{coffee.roastery_ref?.name}
 								</a>
-								<button onclick={refreshCoffee} disabled={refreshing}
-									class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-amber-600 transition-colors disabled:opacity-50">
-									{refreshing ? $t('detail.refreshing') : $t('detail.refresh')}
-								</button>
-								{#if coffee.fetched_at}
-									<span class="text-[10px] text-stone-300">{$t('detail.fetched_at')} {new Date(coffee.fetched_at).toLocaleDateString()}</span>
+								<div class="flex flex-wrap gap-x-5 gap-y-0.5 text-sm">
+									{#if coffee.score != null}
+										<div><span class="text-stone-400 text-[10px] uppercase tracking-wide">{$t('detail.score')}</span><p class="text-amber-700 font-bold text-sm">{coffee.score}</p></div>
+									{/if}
+									{#if coffee.process}
+										<div><span class="text-stone-400 text-[10px] uppercase tracking-wide">{$t('detail.process')}</span><p class="text-stone-700 font-medium text-sm">{coffee.process}</p></div>
+									{/if}
+									{#if coffee.roast_level}
+										<div><span class="text-stone-400 text-[10px] uppercase tracking-wide">{$t('detail.roast')}</span><p class="text-stone-700 font-medium text-sm">{coffee.roast_level}</p></div>
+									{/if}
+								</div>
+								{#if coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null}
+									<div class="space-y-1">
+										{#if coffee.sweetness != null}
+											<div class="flex items-center gap-2">
+												<span class="text-[10px] text-stone-400 uppercase tracking-wide w-12">{$t('card.sweet')}</span>
+												<div class="w-20 h-1.5 bg-card-inset rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: {coffee.sweetness * 10}%; background: linear-gradient(90deg, #d4a574, #b45309);"></div></div>
+												<span class="text-xs font-bold text-amber-800 w-4 text-right">{coffee.sweetness}</span>
+											</div>
+										{/if}
+										{#if coffee.acidity != null}
+											<div class="flex items-center gap-2">
+												<span class="text-[10px] text-stone-400 uppercase tracking-wide w-12">{$t('card.acid')}</span>
+												<div class="w-20 h-1.5 bg-card-inset rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: {coffee.acidity * 10}%; background: linear-gradient(90deg, #d4a574, #b45309);"></div></div>
+												<span class="text-xs font-bold text-amber-800 w-4 text-right">{coffee.acidity}</span>
+											</div>
+										{/if}
+										{#if coffee.bitterness != null}
+											<div class="flex items-center gap-2">
+												<span class="text-[10px] text-stone-400 uppercase tracking-wide w-12">{$t('card.bitter')}</span>
+												<div class="w-20 h-1.5 bg-card-inset rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: {coffee.bitterness * 10}%; background: linear-gradient(90deg, #d4a574, #b45309);"></div></div>
+												<span class="text-xs font-bold text-amber-800 w-4 text-right">{coffee.bitterness}</span>
+											</div>
+										{/if}
+									</div>
 								{/if}
 							</div>
-							{#if refreshError}
-								<p class="text-xs text-red-500 mt-1">{refreshError}</p>
-							{/if}
-						{/if}
-						{#if !coffee.roastery_url && coffee.updated_at}
-							<span class="text-[10px] text-stone-300">{$t('detail.updated_at')} {new Date(coffee.updated_at).toLocaleDateString()}</span>
-						{/if}
+
+							<!-- Col 3: Comment + descriptors -->
+							<div class="detail-right-col">
+								{#if roasterCommentText || coffee.notes}
+									<div class="bg-card-inset rounded-lg px-3 py-2 text-left w-full max-w-sm">
+										{#if roasterCommentText}
+											<p class="text-xs text-stone-400 uppercase tracking-wide mb-1">{$t('detail.notes')}</p>
+											<p class="text-sm text-stone-600 italic leading-relaxed">{roasterCommentText}</p>
+										{/if}
+										{#if coffee.notes}
+											<p class="text-xs text-stone-400 italic mt-1">{coffee.notes}</p>
+										{/if}
+									</div>
+								{/if}
+								{#if coffee.roastery_descriptors.length > 0}
+									<div class="flex flex-wrap gap-1 mt-auto pt-1 justify-end">
+										{#each coffee.roastery_descriptors as desc}
+											<span class="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-100">{desc.name}</span>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						</div>
 					{/if}
 				</div>
 			</div>
-		</div>
 
 		<!-- Grinder + Reviews row -->
-		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+		<div class="detail-bottom-grid">
 			<!-- Grinder Settings -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-4 md:p-6">
+			<div class="bg-card rounded-xl border border-stone-100 shadow-sm animate-card p-3 md:p-4 lg:p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/burr-icon.png" alt="" class="w-12 h-12 opacity-60" />
@@ -620,12 +600,10 @@
 					</div>
 				{/if}
 				{#each coffee.grinder_settings as setting}
-					<div class="flex items-center gap-2 py-2 border-b border-stone-50 last:border-0">
-						<div class="flex flex-col gap-0.5 flex-1 min-w-0">
-							<span class="text-xs text-stone-500 truncate">{setting.grinder.manufacturer}{setting.grinder.model ? ` ${setting.grinder.model}` : ''}</span>
-							<span class="text-xs text-stone-400 truncate">{setting.brew_setup.manufacturer}{setting.brew_setup.model ? ` ${setting.brew_setup.model}` : ''}</span>
-						</div>
-						<GrindValue value={setting.setting} step={setting.grinder.step} class="text-2xl text-amber-700 flex-shrink-0" />
+					<div class="detail-data-row">
+						<span class="text-sm text-stone-600 truncate">{setting.grinder.manufacturer}{setting.grinder.model ? ` ${setting.grinder.model}` : ''}</span>
+						<span class="text-sm text-stone-400 truncate">{setting.brew_setup.manufacturer}{setting.brew_setup.model ? ` ${setting.brew_setup.model}` : ''}</span>
+						<GrindValue value={setting.setting} step={setting.grinder.step} class="text-2xl text-amber-700" />
 					</div>
 				{/each}
 				{#if showSettingForm}
@@ -662,7 +640,7 @@
 			</div>
 
 			<!-- Reviews -->
-			<div class="bg-card rounded-2xl border border-stone-100 shadow-sm animate-card p-4 md:p-6">
+			<div class="bg-card rounded-xl border border-stone-100 shadow-sm animate-card p-3 md:p-4 lg:p-6">
 				<div class="flex items-center justify-between mb-3">
 					<div class="flex items-center gap-2">
 						<img src="/img/coffee-cup.png" alt="" class="w-12 h-12 opacity-60" />
@@ -702,12 +680,10 @@
 					/>
 				{:else}
 					{#each coffee.reviews as review}
-						<div class="flex items-center gap-2 py-2 border-b border-stone-50 last:border-0">
-							<div class="flex flex-col gap-0.5 flex-1 min-w-0">
-								<span class="text-sm text-stone-600 truncate">{review.taster.name}</span>
-								<span class="text-xs text-stone-400 truncate">{review.brew_setup.manufacturer}{review.brew_setup.model ? ` ${review.brew_setup.model}` : ''}</span>
-							</div>
-							<span class="text-2xl font-bold text-amber-700 tabular-nums flex-shrink-0">{review.rating}</span>
+						<div class="detail-data-row">
+							<span class="text-sm text-stone-600 truncate">{review.taster.name}</span>
+							<span class="text-sm text-stone-400 truncate">{review.brew_setup.manufacturer}{review.brew_setup.model ? ` ${review.brew_setup.model}` : ''}</span>
+							<span class="text-2xl font-bold text-amber-700 tabular-nums">{review.rating}</span>
 						</div>
 					{/each}
 				{/if}
@@ -716,3 +692,118 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/* Page container */
+	.detail-page {
+		max-width: 72rem;
+		margin: 0 auto;
+		padding: 0.5rem 0.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	@media (min-width: 768px) {
+		.detail-page {
+			padding: 0.5rem 1rem;
+			gap: 0.6rem;
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.detail-page {
+			padding: 1.5rem 2.5rem;
+			gap: 1rem;
+		}
+	}
+
+	/* 3-column layout: image | details | comment */
+	.detail-3col {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	@media (min-width: 768px) {
+		.detail-3col {
+			flex-wrap: nowrap;
+			gap: 0.75rem;
+		}
+	}
+
+	.detail-inline-image {
+		width: 80px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+	}
+
+	@media (min-width: 768px) {
+		.detail-inline-image {
+			width: 100px;
+		}
+	}
+
+	.detail-right-col {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	@media (min-width: 768px) {
+		.detail-right-col {
+			width: auto;
+			flex: 1;
+			align-items: flex-end;
+			min-width: 120px;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.detail-inline-image { width: 130px; }
+	}
+
+	@media (min-width: 1280px) {
+		.detail-3col { gap: 1.5rem; }
+		.detail-inline-image { width: 200px; }
+	}
+
+	.detail-header-grid {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: start;
+		gap: 0.5rem;
+	}
+
+	.detail-bottom-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.5rem;
+	}
+
+	@media (min-width: 768px) {
+		.detail-bottom-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.detail-bottom-grid { gap: 1rem; }
+	}
+
+	.detail-data-row {
+		display: grid;
+		grid-template-columns: 35% 40% auto;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.35rem 0;
+		border-bottom: 1px solid rgba(0,0,0,0.03);
+	}
+
+	.detail-data-row:last-child {
+		border-bottom: none;
+	}
+</style>

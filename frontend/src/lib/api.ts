@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.DEV ? 'http://localhost:8001' : '/api';
+const BASE_URL = '/api';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
 	const res = await fetch(`${BASE_URL}${path}`, {
@@ -132,6 +132,10 @@ export interface CoffeeListItem {
 	origin_ref: Origin | null;
 	roast_level: string | null;
 	image_url: string | null;
+	score: number | null;
+	sweetness: number | null;
+	acidity: number | null;
+	bitterness: number | null;
 	price: number | null;
 	price_wholesale: number | null;
 	in_stock: boolean;
