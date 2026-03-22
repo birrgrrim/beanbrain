@@ -178,6 +178,7 @@ const translations: Record<string, Record<string, string>> = {
 	'empty.discover_hint': { en: 'Add your first coffee to get started', uk: 'Додайте першу каву' },
 
 	// Common
+	'common.back': { en: 'Back', uk: 'Назад' },
 	'common.optional': { en: 'Optional', uk: 'Необов\'язково' },
 	'common.default': { en: 'default', uk: 'за замовч.' },
 	'common.set_default': { en: 'set default', uk: 'за замовч.' },
