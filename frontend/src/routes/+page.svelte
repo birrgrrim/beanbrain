@@ -148,7 +148,7 @@
 					</button>
 				</div>
 
-				<div class="controls-right">
+				<div class="controls-right hidden md:block">
 					{#if currentMode === 'discover'}
 						<div class="relative flex items-center">
 							<svg class="absolute left-2.5 w-4 h-4 text-stone-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
@@ -160,12 +160,30 @@
 								placeholder={$t('sidebar.search')}
 								class="pl-8 pr-3 py-2 border border-stone-200 rounded-lg text-sm bg-card-inset
 									focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-200
-									w-[160px] md:w-[240px] lg:w-[300px]"
+									w-[240px] lg:w-[300px]"
 							/>
 						</div>
 					{/if}
 				</div>
 			</div>
+
+			<!-- Mobile search row (Discover only) -->
+			{#if currentMode === 'discover'}
+				<div class="md:hidden mb-2">
+					<div class="relative flex items-center">
+						<svg class="absolute left-2.5 w-4 h-4 text-stone-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+						</svg>
+						<input
+							type="text"
+							bind:value={searchQuery}
+							placeholder={$t('sidebar.search')}
+							class="w-full pl-8 pr-3 py-2 border border-stone-200 rounded-lg text-sm bg-card-inset
+								focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-200"
+						/>
+					</div>
+				</div>
+			{/if}
 
 			<!-- Cards grid -->
 			{#if filteredCoffees.length === 0}
@@ -241,6 +259,8 @@
 		background: var(--color-card);
 		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 		flex-shrink: 0;
+		position: relative;
+		z-index: 20;
 	}
 
 	.app-shell {
@@ -381,9 +401,8 @@
 		color: var(--color-amber-700, #b45309);
 	}
 
-	/* Hide grinder + brew setup in discover mode */
-	.discover-context :global(.context-switcher > div:nth-child(2)),
-	.discover-context :global(.context-switcher > div:nth-child(3)) {
+	/* Hide only grinder in discover mode (keep person + brew for rating) */
+	.discover-context :global(.context-switcher > div:nth-child(2)) {
 		display: none;
 	}
 </style>

@@ -22,7 +22,6 @@
 
 	const displayPrice = $derived(coffee.price ? `${coffee.price}₴` : null);
 	const ratingDisplay = $derived(coffee.person_rating != null ? coffee.person_rating : null);
-	const avgRatingDisplay = $derived(coffee.avg_rating != null ? Math.round(coffee.avg_rating) : null);
 	const dimmed = $derived(!coffee.in_stock && !coffee.in_store);
 	const descriptorNames = $derived(coffee.roastery_descriptors.slice(0, 5).map(d => d.name));
 	const hasTaste = $derived(coffee.sweetness != null || coffee.acidity != null || coffee.bitterness != null);
@@ -62,8 +61,8 @@
 							{#if coffee.default_grind != null}<div class="met ms"><img src="/img/icon-grind.png" alt="" class="met-ico mis" /><GrindValue value={coffee.default_grind} step={coffee.default_grind_step} class="met-val mvs" /></div>{/if}
 							{#if ratingDisplay}<div class="met ms"><img src="/img/icon-rating.png" alt="" class="met-ico mis" /><span class="met-val mvs">{ratingDisplay}</span></div>{/if}
 						{:else}
-							{#if avgRatingDisplay}<div class="met ms"><img src="/img/icon-rating.png" alt="" class="met-ico mis" /><span class="met-val mvs">{avgRatingDisplay}</span></div>{/if}
-							{#if displayPrice}<div class="met ms"><span class="met-price mps">{displayPrice}</span></div>{/if}
+							{#if ratingDisplay}<div class="met ms"><img src="/img/icon-rating.png" alt="" class="met-ico mis" /><span class="met-val mvs">{ratingDisplay}</span></div>{/if}
+							{#if displayPrice}<div class="met ms"><span class="met-ico mis met-currency">₴</span><span class="met-val mvs">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}</span></div>{/if}
 						{/if}
 					</div>
 				</div>
@@ -104,8 +103,8 @@
 						{#if coffee.default_grind != null}<div class="met"><img src="/img/icon-grind.png" alt="" class="met-ico" /><GrindValue value={coffee.default_grind} step={coffee.default_grind_step} class="met-val" /></div>{/if}
 						{#if ratingDisplay}<div class="met"><img src="/img/icon-rating.png" alt="" class="met-ico" /><span class="met-val">{ratingDisplay}</span></div>{/if}
 					{:else}
-						{#if avgRatingDisplay}<div class="met"><img src="/img/icon-rating.png" alt="" class="met-ico" /><span class="met-val">{avgRatingDisplay}</span></div>{/if}
-						{#if displayPrice}<div class="met"><span class="met-price">{displayPrice}</span></div>{/if}
+						{#if ratingDisplay}<div class="met"><img src="/img/icon-rating.png" alt="" class="met-ico" /><span class="met-val">{ratingDisplay}</span></div>{/if}
+						{#if displayPrice}<div class="met"><span class="met-ico met-currency">₴</span><span class="met-val">{coffee.price_wholesale != null ? coffee.price_wholesale : coffee.price}</span></div>{/if}
 					{/if}
 				</div>
 			</div>
@@ -191,6 +190,8 @@
 	.met.ms { gap: 0.45rem; padding: 0.12rem 0.55rem; border-radius: 0.35rem; min-width: 4.2rem; }
 	.met-ico { opacity: 0.5; width: 20px; height: 20px; }
 	.met-ico.mis { width: 18px; height: 18px; }
+	.met-currency { width: auto; height: auto; font-size: 1.1rem; font-weight: 700; color: #92400e; opacity: 0.4; }
+	.met-currency.mis { font-size: 0.95rem; }
 	:global(.met-val) { font-weight: 700; color: #92400e; font-size: 1.2rem; text-align: right; }
 	:global(.met-val.mvs) { font-size: 1.1rem; }
 	.met-price { font-weight: 700; color: #b45309; font-size: 1.2rem; text-align: right; }

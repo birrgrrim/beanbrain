@@ -44,32 +44,22 @@ def list_coffees(
 
     coffee_ids = [c.id for c in coffees]
 
-    # Bulk: avg ratings — only for "Everyone" mode, filtered by active brew setup
-    avg_ratings: dict[int, float] = {}
-
     # Resolve active equipment from explicit IDs
     active_grinder = db.query(Grinder).filter(Grinder.id == grinder_id).first() if grinder_id else None
     active_setup = db.query(BrewSetup).filter(BrewSetup.id == brew_setup_id).first() if brew_setup_id else None
 
-    # Bulk: avg ratings for "Everyone" mode, filtered by active brew setup
-    if not taster_id and active_setup:
-        avg_ratings = dict(
-            db.query(Review.coffee_id, func.avg(Review.rating))
-            .filter(Review.coffee_id.in_(coffee_ids), Review.brew_setup_id == active_setup.id)
-            .group_by(Review.coffee_id)
-            .all()
-        )
+    avg_ratings: dict[int, float] = {}
 
-    # Bulk: person ratings for active brew setup (1 query)
-    person_ratings = {}
-    if taster_id and active_setup:
+    # Bulk: person ratings — best rating by this person for each coffee
+    person_ratings: dict[int, int] = {}
+    if taster_id:
         person_ratings = dict(
-            db.query(Review.coffee_id, Review.rating)
+            db.query(Review.coffee_id, func.max(Review.rating))
             .filter(
                 Review.coffee_id.in_(coffee_ids),
                 Review.taster_id == taster_id,
-                Review.brew_setup_id == active_setup.id,
             )
+            .group_by(Review.coffee_id)
             .all()
         )
 
