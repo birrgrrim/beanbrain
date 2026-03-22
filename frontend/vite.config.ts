@@ -8,4 +8,12 @@ export default defineConfig({
 	define: {
 		__APP_VERSION__: JSON.stringify(pkg.version),
 	},
+	server: {
+		proxy: {
+			'/api': {
+				target: 'http://localhost:8001',
+				rewrite: (path) => path.replace(/^\/api/, ''),
+			},
+		},
+	},
 });

@@ -268,6 +268,10 @@ class CoffeeListOut(BaseModel):
     roastery_ref: RoasteryOut | None = None
     roast_level: str | None = None
     image_url: str | None = None
+    score: float | None = None
+    sweetness: int | None = None
+    acidity: int | None = None
+    bitterness: int | None = None
     price: int | None = None
     price_wholesale: int | None = None
     in_stock: bool

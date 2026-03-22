@@ -165,7 +165,7 @@
 	<div class="relative">
 		<button
 			onclick={() => toggle('person')}
-			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+			class="w-11 h-11 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
 				{openPanel === 'person' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentPerson?.name ?? $t('person.everyone')}
 		>
@@ -189,7 +189,7 @@
 	<div class="relative">
 		<button
 			onclick={() => toggle('grinder')}
-			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+			class="w-11 h-11 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
 				{openPanel === 'grinder' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentGrinder ? `${currentGrinder.manufacturer}${currentGrinder.model ? ` ${currentGrinder.model}` : ''}` : 'Grinder'}
 		>
@@ -213,7 +213,7 @@
 	<div class="relative">
 		<button
 			onclick={() => toggle('brew')}
-			class="w-10 h-10 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
+			class="w-11 h-11 rounded-xl overflow-hidden border-2 transition-colors hover:border-amber-300
 				{openPanel === 'brew' ? 'border-amber-400 shadow-sm' : 'border-stone-200'}"
 			title={currentBrewSetup ? `${currentBrewSetup.manufacturer}${currentBrewSetup.model ? ` ${currentBrewSetup.model}` : ''}` : 'Brew'}
 		>
